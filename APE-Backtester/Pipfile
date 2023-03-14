@@ -4,10 +4,15 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-backtrader = "*"
+yfinance = "*"
+backtrader = {ref = "0fa63ef4a35dc53cc7320813f8b15480c8f85517", git = "https://github.com/mementum/backtrader.git"}
 matplotlib = "*"
+datetime = "*"
+requests = "*"
+yahooquery = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.11"
+python_version = "3.8"
+python_full_version = "3.8.16"
