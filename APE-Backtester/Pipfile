@@ -10,6 +10,10 @@ matplotlib = "*"
 datetime = "*"
 requests = "*"
 yahooquery = "*"
+boto3 = "*"
+pandas = "*"
+smart-open = "*"
+s3fs = "*"
 
 [dev-packages]
 
