@@ -352,4 +352,3 @@ class BTStrategy:
 # for i, row in df_option_data.iterrows():
 #     polygon_option_call(option_ticker_list[i])
 #     Backtester_Function(option_ticker_list[i], backtester_start_datetime)
-
