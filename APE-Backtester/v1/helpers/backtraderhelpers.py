@@ -5,10 +5,17 @@ import boto3
 import pandas as pd
 import requests
 import json
+import ast
 
 
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+
+def round_up_to_base(x, base=5):
+    return x + (base - x) % base
+
+def round_down_to_base(x, base=5):
+    return x - (x % base)
 
 def end_date(start_date, add_days):
     #Trading days only
@@ -26,29 +33,108 @@ def s3_data():
     #Pulls training set data from s3
     s3 = boto3.client('s3', aws_access_key_id = AWS_ACCESS_KEY_ID, aws_secret_access_key = AWS_SECRET_ACCESS_KEY)
     bucket_name = 'icarus-research-data'
-    object_key = 'training_datasets/raw_1d_datasets/2023/01/02.csv'
+    object_key = 'training_datasets/expanded_1d_datasets/2023/04/17.csv'
     obj = s3.get_object(Bucket = bucket_name, Key = object_key)
     rawdata = obj['Body'].read().decode('utf-8')
     df = pd.read_csv(StringIO(rawdata))
     df.dropna(inplace = True)
     df.reset_index(inplace= True, drop = True)
+    df['contracts'] = df['contracts'].apply(lambda x: ast.literal_eval(x))
+    df['contracts_available'] = df['contracts'].apply(lambda x: len(x)>=12)
     return df
 
-def create_option(symbol, date, price, direction):
+def create_option(symbol, date, price, direction, contracts):
+
     if direction == "day_gainers" or "most_actives" or "most_watched":
         CallPut = "C"
     elif direction == "day_losers":
         CallPut = "P"
     else:
         CallPut = "C"
+
     t_2wk = timedelta((11 - date.weekday()) % 14)
     Expiry = (date + t_2wk).strftime("%y%m%d")
     x = str(round(price))
+    datadicts = []
+
     if len(x) == 1:
         y = "0" + x
     else:
         y = x
+    
     optionsymbol = "O:" + symbol + Expiry + CallPut + "000" + y + "000"
+
+    for item in contracts:
+        if item == optionsymbol:
+            return optionsymbol, CallPut
+            break
+        else:
+            continue
+
+
+    for item in contracts:
+        if len(x) == 1:
+            strike = item[-4]
+            strike_dict = {
+                'contract': item,
+                'strike': strike
+                }
+            datadicts.append(strike_dict)
+        elif len(x) == 2:
+            strike = item[-5:-3]
+            strike_dict = {
+                'contract': item,
+                'strike': strike
+                }
+            datadicts.append(strike_dict)
+        elif len(x) == 3:
+            strike = item[-6:-3]
+            strike_dict = {
+                'contract': item,
+                'strike': strike
+                }
+            datadicts.append(strike_dict)
+        elif len(x) == 4:
+            strike = item[-7:-3]
+            strike_dict = {
+                'contract': item,
+                'strike': strike
+                }
+            datadicts.append(strike_dict)
+        elif len(x) == 5:
+            strike = item[-8:-3]
+            strike_dict = {
+                'contract': item,
+                'strike': strike
+                }
+            datadicts.append(strike_dict)
+    
+    data = pd.DataFrame(datadicts)
+
+    for i, row in data.iterrows():
+        if CallPut == "C":
+            if Expiry in str(row['contract']):
+                x_rounded_up = round_up_to_base(int(x))
+                if int(row['strike']) == x_rounded_up:
+                    optionsymbol = row['contract']
+                    break
+                else:
+                    continue
+            else:
+                    continue
+        elif CallPut == "P":
+            if Expiry in str(row['contract']):
+                x_rounded_down = round_down_to_base(int(x))
+                if int(row['strike']) == x_rounded_down:
+                    optionsymbol = row['contract']
+                    break
+                else:
+                    continue
+            else:
+                continue
+        else:
+            print("Failed Here")
+
     return optionsymbol, CallPut
 
 def polygon_optiondata(x, from_date, to_date):
@@ -72,7 +158,7 @@ def polygon_optiondata(x, from_date, to_date):
     res_option_df = pd.DataFrame(response_data['results'])
     res_option_df['t'] = res_option_df['t'].apply(lambda x: int(x/1000))
     res_option_df['date'] = res_option_df['t'].apply(lambda x: datetime.fromtimestamp(x))
-    res_option_df.to_csv(f'/Users/ogdiz/Projects/APE-Research/APE-BAcktester/APE-Backtester-Results/Testing_Research_Data_CSV_{x}_{from_date}.csv')
+    #res_option_df.to_csv(f'/Users/ogdiz/Projects/APE-Research/APE-BAcktester/APE-Backtester-Results/Testing_Research_Data_CSV_{x}_{from_date}.csv')
     return res_option_df
 
 def polygon_stockdata(x, from_date, to_date, df_optiondata):
@@ -106,8 +192,8 @@ def polygon_stockdata(x, from_date, to_date, df_optiondata):
     df_optiondata.to_csv(f'/Users/ogdiz/Projects/APE-Research/APE-Backtester/APE-Backtester-Results/Testing_Research_Data_CSV_{x}_{new_date}.csv')
     return df_optiondata
 
-def data_pull(symbol, start_date, end_date, mktprice, strategy):
-    option_symbol, direction = create_option(symbol, start_date, mktprice, strategy)
+def data_pull(symbol, start_date, end_date, mktprice, strategy, contracts):
+    option_symbol, direction = create_option(symbol, start_date, mktprice, strategy, contracts)
     df_tickerdata = polygon_optiondata(option_symbol, start_date, end_date)
     polygon_df = polygon_stockdata(symbol,start_date, end_date, df_tickerdata)
     return option_symbol, direction, polygon_df
@@ -128,12 +214,22 @@ def set_data(from_date, to_date):
         reverse=False)
     return data
 
+def build_table(start_date, end_date):
+    days = pd.date_range(start_date, end_date, freq='15min', name = 'Time')
+    results = pd.DataFrame(days)
+    index = pd.Index(days)
+    results = results.set_index(index)
+    return results
+
 # rawdata = s3_data()
-# start_date = datetime.strptime(rawdata['date'].values[1], '%Y-%m-%d %H:%M:%S')
+# start_date = datetime.strptime(rawdata['date'].values[42], '%Y-%m-%d %H:%M:%S')
 # end_date = end_date(start_date, 4)
-# tickersymbol = rawdata['symbol'].values[1]
-# strategytype = rawdata['title'].values[1]
-# mktprice = rawdata['regularMarketPrice'].values[1]
-# optionsymbol = rawdata['symbol'].values[1]
-# result_df = data_pull(tickersymbol, start_date, end_date, mktprice,strategytype)
+# tickersymbol = rawdata['symbol'].values[42]
+# strategytype = rawdata['title'].values[42]
+# mktprice = rawdata['regularMarketPrice'].values[42]
+# contracts = rawdata['contracts'].values[42]
+# optionsymbol = rawdata['symbol'].values[42]
+# result_df = data_pull(tickersymbol, start_date, end_date, mktprice, strategytype, contracts)
 # print(result_df)
+# 
+# O:PSX230407C00105000
