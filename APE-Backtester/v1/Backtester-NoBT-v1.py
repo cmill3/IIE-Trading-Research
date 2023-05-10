@@ -186,8 +186,8 @@ for i, rows in data.iterrows():
         dflist.append(OrderMarker)
         openlist.append(UniqueOpenMarker)
         closelist.append(UniqueCloseMarker)
-        if i >= 50:
-            break
+        # if i >= 50:
+        #     break
     except:
         failed_list.append(optionsymbol)
         print("Failed to pull option data for" + optionsymbol)
@@ -263,6 +263,5 @@ for i, row in transactions.iterrows():
     transactions['EndValue'][i].append(endval)
 
 transactions.to_csv(f'/Users/ogdiz/Projects/APE-Research/APE-Backtester/v1/BT_Results/TEST.csv')
-print(transactions)
 
-print(days)
+print(transactions)
