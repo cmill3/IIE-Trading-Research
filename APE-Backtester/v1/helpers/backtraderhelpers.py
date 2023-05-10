@@ -11,6 +11,10 @@ import ast
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 
+def startbacktrader(Starting_Cash):
+    Starting_Value = Starting_Cash
+    return Starting_Value
+
 def round_up_to_base(x, base=5):
     return x + (base - x) % base
 
@@ -188,7 +192,6 @@ def polygon_stockdata(x, from_date, to_date, df_optiondata):
         underlying_price.append(str(round(open_price[0],2)))
     df_optiondata['underlyingPrice'] = underlying_price
     new_date = from_date.strftime("D:" + "%Y%m%d" + "T:" + "%H-%M-%S")
-    print(new_date)
     df_optiondata.to_csv(f'/Users/ogdiz/Projects/APE-Research/APE-Backtester/APE-Backtester-Results/Testing_Research_Data_CSV_{x}_{new_date}.csv')
     return df_optiondata
 
@@ -214,12 +217,30 @@ def set_data(from_date, to_date):
         reverse=False)
     return data
 
+def convertepoch(time):
+    epochtime = time.astype(datetime)
+    closetime = int(epochtime) / 1000000000
+    closedate = datetime.utcfromtimestamp(closetime).strftime('%Y-%m-%d %H:%M:%S')
+    finaldate = datetime.strptime(closedate, '%Y-%m-%d %H:%M:%S')
+    return finaldate
+
 def build_table(start_date, end_date):
-    days = pd.date_range(start_date, end_date, freq='15min', name = 'Time')
-    results = pd.DataFrame(days)
-    index = pd.Index(days)
-    results = results.set_index(index)
-    return results
+    datetimeindex = pd.date_range(start_date, end_date, freq='15min', name = 'Time')
+    days = []
+    for time in datetimeindex:
+        convertedtime = time.strftime('%Y-%m-%d %H:%M:%S')
+        finaldate = datetime.strptime(convertedtime, '%Y-%m-%d %H:%M:%S')
+        days.append(finaldate)
+    results = pd.DataFrame(index=days)
+    # results.dropna(inplace = True)
+    # results = results.reset_index()   
+    # index = pd.Index(days)
+    # results = results.set_index(index)
+    return days, datetimeindex, results
+
+def build_dict(seq, key):
+    return dict((d[key], dict(d, index=index)) for (index, d) in enumerate(seq))
+
 
 # rawdata = s3_data()
 # start_date = datetime.strptime(rawdata['date'].values[42], '%Y-%m-%d %H:%M:%S')

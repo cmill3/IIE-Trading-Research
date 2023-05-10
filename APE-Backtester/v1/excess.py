@@ -1,3 +1,11 @@
+from datetime import timedelta, datetime
+import datetime as dt
+import backtrader as bt
+import backtrader.feeds as btfeeds
+import backtrader.indicators as btind
+import pandas as pd
+import helpers.backtraderhelpers as backtest
+import matplotlib
 
 # class BuyAndHold(bt.Strategy):
 #     def start(self):
@@ -94,3 +102,7 @@
 # 		elif order.status in [order.Canceled, order.Margin, order.Rejected]:
 # 			self.log("Order was canceled/margin/rejected")
 # 		self.order = None
+
+
+rawdata = backtest.s3_data()
+print(rawdata[0].time)

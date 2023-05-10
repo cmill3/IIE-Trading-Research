@@ -68,12 +68,27 @@ end_date = end_date(start_date, 3)
 
 def build_table():
     days = pd.date_range(start_date, end_date, freq='15min', name = 'Time')
-    results = pd.DataFrame(days)
-    index = pd.Index(days)
-    results = results.set_index(index)
+    results = pd.DataFrame(days, columns= ['datetime'])
+    # index = pd.Index(days)
+    # results = results.set_index(index)
+    # results.drop(columns=['Days'])
     return days,results
 
-days, df2 = build_table()
+def convertepoch(time):
+    # closetime = int(epochtime) / 1000000000
+    # closetime_esttogmt = closetime + 14400
+    closedate = datetime.utcfromtimestamp(time).strftime('%Y-%m-%d %H:%M:%S')
+    finaldate = datetime.strptime(closedate, '%Y-%m-%d %H:%M:%S')
+    return finaldate
 
-print(days)
-print(df2)
+dtdt = convertepoch(1683647027)
+print(dtdt)
+
+
+# days, df2 = build_table()
+# df = s3_data()
+
+# print(days)
+# print(df2)
+
+# print(df['date'][0])
