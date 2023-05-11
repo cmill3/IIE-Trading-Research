@@ -7,7 +7,6 @@ import requests
 import json
 import ast
 
-
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 
@@ -240,17 +239,3 @@ def build_table(start_date, end_date):
 
 def build_dict(seq, key):
     return dict((d[key], dict(d, index=index)) for (index, d) in enumerate(seq))
-
-
-# rawdata = s3_data()
-# start_date = datetime.strptime(rawdata['date'].values[42], '%Y-%m-%d %H:%M:%S')
-# end_date = end_date(start_date, 4)
-# tickersymbol = rawdata['symbol'].values[42]
-# strategytype = rawdata['title'].values[42]
-# mktprice = rawdata['regularMarketPrice'].values[42]
-# contracts = rawdata['contracts'].values[42]
-# optionsymbol = rawdata['symbol'].values[42]
-# result_df = data_pull(tickersymbol, start_date, end_date, mktprice, strategytype, contracts)
-# print(result_df)
-# 
-# O:PSX230407C00105000
