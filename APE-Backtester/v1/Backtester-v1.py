@@ -5,247 +5,260 @@ import backtrader.feeds as btfeeds
 import backtrader.indicators as btind
 import pandas as pd
 import helpers.backtraderhelpers as backtest
-import matplotlib
 
-def pull_data():
+startingvalue = backtest.startbacktrader(1000000)
+rawdata = backtest.s3_data()
+dataset = pd.DataFrame(rawdata)
+data = dataset[dataset.volume >= 20000000]
+
+def pull_data(index):
     rawdata = backtest.s3_data()
-    start_date = datetime.strptime(rawdata['date'].values[1], '%Y-%m-%d %H:%M:%S')
-    end_date = backtest.end_date(start_date, 4)
-    symbol = rawdata['symbol'].values[1]
-    mkt_price = rawdata['regularMarketPrice'].values[1]
-    strategy = rawdata['title'].values[1]
-    option_symbol, stratdirection, polygon_df = backtest.data_pull(symbol, start_date, end_date, mkt_price, strategy)
-    return start_date, end_date, symbol, mkt_price, strategy, option_symbol, stratdirection, polygon_df
+    dataset = pd.DataFrame(rawdata)
+    data = dataset[dataset.volume >= 20000000]
+    start_date = datetime.strptime(rawdata['date'].values[index], '%Y-%m-%d %H:%M:%S')
+    end_date = backtest.end_date(start_date, 3)
+    symbol = rawdata['symbol'].values[index]
+    mkt_price = rawdata['regularMarketPrice'].values[index]
+    contracts = rawdata['contracts'].values[index]
+    strategy = rawdata['title'].values[index]
+    option_symbol, stratdirection, polygon_df = backtest.data_pull(symbol, start_date, end_date, mkt_price, strategy, contracts)
+    open_prices = polygon_df['o'].values
+    datetimelist, datetimeindex, results = backtest.build_table(start_date,end_date)
+    return start_date, end_date, symbol, mkt_price, strategy, option_symbol, stratdirection, polygon_df, open_prices, datetimelist, datetimeindex, results
 
-start_date, end_date, symbol, mkt_price, strategy, optionsymbol, stratdirection, polygon_df = pull_data()
+def BuyIterateSell(mkt_price, optionsymbol, stratdirection, open_prices, strategy):
 
-print(polygon_df)
-open_prices = polygon_df['o'].values
-print(stratdirection)
-data = bt.feeds.GenericCSVData(
-    dataname= f'/Users/ogdiz/Projects/APE-Research/APE-Backtester/APE-Backtester-Results/Testing_Research_Data_CSV_RBLX_2023-01-02 14:00:00.csv',
-    fromdate=start_date,
-    todate=end_date,
-    sessionstart=start_date,
-    sessionend=end_date,
-    dtformat=('%Y-%m-%d %H:%M:%S'),
-    datetime=9,
-    open = 3,
-    high = 5,
-    low = 6,
-    close = 4,
-    volume =1, 
-    openinterest=-1,
-    reverse=False)
+    #option contract values
+    openPrice = open_prices[0]
+    open_dt = polygon_df['date'][0]
+    open_datetime = open_dt.to_pydatetime()
+    contract_size = 100
+    contract_cost = round((openPrice * contract_size), 2)
+    inverse_date_time = []
+    target_date_time = []
+    openorderstr = "B"
+    closeorderstr = "S"
 
-class InAndOut(bt.Strategy):
-    def log(self, txt, dt=None):
-        ''' Logging function for this strategy'''
-        dt = self.datas[0].datetime.date(0)
-        dt_time = self.datas[0].datetime.time(0)
-        dt_weekday = datetime.weekday(dt)
+    #ADD TRANSACTION COSTS
 
+    #Assigns target and inverse price to each strat direction
+    for i, row in polygon_df.iterrows():
+        if stratdirection == "C":
+            targetprice = (mkt_price * 0.05) + mkt_price
+            inverseprice = mkt_price - (mkt_price * 0.05)
+            if float(row['underlyingPrice']) <= inverseprice:
+                inverse_date_time.append(row['date'])
+            elif float(row['underlyingPrice']) >= targetprice:
+                target_date_time.append(row['date'])
 
-        print('%s, %s' % (dt.isoformat(), txt))
+    #Creates dictionary results if price targets have been hit'
+    if len(inverse_date_time) != 0 and len(target_date_time) != 0:
+        if inverse_date_time[0] <= target_date_time[0]:
+            matched_row = polygon_df.loc[polygon_df['date'] == inverse_date_time[0]]
+            orderSource = "max_loss"
+            close_datetime = matched_row['date'].values
+            closePrice = matched_open[0]
+            orderType = "Sell"
+            matched_dt = matched_row['date'].values
+            close_dt = matched_dt[0]
+            close_datetime = backtest.convertepoch(close_dt)
 
-    def __init__(self):
-        # Keep a reference to the "close" line in the data[0] dataseries
-        self.datatest = self.datas[0]
-        # self.dataclose = self.datas[0].close
-        self.dataopen = self.datas[0].open
-        self.dataopens = open_prices
-        self.openpurchaseprice = self.dataopens[0]
-        self.order = None
-        self.startdt = self.datas[0].datetime
-        self.enddt = self.datas[-1].datetime
-        self.dt = self.datas[0].datetime
-        self.stratdirection = stratdirection
-        if self.stratdirection == 'C':
-            self.target_price = mkt_price * 1.05
-        elif self.stratdirection == 'P':
-            self.target_price = mkt_price - (0.05 * mkt_price)
-        print(self.datatest)
-        print(self.startdt)
-        print(self.openpurchaseprice)
+        elif inverse_date_time[0] >= target_date_time[0]:
+            matched_row = polygon_df.loc[polygon_df['date'] == target_date_time[0]]
+            orderSource = "profit_target"
+            matched_open = matched_row['o'].values
+            closePrice = matched_open[0]
+            orderType = "Sell"
+            matched_dt = matched_row['date'].values
+            close_dt = matched_dt[0]
+            close_datetime = backtest.convertepoch(close_dt)
 
-    def notify_order(self, order):
-        if order.status in [order.Submitted, order.Accepted]:
-            # Buy/Sell order submitted/accepted to/by broker - Nothing to do
-            return
-
-        # Check if an order has been completed
-        # Attention: broker could reject order if not enougth cash
-        if order.status in [order.Completed]:
-            if order.isbuy():
-                self.log(
-                    'BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f, Datetime: %s' %
-                    (order.executed.price,
-                     order.executed.value,
-                     order.executed.comm,
-                    bt.num2date(order.executed.dt)))
-
-                self.buyprice = order.executed.price
-                self.buycomm = order.executed.comm
-            else:  # Sell
-                self.log('SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f, Datetime: %s' %
-                         (order.executed.price,
-                          order.executed.value,
-                          order.executed.comm,
-                          bt.num2date(order.executed.dt)))
-
-            self.bar_executed = len(self)
-
-        elif order.status in [order.Canceled, order.Margin, order.Rejected]:
-            self.log('Order Canceled/Margin/Rejected')
-
-        self.order = None
-
-    def notify_trade(self, trade):
-        if not trade.isclosed:
-            return
-        self.log('OPERATION PROFIT, GROSS %.2f, NET %.2f' %
-                 (trade.pnl, trade.pnlcomm))
-        
-    def start(self):
-        self.val_start = self.broker.get_cash()  # keep the starting cash
-    
-    def nextstart(self):
-        if not self.position:
-            self.buy(price = self.openpurchaseprice, size = 100)
-            print(self.dataopens[0])
         else:
-            return
+            matched_row = polygon_df.iloc[-1]
+            orderSource = "max_time"
+            matched_open = matched_row['o'].values
+            closePrice = matched_open[0]
+            orderType = "Sell"
+            matched_dt = matched_row['date'].values
+            close_dt = matched_dt[0]
+            close_datetime = backtest.convertepoch(close_dt)
 
-    def next(self):
-        if self.order:
-            return
-        if self.position:
-            if self.dataopen >= self.target_price:
-                self.sell(size = 100)
-                # print(self.broker.getposition(data))
-            else:
-                return
-        else:
-            self.close(size = 100)
-            # print(self.broker.getposition(data))
-        # if not self.position:
-        #     self.buy(price = self.dataopen[0], size = 100)
-        #     print(self.dataopen[0])
-        #     # print(self.broker.getposition(data))
-        # elif self.position:
-        #     if self.dataopen >= self.target_price:
-        #         self.sell(size = 100)
-        #         # print(self.broker.getposition(data))
-        #     else:
-        #         return
-        # else:
-        #     self.close(size = 100)
-        #     # print(self.broker.getposition(data))
+    elif len(inverse_date_time) == 0 and len(target_date_time) != 0:
+        matched_row = polygon_df.loc[polygon_df['date'] == target_date_time[0]]
+        orderSource = "profit_target"
+        matched_open = matched_row['o'].values
+        closePrice = matched_open[0]
+        orderType = "Sell"
+        matched_dt = matched_row['date'].values
+        close_dt = matched_dt[0]
+        close_datetime = backtest.convertepoch(close_dt)
 
+    elif len(inverse_date_time) != 0 and len(target_date_time) == 0:
+        matched_row = polygon_df.loc[polygon_df['date'] == inverse_date_time[0]]
+        orderSource = "max_loss"
+        matched_open = matched_row['o'].values
+        closePrice = matched_open[0]
+        orderType = "Sell"
+        matched_dt = matched_row['date'].values
+        close_dt = matched_dt[0]
+        close_datetime = backtest.convertepoch(close_dt)
+
+    elif len(inverse_date_time) == 0 and len(target_date_time) == 0:
+        #Because this is the last value in the sheet, and indexed differently, I need to use different methods to pull information
+        #including not using .values and not requiring the convertepoch helper function used above
+        matched_row = polygon_df.iloc[-1]
+        orderSource = "max_time"
+        closePrice = matched_row['o']
+        orderType = "Sell"
+        close_dt = matched_row['date']
+        close_datetime = close_dt.to_pydatetime()
+
+    #Defining other variables to be included in the dictionary "OrderMarker"
+    orderTicker = optionsymbol
+    contract_return = round((closePrice * contract_size),2)
+    net_value = contract_return - contract_cost
+    roi = net_value / contract_cost
+
+    UniqueOpenStr = openorderstr + "|" + strategy + "|" + orderTicker + "|" + str(openPrice)
+    UniqueCloseStr = closeorderstr + "|" + orderSource + "|" + orderTicker + "|" + str(closePrice)
     
-    # def next(self):
-    #     self.close(size = 100)
-    #     print(self.broker.getposition(data))
-
-    def stop(self):
-        print(self.broker.get_orders_open(True))
-        print(self.broker.getposition(data))
-        self.val_end = self.broker.get_cash()
-        # print(self.broker.get_value())
-        # print(self.val_start)
-        # print(self.val_end)
-        self.roi = (self.val_end - self.val_start)/100
-        print('ROI:  {:.2f}%'.format(self.roi))
-
-# class InAndOut(bt.Strategy):
-#     def log(self, txt, dt=None):
-#         ''' Logging function for this strategy'''
-#         dt = self.datas[0].datetime.date(0)
-#         dt_time = self.datas[0].datetime.time(0)
-#         dt_weekday = datetime.weekday(dt)
-
-
-#         print('%s, %s' % (dt.isoformat(), txt))
-
-#     def __init__(self):
-#         # Keep a reference to the "close" line in the data[0] dataseries
-#         self.dataclose = self.datas[0].close
-#         self.dataopen = self.datas[0].open
-#         self.dt = self.datas[0].datetime.date(0)
-#         self.dt_time = self.datas[0].datetime.time(0)
-#         self.dt_weekday = datetime.weekday(self.dt)
-
-#     def notify_order(self, order):
-#         if order.status in [order.Submitted, order.Accepted]:
-#             # Buy/Sell order submitted/accepted to/by broker - Nothing to do
-#             return
-
-#         # Check if an order has been completed
-#         # Attention: broker could reject order if not enougth cash
-#         if order.status in [order.Completed]:
-#             if order.isbuy():
-#                 self.log(
-#                     'BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f, Datetime: %s' %
-#                     (order.executed.price,
-#                      order.executed.value,
-#                      order.executed.comm,
-#                     bt.num2date(order.executed.dt)))
-
-#                 self.buyprice = order.executed.price
-#                 self.buycomm = order.executed.comm
-#             else:  # Sell
-#                 self.log('SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f, Datetime: %s' %
-#                          (order.executed.price,
-#                           order.executed.value,
-#                           order.executed.comm,
-#                           bt.num2date(order.executed.dt)))
-
-#             self.bar_executed = len(self)
-
-#         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
-#             self.log('Order Canceled/Margin/Rejected')
-
-#         self.order = None
-
-#     def notify_trade(self, trade):
-#         if not trade.isclosed:
-#             return
-#         self.log('OPERATION PROFIT, GROSS %.2f, NET %.2f' %
-#                  (trade.pnl, trade.pnlcomm))
-        
-#     def start(self):
-#         self.val_start = self.broker.get_cash()  # keep the starting cash
-
-#     def nextstart(self):
-#         self.buy(size = 100)
-#         print(self.broker.getposition(data))
+    OrderMarker = {
+        "type": "BUY/SELL",
+        "strategy": strategy,
+        "source": orderSource,
+        "ticker": orderTicker,
+        "openPrice": openPrice,
+        "closePrice": closePrice,
+        "contractCost": contract_cost,
+        "contractReturn": contract_return,
+        "netValue": net_value,
+        "ROI": roi,
+        "openDate": open_datetime,
+        "closeDate": close_datetime,
+        "uniqueopenstr":UniqueOpenStr,
+        "uniqueclosestr": UniqueCloseStr
+        }
     
-#     def next(self):
-#         self.close(size = 100)
-#         print(self.broker.getposition(data))
+    OpenMarker = {
+        "uniqueopenstr":UniqueOpenStr,
+        "type": "BUY",
+        "source": orderSource,
+        "ticker": orderTicker,
+        "openPrice": openPrice,
+        "contractCost": contract_cost,
+        "openDate": open_datetime
+        }
+    
+    CloseMarker = {
+        "uniqueclosestr": UniqueCloseStr,
+        "type": "SELL",
+        "ticker": orderTicker,
+        "openPrice": openPrice,
+        "closePrice": closePrice,
+        "contractReturn": contract_return,
+        "netValue": net_value,
+        "ROI": roi,
+        "closeDate": close_datetime
+        }
 
-#     def stop(self):
-#         print(self.broker.get_orders_open(True))
-#         # print(self.broker.getposition(data))
-#         self.val_end = self.broker.get_cash()
-#         # print(self.broker.get_value())
-#         # print(self.val_start)
-#         # print(self.val_end)
-#         self.roi = (self.val_end - self.val_start)/100
-#         print('ROI:  {:.2f}%'.format(self.roi))
+    # UniqueOpenMarker = {
+    #     "datetime": open_datetime,
+    #     "openstr": UniqueOpenStr
+    # }
 
-if __name__ == '__main__':
-    # Create a cerebro instance, add our strategy, some starting cash at broker and a 0.1% broker commission
-    cerebro = bt.Cerebro()
-    cerebro.addstrategy(InAndOut)
-    cerebro.broker.setcash(100000)
-    cerebro.broker.setcommission(commission=0.001)
-    cerebro.adddata(data)
-    print('<START> Brokerage account: $%.2f' % cerebro.broker.getvalue())
-    cerebro.run()
-    print('<FINISH> Brokerage account: $%.2f' % cerebro.broker.getvalue())
-    # Plot the strategy
-    # cerebro.plot(style='candlestick',loc='grey', grid=False) #You can leave inside the paranthesis empty
+    # UniqueCloseMarker = {
+    #     "datetime": close_datetime,
+    #     "closestr": UniqueCloseStr
+    # }
 
+    return OrderMarker, OpenMarker, CloseMarker, open_datetime, close_datetime
 
+dflist = []
+openlist = []
+closelist = []
+failed_openlist = []
+failed_dictlist = []
 
+for i, rows in data.iterrows():
+    try:
+        start_date, end_date, symbol, mkt_price, strategy, optionsymbol, stratdirection, polygon_df, open_prices, datetimelist, datetimeindex, results = pull_data(i)
+        OrderMarker, OpenMarker, CloseMarker, open_datetime, close_datetime = BuyIterateSell(mkt_price, optionsymbol, stratdirection, open_prices, strategy)
+        dflist.append(OrderMarker)
+        # openlist.append(UniqueOpenMarker)
+        # closelist.append(UniqueCloseMarker)
+        # if i >= 50:
+        #     break
+    except:
+        failed_openlist.append(optionsymbol)
+        print("Failed to pull option data for" + optionsymbol)
+        continue
+
+df_trades = pd.DataFrame(dflist)
+# df_open = pd.DataFrame(openlist)
+# df_close = pd.DataFrame(closelist)
+
+key_list = ["Time", "Buy", "Sell", "ActiveHoldings", "Cost", "Return", "NetValueofInterval", "StartValue", "EndValue"]
+n = len(datetimelist)
+transactiondict = []
+for idx in range(0, n, 1):
+    transactiondict.append({
+        key_list[0]: datetimelist[idx],
+        key_list[1]: [],
+        key_list[2]: [],
+        key_list[3]: [],
+        key_list[4]: [],
+        key_list[5]: [],
+        key_list[6]: 0,
+        key_list[7]: 0,
+        key_list[8]: 0
+        })
+
+for i, row in df_trades.iterrows():
+    try:
+        reference = backtest.build_dict(transactiondict, key="Time")
+        open_info = reference.get(row['openDate'])
+        close_info = reference.get(row['closeDate'])
+        open_index = open_info['index']
+        close_index = close_info['index']
+        openreferencedate = open_info['Time']
+        closereferencedate = close_info['Time']
+        transactiondict[open_index]['Buy'].append(row['uniqueopenstr'])
+        transactiondict[close_index]['Sell'].append(row['uniqueclosestr'])
+        transactiondict[open_index]['Cost'].append(row['contractCost'])
+        transactiondict[close_index]['Return'].append(row['contractReturn'])
+    except:
+        print("Failed to add a trade to dict")
+        failed_dictlist.append(dict(row))
+        continue
+
+transactions = pd.DataFrame(transactiondict)
+
+transactions['StartValue'][0].append(startingvalue)
+
+for i, row in transactions.iterrows():
+    transactions['ActiveHoldings'][i].append(transactions['Buy'][i])
+    if i > 0:
+        transactions['ActiveHoldings'][i].append(transactions['ActiveHoldings'][i-1])
+    holdingslist = transactions['ActiveHoldings'][i]
+    soldlist = transactions['Sell'][i]
+    for item in soldlist:
+        try:
+            holdingslist.remove(item)
+        except ValueError:
+            pass
+    transactions.at[i,'ActiveHoldings'] = holdingslist
+    totalcost = sum(transactions['Cost'][i])
+    totalreturn = sum(transactions['Return'][i])
+    net = totalreturn - totalcost
+    transactions['NetValueofInterval'][i].append(net)
+    if i > 0:
+        transactions['StartValue'][i].append(transactions['EndValue'][i-1])
+    startval = transactions['StartValue'][i][0]
+    if type(startval) == int:
+        endval = startval + net
+    elif type(startval) == list:
+        endval = startval[0] + net
+    transactions['EndValue'][i].append(endval)
+
+print(failed_dictlist, failed_openlist)
+transactions.to_csv(f'/Users/ogdiz/Projects/APE-Research/APE-Backtester/v1/BT_Results/TEST.csv')
