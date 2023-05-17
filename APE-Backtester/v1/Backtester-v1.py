@@ -7,6 +7,7 @@ import pandas as pd
 import helpers.backtraderhelpers as backtest
 
 startingvalue = backtest.startbacktrader(1000000)
+commissioncost = 0.35
 rawdata = backtest.s3_data()
 dataset = pd.DataFrame(rawdata)
 data = dataset[dataset.volume >= 20000000]
@@ -26,20 +27,22 @@ def pull_data(index):
     datetimelist, datetimeindex, results = backtest.build_table(start_date,end_date)
     return start_date, end_date, symbol, mkt_price, strategy, option_symbol, stratdirection, polygon_df, open_prices, datetimelist, datetimeindex, results
 
-def BuyIterateSell(mkt_price, optionsymbol, stratdirection, open_prices, strategy):
+def BuyIterateSell(symbol, mkt_price, optionsymbol, stratdirection, open_prices, strategy):
 
     #option contract values
     openPrice = open_prices[0]
     open_dt = polygon_df['date'][0]
     open_datetime = open_dt.to_pydatetime()
+    open_dt_hrmin = open_datetime.strftime("D%Y-%m-%dT%H:%M")
+    contract_number = 1
     contract_size = 100
-    contract_cost = round((openPrice * contract_size), 2)
+    transaction_cost = commissioncost * contract_number
+    total_transaction_cost = transaction_cost * 2
+    contract_cost = round((openPrice * contract_size * contract_number), 2) + transaction_cost
     inverse_date_time = []
     target_date_time = []
     openorderstr = "B"
     closeorderstr = "S"
-
-    #ADD TRANSACTION COSTS
 
     #Assigns target and inverse price to each strat direction
     for i, row in polygon_df.iterrows():
@@ -115,12 +118,13 @@ def BuyIterateSell(mkt_price, optionsymbol, stratdirection, open_prices, strateg
 
     #Defining other variables to be included in the dictionary "OrderMarker"
     orderTicker = optionsymbol
-    contract_return = round((closePrice * contract_size),2)
+    contract_return = round((closePrice * contract_size),2) + transaction_cost
     net_value = contract_return - contract_cost
     roi = net_value / contract_cost
 
-    UniqueOpenStr = openorderstr + "|" + strategy + "|" + orderTicker + "|" + str(openPrice)
-    UniqueCloseStr = closeorderstr + "|" + orderSource + "|" + orderTicker + "|" + str(closePrice)
+    PositionID = symbol + strategy + open_dt_hrmin
+    UniqueOpenStr = openorderstr + "|" + strategy + "|" + orderTicker + "|" + str(openPrice) + "|" + str(PositionID)
+    UniqueCloseStr = closeorderstr + "|" + orderSource + "|" + orderTicker + "|" + str(closePrice) + "|" + str(PositionID)
     
     OrderMarker = {
         "type": "BUY/SELL",
@@ -130,6 +134,8 @@ def BuyIterateSell(mkt_price, optionsymbol, stratdirection, open_prices, strateg
         "openPrice": openPrice,
         "closePrice": closePrice,
         "contractCost": contract_cost,
+        "commissionRate": transaction_cost,
+        "transactionCost": total_transaction_cost,
         "contractReturn": contract_return,
         "netValue": net_value,
         "ROI": roi,
@@ -146,6 +152,7 @@ def BuyIterateSell(mkt_price, optionsymbol, stratdirection, open_prices, strateg
         "ticker": orderTicker,
         "openPrice": openPrice,
         "contractCost": contract_cost,
+        "transactionCost": total_transaction_cost,
         "openDate": open_datetime
         }
     
@@ -160,6 +167,12 @@ def BuyIterateSell(mkt_price, optionsymbol, stratdirection, open_prices, strateg
         "ROI": roi,
         "closeDate": close_datetime
         }
+    
+    BuySellPair = {
+        "OpenMarker": UniqueOpenStr,
+        "CloseMarker": UniqueCloseStr,
+        "PositionID": PositionID
+        }
 
     # UniqueOpenMarker = {
     #     "datetime": open_datetime,
@@ -171,9 +184,10 @@ def BuyIterateSell(mkt_price, optionsymbol, stratdirection, open_prices, strateg
     #     "closestr": UniqueCloseStr
     # }
 
-    return OrderMarker, OpenMarker, CloseMarker, open_datetime, close_datetime
+    return OrderMarker, OpenMarker, CloseMarker, open_datetime, close_datetime, BuySellPair
 
 dflist = []
+BuySellMatch = []
 openlist = []
 closelist = []
 failed_openlist = []
@@ -182,22 +196,25 @@ failed_dictlist = []
 for i, rows in data.iterrows():
     try:
         start_date, end_date, symbol, mkt_price, strategy, optionsymbol, stratdirection, polygon_df, open_prices, datetimelist, datetimeindex, results = pull_data(i)
-        OrderMarker, OpenMarker, CloseMarker, open_datetime, close_datetime = BuyIterateSell(mkt_price, optionsymbol, stratdirection, open_prices, strategy)
+        OrderMarker, OpenMarker, CloseMarker, open_datetime, close_datetime, BuySellPair = BuyIterateSell(symbol, mkt_price, optionsymbol, stratdirection, open_prices, strategy)
         dflist.append(OrderMarker)
+        BuySellMatch.append(BuySellPair)
         # openlist.append(UniqueOpenMarker)
         # closelist.append(UniqueCloseMarker)
         # if i >= 50:
         #     break
+        print(i + "/" + len(data) + "Complete")
     except:
         failed_openlist.append(optionsymbol)
-        print("Failed to pull option data for" + optionsymbol)
+        print("Failed to pull option data for " + optionsymbol)
+        print(i + "/" + len(data) + "Complete")
         continue
 
 df_trades = pd.DataFrame(dflist)
 # df_open = pd.DataFrame(openlist)
 # df_close = pd.DataFrame(closelist)
 
-key_list = ["Time", "Buy", "Sell", "ActiveHoldings", "Cost", "Return", "NetValueofInterval", "StartValue", "EndValue"]
+key_list = ["Time", "Buy", "Sell", "ActiveHoldings", "Cost", "Return", "TransactionCosts", "TransactionCostofInterval", "NetValueofInterval", "StartValue", "EndValue"]
 n = len(datetimelist)
 transactiondict = []
 for idx in range(0, n, 1):
@@ -208,9 +225,11 @@ for idx in range(0, n, 1):
         key_list[3]: [],
         key_list[4]: [],
         key_list[5]: [],
-        key_list[6]: 0,
-        key_list[7]: 0,
-        key_list[8]: 0
+        key_list[6]: [],
+        key_list[7]: [],
+        key_list[8]: 0,
+        key_list[9]: 0,
+        key_list[10]: 0
         })
 
 for i, row in df_trades.iterrows():
@@ -226,6 +245,8 @@ for i, row in df_trades.iterrows():
         transactiondict[close_index]['Sell'].append(row['uniqueclosestr'])
         transactiondict[open_index]['Cost'].append(row['contractCost'])
         transactiondict[close_index]['Return'].append(row['contractReturn'])
+        transactiondict[open_index]['TransactionCosts'].append(row['commissionRate'])
+        transactiondict[close_index]['TransactionCosts'].append(row['commissionRate'])
     except:
         print("Failed to add a trade to dict")
         failed_dictlist.append(dict(row))
@@ -233,32 +254,30 @@ for i, row in df_trades.iterrows():
 
 transactions = pd.DataFrame(transactiondict)
 
-transactions['StartValue'][0].append(startingvalue)
+transactions['StartValue'][0] = int(startingvalue)
 
 for i, row in transactions.iterrows():
-    transactions['ActiveHoldings'][i].append(transactions['Buy'][i])
+    transactions['ActiveHoldings'][i].extend(transactions['Buy'][i])
     if i > 0:
-        transactions['ActiveHoldings'][i].append(transactions['ActiveHoldings'][i-1])
+        transactions['ActiveHoldings'][i].extend(transactions['ActiveHoldings'][i-1])
     holdingslist = transactions['ActiveHoldings'][i]
     soldlist = transactions['Sell'][i]
     for item in soldlist:
-        try:
-            holdingslist.remove(item)
-        except ValueError:
-            pass
+        matchdict = next(thing for thing in BuySellMatch if thing['CloseMarker'] == item)
+        positionid = matchdict['PositionID']
+        holdingslist[:] = [x for x in holdingslist if positionid not in x]
     transactions.at[i,'ActiveHoldings'] = holdingslist
+    totaltransactioncost = sum(transactions['TransactionCosts'][i])
+    transactions['TransactionCostofInterval'][i] = totaltransactioncost
     totalcost = sum(transactions['Cost'][i])
     totalreturn = sum(transactions['Return'][i])
-    net = totalreturn - totalcost
-    transactions['NetValueofInterval'][i].append(net)
+    net = (totalreturn - totalcost) - totaltransactioncost
+    transactions['NetValueofInterval'][i] = net
     if i > 0:
-        transactions['StartValue'][i].append(transactions['EndValue'][i-1])
-    startval = transactions['StartValue'][i][0]
-    if type(startval) == int:
-        endval = startval + net
-    elif type(startval) == list:
-        endval = startval[0] + net
-    transactions['EndValue'][i].append(endval)
+        transactions['StartValue'][i] = transactions['EndValue'][i-1]
+    startval = transactions['StartValue'][i]
+    endval = startval + net
+    transactions['EndValue'][i] = endval
 
 print(failed_dictlist, failed_openlist)
 transactions.to_csv(f'/Users/ogdiz/Projects/APE-Research/APE-Backtester/v1/BT_Results/TEST.csv')
