@@ -3,10 +3,10 @@ import datetime as dt
 import pandas as pd
 import helpers.backtraderhelpers as backtest
 
-def kickoff():
+def kickoff(s3link):
     startingvalue = backtest.startbacktrader(1000000)
     commissioncost = 0.35
-    rawdata = backtest.s3_data()
+    rawdata = backtest.s3_data(s3link)
     dataset = pd.DataFrame(rawdata)
     data = dataset[dataset.volume >= 20000000]
     data.reset_index(inplace=True)
@@ -21,8 +21,8 @@ def kickoff():
     failed_dictlist = []
     return startingvalue, commissioncost, rawdata, data, datetimelist, datetimeindex, results, dflist, buysellmatch, openlist, closelist, failed_openlist, failed_dictlist
 
-def pull_data(index):
-    rawdata = backtest.s3_data()
+def pull_data(index, s3link):
+    rawdata = backtest.s3_data(s3link)
     start_date = datetime.strptime(rawdata['date'].values[index], '%Y-%m-%d %H:%M:%S')
     end_date = backtest.end_date(start_date, 3)
     symbol = rawdata['symbol'].values[index]
@@ -193,10 +193,10 @@ def buyiteratesell(symbol, mkt_price, optionsymbol, stratdirection, open_prices,
 
     return OrderMarker, OpenMarker, CloseMarker, open_datetime, close_datetime, BuySellPair
 
-def btfunction(data, dflist, buysellmatch, failed_openlist, failed_dictlist, datetimelist, startingvalue, commissioncost):
+def btfunction(data, dflist, buysellmatch, failed_openlist, failed_dictlist, datetimelist, startingvalue, commissioncost, s3link):
     for i, rows in data.iterrows():
         try:
-            start_date, end_date, symbol, mkt_price, strategy, optionsymbol, stratdirection, polygon_df, open_prices = pull_data(i)
+            start_date, end_date, symbol, mkt_price, strategy, optionsymbol, stratdirection, polygon_df, open_prices = pull_data(i, s3link)
             OrderMarker, OpenMarker, CloseMarker, open_datetime, close_datetime, BuySellPair = buyiteratesell(symbol, mkt_price, optionsymbol, stratdirection, open_prices, strategy, polygon_df, commissioncost)
             dflist.append(OrderMarker)
             buysellmatch.append(BuySellPair)
@@ -288,5 +288,9 @@ def btfunction(data, dflist, buysellmatch, failed_openlist, failed_dictlist, dat
     return transactions
 
 if __name__ == "__main__":
-    startingvalue, commissioncost, rawdata, data, datetimelist, datetimeindex, results, dflist, buysellmatch, openlist, closelist, failed_openlist, failed_dictlist = kickoff()
-    transactions = btfunction(data, dflist, buysellmatch, failed_openlist, failed_dictlist, datetimelist, startingvalue, commissioncost)
+    s3link = {
+    'bucketname': 'icarus-research-data',
+    'objectkey': 'training_datasets/expanded_1d_datasets/2023/05/12.csv'
+    }
+    startingvalue, commissioncost, rawdata, data, datetimelist, datetimeindex, results, dflist, buysellmatch, openlist, closelist, failed_openlist, failed_dictlist = kickoff(s3link)
+    transactions = btfunction(data, dflist, buysellmatch, failed_openlist, failed_dictlist, datetimelist, startingvalue, commissioncost, s3link)
