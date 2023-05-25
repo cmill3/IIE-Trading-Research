@@ -1,8 +1,5 @@
 from datetime import timedelta, datetime
 import datetime as dt
-import backtrader as bt
-import backtrader.feeds as btfeeds
-import backtrader.indicators as btind
 import pandas as pd
 import helpers.backtraderhelpers as backtest
 
@@ -11,11 +8,15 @@ commissioncost = 0.35
 rawdata = backtest.s3_data()
 dataset = pd.DataFrame(rawdata)
 data = dataset[dataset.volume >= 20000000]
+data.reset_index(inplace=True)
+init_date = datetime.strptime(rawdata['date'].values[0], '%Y-%m-%d %H:%M:%S')
+comp_date = backtest.end_date(init_date, 4)
+datetimelist, datetimeindex, results = backtest.build_table(init_date, comp_date)
 
 def pull_data(index):
     rawdata = backtest.s3_data()
-    dataset = pd.DataFrame(rawdata)
-    data = dataset[dataset.volume >= 20000000]
+    # dataset = pd.DataFrame(rawdata)
+    # data = dataset[dataset.volume >= 20000000]
     start_date = datetime.strptime(rawdata['date'].values[index], '%Y-%m-%d %H:%M:%S')
     end_date = backtest.end_date(start_date, 3)
     symbol = rawdata['symbol'].values[index]
@@ -24,8 +25,7 @@ def pull_data(index):
     strategy = rawdata['title'].values[index]
     option_symbol, stratdirection, polygon_df = backtest.data_pull(symbol, start_date, end_date, mkt_price, strategy, contracts)
     open_prices = polygon_df['o'].values
-    datetimelist, datetimeindex, results = backtest.build_table(start_date,end_date)
-    return start_date, end_date, symbol, mkt_price, strategy, option_symbol, stratdirection, polygon_df, open_prices, datetimelist, datetimeindex, results
+    return start_date, end_date, symbol, mkt_price, strategy, option_symbol, stratdirection, polygon_df, open_prices
 
 def BuyIterateSell(symbol, mkt_price, optionsymbol, stratdirection, open_prices, strategy):
 
@@ -33,7 +33,7 @@ def BuyIterateSell(symbol, mkt_price, optionsymbol, stratdirection, open_prices,
     openPrice = open_prices[0]
     open_dt = polygon_df['date'][0]
     open_datetime = open_dt.to_pydatetime()
-    open_dt_hrmin = open_datetime.strftime("D%Y-%m-%dT%H:%M")
+    open_dt_hrmin = open_datetime.strftime("%Y-%m-%d %H:%M")
     contract_number = 1
     contract_size = 100
     transaction_cost = commissioncost * contract_number
@@ -122,9 +122,10 @@ def BuyIterateSell(symbol, mkt_price, optionsymbol, stratdirection, open_prices,
     net_value = contract_return - contract_cost
     roi = net_value / contract_cost
 
-    PositionID = symbol + strategy + open_dt_hrmin
-    UniqueOpenStr = openorderstr + "|" + strategy + "|" + orderTicker + "|" + str(openPrice) + "|" + str(PositionID)
-    UniqueCloseStr = closeorderstr + "|" + orderSource + "|" + orderTicker + "|" + str(closePrice) + "|" + str(PositionID)
+    PositionID = "[Symbol: " + symbol + ", Strategy: " + strategy + ", opendatetime: " + open_dt_hrmin + "]"
+    UniqueOpenStr = "[Buy/Sell: " + openorderstr + ", Ticker: " + orderTicker + ", OpenPrice: " + str(openPrice) + ", PositionID: " + str(PositionID) + "]"
+    UniqueCloseStr = "[Buy/Sell: " +  closeorderstr + ", Ticker: " + orderTicker + ", OpenPrice: " + str(closePrice) + ", PositionID: " + str(PositionID) + "]"
+
     
     OrderMarker = {
         "type": "BUY/SELL",
@@ -195,19 +196,19 @@ failed_dictlist = []
 
 for i, rows in data.iterrows():
     try:
-        start_date, end_date, symbol, mkt_price, strategy, optionsymbol, stratdirection, polygon_df, open_prices, datetimelist, datetimeindex, results = pull_data(i)
+        start_date, end_date, symbol, mkt_price, strategy, optionsymbol, stratdirection, polygon_df, open_prices = pull_data(i)
         OrderMarker, OpenMarker, CloseMarker, open_datetime, close_datetime, BuySellPair = BuyIterateSell(symbol, mkt_price, optionsymbol, stratdirection, open_prices, strategy)
         dflist.append(OrderMarker)
         BuySellMatch.append(BuySellPair)
         # openlist.append(UniqueOpenMarker)
         # closelist.append(UniqueCloseMarker)
-        # if i >= 50:
+        # if i >= 100:
         #     break
-        print(i + "/" + len(data) + "Complete")
+        print(str(i) + "/" + str(len(data.index)))
     except:
         failed_openlist.append(optionsymbol)
         print("Failed to pull option data for " + optionsymbol)
-        print(i + "/" + len(data) + "Complete")
+        print(str(i) + "/" + str(len(data.index)))
         continue
 
 df_trades = pd.DataFrame(dflist)
@@ -231,10 +232,11 @@ for idx in range(0, n, 1):
         key_list[9]: 0,
         key_list[10]: 0
         })
+    
+reference = backtest.build_dict(transactiondict, key="Time")
 
 for i, row in df_trades.iterrows():
     try:
-        reference = backtest.build_dict(transactiondict, key="Time")
         open_info = reference.get(row['openDate'])
         close_info = reference.get(row['closeDate'])
         open_index = open_info['index']
@@ -247,10 +249,12 @@ for i, row in df_trades.iterrows():
         transactiondict[close_index]['Return'].append(row['contractReturn'])
         transactiondict[open_index]['TransactionCosts'].append(row['commissionRate'])
         transactiondict[close_index]['TransactionCosts'].append(row['commissionRate'])
-    except:
-        print("Failed to add a trade to dict")
-        failed_dictlist.append(dict(row))
+    except Exception as e:
+        print(e)
+        print("Failed to add a trade to dict for index" + str(i))
+        failed_dictlist.append({'OpenStr': row['uniqueopenstr'], 'CloseStr': row['uniqueclosestr']})
         continue
+
 
 transactions = pd.DataFrame(transactiondict)
 
@@ -279,5 +283,9 @@ for i, row in transactions.iterrows():
     endval = startval + net
     transactions['EndValue'][i] = endval
 
-print(failed_dictlist, failed_openlist)
+print(failed_dictlist)
+print(len(failed_dictlist))
+print(len(dflist))
+print(failed_openlist)
+
 transactions.to_csv(f'/Users/ogdiz/Projects/APE-Research/APE-Backtester/v1/BT_Results/TEST.csv')

@@ -231,10 +231,6 @@ def build_table(start_date, end_date):
         finaldate = datetime.strptime(convertedtime, '%Y-%m-%d %H:%M:%S')
         days.append(finaldate)
     results = pd.DataFrame(index=days)
-    # results.dropna(inplace = True)
-    # results = results.reset_index()   
-    # index = pd.Index(days)
-    # results = results.set_index(index)
     return days, datetimeindex, results
 
 def build_dict(seq, key):
