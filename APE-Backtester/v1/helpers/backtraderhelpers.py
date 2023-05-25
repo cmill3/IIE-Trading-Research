@@ -32,11 +32,11 @@ def end_date(start_date, add_days):
     
     return start_date
 
-def s3_data():
+def s3_data(s3link):
     #Pulls training set data from s3
     s3 = boto3.client('s3', aws_access_key_id = AWS_ACCESS_KEY_ID, aws_secret_access_key = AWS_SECRET_ACCESS_KEY)
-    bucket_name = 'icarus-research-data'
-    object_key = 'training_datasets/expanded_1d_datasets/2023/04/17.csv'
+    bucket_name = s3link['bucketname']
+    object_key = s3link['objectkey']
     obj = s3.get_object(Bucket = bucket_name, Key = object_key)
     rawdata = obj['Body'].read().decode('utf-8')
     df = pd.read_csv(StringIO(rawdata))
@@ -191,7 +191,7 @@ def polygon_stockdata(x, from_date, to_date, df_optiondata):
         underlying_price.append(str(round(open_price[0],2)))
     df_optiondata['underlyingPrice'] = underlying_price
     new_date = from_date.strftime("D:" + "%Y%m%d" + "T:" + "%H-%M-%S")
-    df_optiondata.to_csv(f'/Users/ogdiz/Projects/APE-Research/APE-Backtester/APE-Backtester-Results/Testing_Research_Data_CSV_{x}_{new_date}.csv')
+    # df_optiondata.to_csv(f'/Users/ogdiz/Projects/APE-Research/APE-Backtester/APE-Backtester-Results/Testing_Research_Data_CSV_{x}_{new_date}.csv')
     return df_optiondata
 
 def data_pull(symbol, start_date, end_date, mktprice, strategy, contracts):
