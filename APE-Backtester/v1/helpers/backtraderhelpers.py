@@ -6,6 +6,7 @@ import pandas as pd
 import requests
 import json
 import ast
+import holidays
 
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
@@ -235,3 +236,21 @@ def build_table(start_date, end_date):
 
 def build_dict(seq, key):
     return dict((d[key], dict(d, index=index)) for (index, d) in enumerate(seq))
+
+def tradingdaterange(start_date, end_date):
+    alldates = []
+    operating_dates = []
+    start = datetime.strptime(start_date, '%m/%d/%Y')
+    end = datetime.strptime(end_date, '%m/%d/%Y')
+    for n in range(int ((end - start).days)+1):
+            alldates.append(start + timedelta(n))
+
+    nyse_holidays = holidays.NYSE()
+    
+    weekdays = [5,6]
+
+    for i in alldates:
+        if i.weekday() not in weekdays and i not in nyse_holidays:                    # to print only the weekdates
+            operating_dates.append(i.strftime('%Y/%m/%d'))
+
+    return operating_dates

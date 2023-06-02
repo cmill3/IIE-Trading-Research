@@ -1,18 +1,18 @@
 from datetime import timedelta, datetime
 import datetime as dt
 import pandas as pd
-import helpers.backtraderhelpers as backtest
+import helpers.backtraderhelpers as backtrader
 
 def kickoff(s3link):
-    startingvalue = backtest.startbacktrader(1000000)
+    startingvalue = backtrader.startbacktrader(1000000)
     commissioncost = 0.35
-    rawdata = backtest.s3_data(s3link)
+    rawdata = backtrader.s3_data(s3link)
     dataset = pd.DataFrame(rawdata)
     data = dataset[dataset.volume >= 20000000]
     data.reset_index(inplace=True)
     init_date = datetime.strptime(rawdata['date'].values[0], '%Y-%m-%d %H:%M:%S')
-    comp_date = backtest.end_date(init_date, 4)
-    datetimelist, datetimeindex, results = backtest.build_table(init_date, comp_date)
+    comp_date = backtrader.end_date(init_date, 4)
+    datetimelist, datetimeindex, results = backtrader.build_table(init_date, comp_date)
     dflist = []
     buysellmatch = []
     openlist = []
@@ -22,14 +22,14 @@ def kickoff(s3link):
     return startingvalue, commissioncost, rawdata, data, datetimelist, datetimeindex, results, dflist, buysellmatch, openlist, closelist, failed_openlist, failed_dictlist
 
 def pull_data(index, s3link):
-    rawdata = backtest.s3_data(s3link)
+    rawdata = backtrader.s3_data(s3link)
     start_date = datetime.strptime(rawdata['date'].values[index], '%Y-%m-%d %H:%M:%S')
-    end_date = backtest.end_date(start_date, 3)
+    end_date = backtrader.end_date(start_date, 3)
     symbol = rawdata['symbol'].values[index]
     mkt_price = rawdata['regularMarketPrice'].values[index]
     contracts = rawdata['contracts'].values[index]
     strategy = rawdata['title'].values[index]
-    option_symbol, stratdirection, polygon_df = backtest.data_pull(symbol, start_date, end_date, mkt_price, strategy, contracts)
+    option_symbol, stratdirection, polygon_df = backtrader.data_pull(symbol, start_date, end_date, mkt_price, strategy, contracts)
     open_prices = polygon_df['o'].values
     return start_date, end_date, symbol, mkt_price, strategy, option_symbol, stratdirection, polygon_df, open_prices
 
@@ -70,7 +70,7 @@ def buyiteratesell(symbol, mkt_price, optionsymbol, stratdirection, open_prices,
             orderType = "Sell"
             matched_dt = matched_row['date'].values
             close_dt = matched_dt[0]
-            close_datetime = backtest.convertepoch(close_dt)
+            close_datetime = backtrader.convertepoch(close_dt)
 
         elif inverse_date_time[0] >= target_date_time[0]:
             matched_row = polygon_df.loc[polygon_df['date'] == target_date_time[0]]
@@ -80,7 +80,7 @@ def buyiteratesell(symbol, mkt_price, optionsymbol, stratdirection, open_prices,
             orderType = "Sell"
             matched_dt = matched_row['date'].values
             close_dt = matched_dt[0]
-            close_datetime = backtest.convertepoch(close_dt)
+            close_datetime = backtrader.convertepoch(close_dt)
 
         else:
             matched_row = polygon_df.iloc[-1]
@@ -90,7 +90,7 @@ def buyiteratesell(symbol, mkt_price, optionsymbol, stratdirection, open_prices,
             orderType = "Sell"
             matched_dt = matched_row['date'].values
             close_dt = matched_dt[0]
-            close_datetime = backtest.convertepoch(close_dt)
+            close_datetime = backtrader.convertepoch(close_dt)
 
     elif len(inverse_date_time) == 0 and len(target_date_time) != 0:
         matched_row = polygon_df.loc[polygon_df['date'] == target_date_time[0]]
@@ -100,7 +100,7 @@ def buyiteratesell(symbol, mkt_price, optionsymbol, stratdirection, open_prices,
         orderType = "Sell"
         matched_dt = matched_row['date'].values
         close_dt = matched_dt[0]
-        close_datetime = backtest.convertepoch(close_dt)
+        close_datetime = backtrader.convertepoch(close_dt)
 
     elif len(inverse_date_time) != 0 and len(target_date_time) == 0:
         matched_row = polygon_df.loc[polygon_df['date'] == inverse_date_time[0]]
@@ -110,7 +110,7 @@ def buyiteratesell(symbol, mkt_price, optionsymbol, stratdirection, open_prices,
         orderType = "Sell"
         matched_dt = matched_row['date'].values
         close_dt = matched_dt[0]
-        close_datetime = backtest.convertepoch(close_dt)
+        close_datetime = backtrader.convertepoch(close_dt)
 
     elif len(inverse_date_time) == 0 and len(target_date_time) == 0:
         #Because this is the last value in the sheet, and indexed differently, I need to use different methods to pull information
@@ -202,9 +202,9 @@ def btfunction(data, dflist, buysellmatch, failed_openlist, failed_dictlist, dat
             buysellmatch.append(BuySellPair)
             # openlist.append(UniqueOpenMarker)
             # closelist.append(UniqueCloseMarker)
-            # if i >= 100:
+            # if i >= 50:
             #     break
-            print(str(i) + "/" + str(len(data.index)))
+            print(str(i+1) + "/" + str(len(data.index) + 1))
         except:
             failed_openlist.append(optionsymbol)
             print("Failed to pull option data for " + optionsymbol)
@@ -212,8 +212,6 @@ def btfunction(data, dflist, buysellmatch, failed_openlist, failed_dictlist, dat
             continue
 
     df_trades = pd.DataFrame(dflist)
-    # df_open = pd.DataFrame(openlist)
-    # df_close = pd.DataFrame(closelist)
 
     key_list = ["Time", "Buy", "Sell", "ActiveHoldings", "Cost", "Return", "TransactionCosts", "TransactionCostofInterval", "NetValueofInterval", "StartValue", "EndValue"]
     n = len(datetimelist)
@@ -233,7 +231,7 @@ def btfunction(data, dflist, buysellmatch, failed_openlist, failed_dictlist, dat
             key_list[10]: 0
             })
         
-    reference = backtest.build_dict(transactiondict, key="Time")
+    reference = backtrader.build_dict(transactiondict, key="Time")
 
     for i, row in df_trades.iterrows():
         try:
@@ -254,7 +252,6 @@ def btfunction(data, dflist, buysellmatch, failed_openlist, failed_dictlist, dat
             print("Failed to add a trade to dict for index" + str(i))
             failed_dictlist.append({'OpenStr': row['uniqueopenstr'], 'CloseStr': row['uniqueclosestr']})
             continue
-
 
     transactions = pd.DataFrame(transactiondict)
 
