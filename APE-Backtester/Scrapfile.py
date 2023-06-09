@@ -8,28 +8,31 @@ import json
 import ast
 import holidays
 
+results = pd.read_csv('/Users/ogdiz/Projects/APE-Research/APE-Backtester/v1/BT_Results/IGNORE.csv')
 
-AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+results['StartValue'][0] = 1000000
 
-def s3_data():
-    #Pulls training set data from s3
-    s3 = boto3.resource('s3', aws_access_key_id = AWS_ACCESS_KEY_ID, aws_secret_access_key = AWS_SECRET_ACCESS_KEY)
-    my_bucket = s3.Bucket('icarus-research-data/training_datasets/expanded_1d_datasets/2023/04')
-    for file in my_bucket.objects.all():
-        print(file.key)
-    
-    return
-    # bucket_name = 'icarus-research-data'
-    # object_key = 'training_datasets/expanded_1d_datasets/2023/04/17.csv'
-    # obj = s3.get_object(Bucket = bucket_name, Key = object_key)
-    # rawdata = obj['Body'].read().decode('utf-8')
-    # df = pd.read_csv(StringIO(rawdata))
-    # df.dropna(inplace = True)
-    # df.reset_index(inplace= True, drop = True)
-    # df['contracts'] = df['contracts'].apply(lambda x: ast.literal_eval(x))
-    # df['contracts_available'] = df['contracts'].apply(lambda x: len(x)>=12)
-    # return df
+for i, row in results.iterrows():
+    results['ActiveHoldings'][i].extend(results['Buy'][i])
+    if i > 0:
+        results['ActiveHoldings'][i].extend(results['ActiveHoldings'][i-1])
+    holdingslist = results['ActiveHoldings'][i]
+    soldlist = results['Sell'][i]
+    for item in soldlist:
+        matchdict = next(thing for thing in buysellmatchlist if thing['CloseMarker'] == item)
+        positionid = matchdict['PositionID']
+        holdingslist[:] = [x for x in holdingslist if positionid not in x]
+    results.at[i,'ActiveHoldings'] = holdingslist
+    totaltransactioncost = sum(results['TransactionCosts'][i])
+    results['TransactionCostofInterval'][i] = totaltransactioncost
+    totalcost = sum(results['Cost'][i])
+    totalreturn = sum(results['Return'][i])
+    net = (totalreturn - totalcost) - totaltransactioncost
+    results['NetValueofInterval'][i] = net
+    if i > 0:
+        results['StartValue'][i] = results['EndValue'][i-1]
+    startval = results['StartValue'][i]
+    endval = startval + net
+    results['EndValue'][i] = endval
 
-# s3_data()
-print(holidays)
+print(results)
