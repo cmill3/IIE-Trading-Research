@@ -206,9 +206,12 @@ def btfunction(data, dflist, buysellmatch, failed_openlist, failed_dictlist, dat
             #     break
             print(str(i+1) + "/" + str(len(data.index) + 1))
         except:
-            failed_openlist.append(optionsymbol)
-            print("Failed to pull option data for " + optionsymbol)
-            print(str(i) + "/" + str(len(data.index)))
+            try:
+                failed_openlist.append(optionsymbol)
+                print("Failed to pull option data for " + optionsymbol)
+                print(str(i) + "/" + str(len(data.index)))
+            except:
+                next
             continue
 
     df_trades = pd.DataFrame(dflist)
@@ -255,34 +258,35 @@ def btfunction(data, dflist, buysellmatch, failed_openlist, failed_dictlist, dat
 
     transactions = pd.DataFrame(transactiondict)
 
-    transactions['StartValue'][0] = int(startingvalue)
+    print(transactions.columns.tolist())
+    # transactions['StartValue'][0] = int(startingvalue)
 
-    for i, row in transactions.iterrows():
-        transactions['ActiveHoldings'][i].extend(transactions['Buy'][i])
-        if i > 0:
-            transactions['ActiveHoldings'][i].extend(transactions['ActiveHoldings'][i-1])
-        holdingslist = transactions['ActiveHoldings'][i]
-        soldlist = transactions['Sell'][i]
-        for item in soldlist:
-            matchdict = next(thing for thing in buysellmatch if thing['CloseMarker'] == item)
-            positionid = matchdict['PositionID']
-            holdingslist[:] = [x for x in holdingslist if positionid not in x]
-        transactions.at[i,'ActiveHoldings'] = holdingslist
-        totaltransactioncost = sum(transactions['TransactionCosts'][i])
-        transactions['TransactionCostofInterval'][i] = totaltransactioncost
-        totalcost = sum(transactions['Cost'][i])
-        totalreturn = sum(transactions['Return'][i])
-        net = (totalreturn - totalcost) - totaltransactioncost
-        transactions['NetValueofInterval'][i] = net
-        if i > 0:
-            transactions['StartValue'][i] = transactions['EndValue'][i-1]
-        startval = transactions['StartValue'][i]
-        endval = startval + net
-        transactions['EndValue'][i] = endval
+    # for i, row in transactions.iterrows():
+    #     transactions['ActiveHoldings'][i].extend(transactions['Buy'][i])
+    #     if i > 0:
+    #         transactions['ActiveHoldings'][i].extend(transactions['ActiveHoldings'][i-1])
+    #     holdingslist = transactions['ActiveHoldings'][i]
+    #     soldlist = transactions['Sell'][i]
+    #     for item in soldlist:
+    #         matchdict = next(thing for thing in buysellmatch if thing['CloseMarker'] == item)
+    #         positionid = matchdict['PositionID']
+    #         holdingslist[:] = [x for x in holdingslist if positionid not in x]
+    #     transactions.at[i,'ActiveHoldings'] = holdingslist
+    #     totaltransactioncost = sum(transactions['TransactionCosts'][i])
+    #     transactions['TransactionCostofInterval'][i] = totaltransactioncost
+    #     totalcost = sum(transactions['Cost'][i])
+    #     totalreturn = sum(transactions['Return'][i])
+    #     net = (totalreturn - totalcost) - totaltransactioncost
+    #     transactions['NetValueofInterval'][i] = net
+    #     if i > 0:
+    #         transactions['StartValue'][i] = transactions['EndValue'][i-1]
+    #     startval = transactions['StartValue'][i]
+    #     endval = startval + net
+    #     transactions['EndValue'][i] = endval
 
-    transactions.to_csv(f'/Users/ogdiz/Projects/APE-Research/APE-Backtester/v1/BT_Results/TEST.csv')
+    # transactions.to_csv(f'/Users/ogdiz/Projects/APE-Research/APE-Backtester/v1/BT_Results/TEST.csv')
 
-    return transactions
+    return transactions, buysellmatch
 
 if __name__ == "__main__":
     s3link = {
