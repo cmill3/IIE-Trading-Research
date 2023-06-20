@@ -10,6 +10,7 @@ import holidays
 
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+s3 = boto3.client('s3', aws_access_key_id = AWS_ACCESS_KEY_ID, aws_secret_access_key = AWS_SECRET_ACCESS_KEY)
 
 def startbacktrader(Starting_Cash):
     Starting_Value = Starting_Cash
@@ -240,8 +241,8 @@ def build_dict(seq, key):
 def tradingdaterange(start_date, end_date):
     alldates = []
     operating_dates = []
-    start = datetime.strptime(start_date, '%m/%d/%Y')
-    end = datetime.strptime(end_date, '%m/%d/%Y')
+    start = datetime.strptime(start_date, "%Y/%m/%d")
+    end = datetime.strptime(end_date, "%Y/%m/%d")
     for n in range(int ((end - start).days)+1):
             alldates.append(start + timedelta(n))
 
@@ -254,3 +255,25 @@ def tradingdaterange(start_date, end_date):
             operating_dates.append(i.strftime('%Y/%m/%d'))
 
     return operating_dates
+
+def pull_modeling_results(alerts_df):
+    alerts_df['date_str'] = alerts_df['date'].apply(lambda x: x.split(' ')[0].replace('-','/'))
+    alerts_df['hour'] = alerts_df['date'].apply(lambda x: x.split(' ')[1][0:2])
+    alerts_df['date'] = pd.to_datetime(alerts_df['date'])
+
+    hours = ["14","15","16","17","18","19","20"]
+    date_str= alerts_df['date_str'].unique()
+    model_results = []
+    for hour in hours:
+        print(f"yqalerts_full_results/{date_str[0]}/{hour}.csv")
+        dataset = s3.get_object(Bucket="yqalerts-model-results", Key=f"yqalerts_full_results/{date_str[0]}/{hour}:00.csv")
+        df = pd.read_csv(dataset.get("Body"))
+        df['hour'] = hour
+        model_results.append(df)
+    model_results = pd.concat(model_results)
+    model_results = model_results.rename(columns={'strategy': 'title'})
+    merged_df = pd.merge(alerts_df, model_results, on=['symbol', 'hour','title'], how='inner')
+    merged_df.drop(["Unnamed: 0_x","Unnamed: 0_y","Unnamed: 0.1"], axis=1, inplace=True)
+    print(merged_df)
+    return merged_df
+    

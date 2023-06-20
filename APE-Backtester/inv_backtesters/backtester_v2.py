@@ -4,12 +4,12 @@ import numpy as np
 import holidays
 from xone import calendar
 import boto3
-import helpers.backtestfunctions as backtester
-import helpers.backtraderhelpers as backtrader
+import helpers.backtest_functions as backtester
+import helpers.backtrader_helper as backtrader
 
 
-startdate = '05/31/2023' #MM/DD/YYYY format
-enddate = '06/02/2023' #MM/DD/YYYY format
+startdate = '2023/05/31' #MM/DD/YYYY format
+enddate = '2023/05/31' #MM/DD/YYYY format
 bucket_name = 'icarus-research-data'  #s3 bucket name
 object_keybase = 'training_datasets/expanded_1d_datasets/' #s3 key not including date, date is added in pullcsv func
 
@@ -19,7 +19,7 @@ def aggregate_times(df):
     df = df.drop('Time', inplace=False, axis = 1)
     return df
 
-def pullcsvdata(startdate, enddate):
+def run_backtest(startdate, enddate):
     btdays = backtrader.tradingdaterange(startdate, enddate)
     object_keydates = []
 
@@ -31,12 +31,12 @@ def pullcsvdata(startdate, enddate):
     buysellmatchlist = []
 
     for i, item in enumerate(object_keydates):
-        s3link = {
+        s3_link = {
         'bucketname': 'icarus-research-data',
         'objectkey': f'training_datasets/expanded_1d_datasets/{item}'
         }
-        startingvalue, commissioncost, rawdata, data, datetimelist, datetimeindex, res_ults, dflist, buysellpair, openlist, closelist, failed_openlist, failed_dictlist = backtester.kickoff(s3link)
-        transactions, buysellmatch = backtester.btfunction(data, dflist, buysellpair, failed_openlist, failed_dictlist, datetimelist, startingvalue, commissioncost, s3link)
+        starting_value, commission_cost, raw_data, data, datetime_list, datetime_index, results = backtester.kickoff(s3_link)
+        transactions, buysellmatch = backtester.btfunction(data, datetime_list, starting_value, commission_cost, s3_link)
         if i == 0:
             res_df = transactions
             for item in buysellmatch:
@@ -51,7 +51,7 @@ def pullcsvdata(startdate, enddate):
     results = results.reset_index()
 
 
-    results['StartValue'][0] = int(startingvalue)
+    results['StartValue'][0] = int(starting_value)
     removed_items = []
     for i, row in results.iterrows():
         results['ActiveHoldings'][i].extend(results['Buy'][i])
@@ -78,6 +78,6 @@ def pullcsvdata(startdate, enddate):
     return results
 
 if __name__ == "__main__":
-    results = pullcsvdata(startdate, enddate)
+    results = run_backtest(startdate, enddate)
     results.to_csv('/Users/ogdiz/Projects/APE-Research/APE-Backtester/v1/BT_Results/TEST_FULL.csv')
     print(results)

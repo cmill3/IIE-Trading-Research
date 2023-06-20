@@ -1,39 +1,35 @@
 from datetime import timedelta, datetime
 import datetime as dt
 import pandas as pd
-import helpers.backtraderhelpers as backtrader
+from helpers import backtrader_helper
 
 def kickoff(s3link):
-    startingvalue = backtrader.startbacktrader(1000000)
-    commissioncost = 0.35
-    rawdata = backtrader.s3_data(s3link)
-    dataset = pd.DataFrame(rawdata)
-    data = dataset[dataset.volume >= 20000000]
+    starting_value = backtrader_helper.startbacktrader(1000000)
+    commission_cost = 0.35
+    raw_data = backtrader_helper.s3_data(s3link)
+    dataset = pd.DataFrame(raw_data)
+    full_data = backtrader_helper.pull_modeling_results(dataset)
+    data = full_data[full_data.volume >= 20000000]
+    data = data.loc[data['classifier_prediction'] > .5]
     data.reset_index(inplace=True)
-    init_date = datetime.strptime(rawdata['date'].values[0], '%Y-%m-%d %H:%M:%S')
-    comp_date = backtrader.end_date(init_date, 4)
-    datetimelist, datetimeindex, results = backtrader.build_table(init_date, comp_date)
-    dflist = []
-    buysellmatch = []
-    openlist = []
-    closelist = []
-    failed_openlist = []
-    failed_dictlist = []
-    return startingvalue, commissioncost, rawdata, data, datetimelist, datetimeindex, results, dflist, buysellmatch, openlist, closelist, failed_openlist, failed_dictlist
+    init_date = datetime.strptime(raw_data['date'].values[0], '%Y-%m-%d %H:%M:%S')
+    comp_date = backtrader_helper.end_date(init_date, 4)
+    datetime_list, datetime_index, results = backtrader_helper.build_table(init_date, comp_date)
+    return starting_value, commission_cost, raw_data, data, datetime_list, datetime_index, results
 
 def pull_data(index, s3link):
-    rawdata = backtrader.s3_data(s3link)
+    rawdata = backtrader_helper.s3_data(s3link)
     start_date = datetime.strptime(rawdata['date'].values[index], '%Y-%m-%d %H:%M:%S')
-    end_date = backtrader.end_date(start_date, 3)
+    end_date = backtrader_helper.end_date(start_date, 3)
     symbol = rawdata['symbol'].values[index]
     mkt_price = rawdata['regularMarketPrice'].values[index]
     contracts = rawdata['contracts'].values[index]
     strategy = rawdata['title'].values[index]
-    option_symbol, stratdirection, polygon_df = backtrader.data_pull(symbol, start_date, end_date, mkt_price, strategy, contracts)
+    option_symbol, stratdirection, polygon_df = backtrader_helper.data_pull(symbol, start_date, end_date, mkt_price, strategy, contracts)
     open_prices = polygon_df['o'].values
     return start_date, end_date, symbol, mkt_price, strategy, option_symbol, stratdirection, polygon_df, open_prices
 
-def buyiteratesell(symbol, mkt_price, optionsymbol, stratdirection, open_prices, strategy, polygon_df, commissioncost):
+def buy_iterate_sell(symbol, mkt_price, optionsymbol, stratdirection, open_prices, strategy, polygon_df, commissioncost):
 
     #option contract values
     openPrice = open_prices[0]
@@ -50,7 +46,7 @@ def buyiteratesell(symbol, mkt_price, optionsymbol, stratdirection, open_prices,
     openorderstr = "B"
     closeorderstr = "S"
 
-    #Assigns target and inverse price to each strat direction
+    #Assigns target and inverse price to each strat direction ##CHASE this is execution strategy
     for i, row in polygon_df.iterrows():
         if stratdirection == "C":
             targetprice = (mkt_price * 0.05) + mkt_price
@@ -70,7 +66,7 @@ def buyiteratesell(symbol, mkt_price, optionsymbol, stratdirection, open_prices,
             orderType = "Sell"
             matched_dt = matched_row['date'].values
             close_dt = matched_dt[0]
-            close_datetime = backtrader.convertepoch(close_dt)
+            close_datetime = backtrader_helper.convertepoch(close_dt)
 
         elif inverse_date_time[0] >= target_date_time[0]:
             matched_row = polygon_df.loc[polygon_df['date'] == target_date_time[0]]
@@ -80,7 +76,7 @@ def buyiteratesell(symbol, mkt_price, optionsymbol, stratdirection, open_prices,
             orderType = "Sell"
             matched_dt = matched_row['date'].values
             close_dt = matched_dt[0]
-            close_datetime = backtrader.convertepoch(close_dt)
+            close_datetime = backtrader_helper.convertepoch(close_dt)
 
         else:
             matched_row = polygon_df.iloc[-1]
@@ -90,7 +86,7 @@ def buyiteratesell(symbol, mkt_price, optionsymbol, stratdirection, open_prices,
             orderType = "Sell"
             matched_dt = matched_row['date'].values
             close_dt = matched_dt[0]
-            close_datetime = backtrader.convertepoch(close_dt)
+            close_datetime = backtrader_helper.convertepoch(close_dt)
 
     elif len(inverse_date_time) == 0 and len(target_date_time) != 0:
         matched_row = polygon_df.loc[polygon_df['date'] == target_date_time[0]]
@@ -100,7 +96,7 @@ def buyiteratesell(symbol, mkt_price, optionsymbol, stratdirection, open_prices,
         orderType = "Sell"
         matched_dt = matched_row['date'].values
         close_dt = matched_dt[0]
-        close_datetime = backtrader.convertepoch(close_dt)
+        close_datetime = backtrader_helper.convertepoch(close_dt)
 
     elif len(inverse_date_time) != 0 and len(target_date_time) == 0:
         matched_row = polygon_df.loc[polygon_df['date'] == inverse_date_time[0]]
@@ -110,7 +106,7 @@ def buyiteratesell(symbol, mkt_price, optionsymbol, stratdirection, open_prices,
         orderType = "Sell"
         matched_dt = matched_row['date'].values
         close_dt = matched_dt[0]
-        close_datetime = backtrader.convertepoch(close_dt)
+        close_datetime = backtrader_helper.convertepoch(close_dt)
 
     elif len(inverse_date_time) == 0 and len(target_date_time) == 0:
         #Because this is the last value in the sheet, and indexed differently, I need to use different methods to pull information
@@ -193,17 +189,22 @@ def buyiteratesell(symbol, mkt_price, optionsymbol, stratdirection, open_prices,
 
     return OrderMarker, OpenMarker, CloseMarker, open_datetime, close_datetime, BuySellPair
 
-def btfunction(data, dflist, buysellmatch, failed_openlist, failed_dictlist, datetimelist, startingvalue, commissioncost, s3link):
+def btfunction(data, datetimelist, starting_value, commission_cost, s3link):
+    print(f"Starting Backtesting {data}")
+    dflist = []
+    buysellmatch = []
+    failed_openlist = []
+    failed_dictlist = []
     for i, rows in data.iterrows():
         try:
             start_date, end_date, symbol, mkt_price, strategy, optionsymbol, stratdirection, polygon_df, open_prices = pull_data(i, s3link)
-            OrderMarker, OpenMarker, CloseMarker, open_datetime, close_datetime, BuySellPair = buyiteratesell(symbol, mkt_price, optionsymbol, stratdirection, open_prices, strategy, polygon_df, commissioncost)
-            dflist.append(OrderMarker)
-            buysellmatch.append(BuySellPair)
+            order_marker, OpenMarker, CloseMarker, open_datetime, close_datetime, buy_sell_pair = buy_iterate_sell(symbol, mkt_price, optionsymbol, stratdirection, open_prices, strategy, polygon_df, commission_cost)
+            dflist.append(order_marker)
+            buysellmatch.append(buy_sell_pair)
             # openlist.append(UniqueOpenMarker)
             # closelist.append(UniqueCloseMarker)
-            # if i >= 50:
-            #     break
+            if i >= 10:
+                break
             print(str(i+1) + "/" + str(len(data.index) + 1))
         except:
             try:
@@ -293,5 +294,5 @@ if __name__ == "__main__":
     'bucketname': 'icarus-research-data',
     'objectkey': 'training_datasets/expanded_1d_datasets/2023/05/12.csv'
     }
-    startingvalue, commissioncost, rawdata, data, datetimelist, datetimeindex, results, dflist, buysellmatch, openlist, closelist, failed_openlist, failed_dictlist = kickoff(s3link)
-    transactions = btfunction(data, dflist, buysellmatch, failed_openlist, failed_dictlist, datetimelist, startingvalue, commissioncost, s3link)
+    starting_value, commission_cost, rawdata, data, datetime_list, datetimeindex, results,  = kickoff(s3link)
+    transactions = btfunction(data, datetime_list, starting_value, commission_cost, s3link)
