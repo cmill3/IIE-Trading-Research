@@ -2,6 +2,15 @@ from datetime import timedelta, datetime
 import datetime as dt
 import pandas as pd
 from helpers import backtrader_helper
+import warnings
+from helpers.trading_strategies import time_decay_alpha_ma_v0, time_decay_alpha_maP_v0, time_decay_alpha_gainers_v0, time_decay_alpha_losers_v0, bet_sizer
+# from pandas._libs.mode_warnings import SettingWithCopyWarning
+
+
+# warnings.filterwarnings("ignore", category=FutureWarning)
+# warnings.filterwarnings("ignore", category=DeprecationWarning)
+# warnings.filterwarnings("ignore", category=SettingWithCopyWarning)
+
 
 def kickoff(s3link):
     starting_value = backtrader_helper.startbacktrader(1000000)
@@ -13,281 +22,98 @@ def kickoff(s3link):
     data = data.loc[data['classifier_prediction'] > .5]
     data.reset_index(inplace=True)
     init_date = datetime.strptime(raw_data['date'].values[0], '%Y-%m-%d %H:%M:%S')
-    comp_date = backtrader_helper.end_date(init_date, 4)
+    comp_date = backtrader_helper.create_end_date(init_date, 4)
     datetime_list, datetime_index, results = backtrader_helper.build_table(init_date, comp_date)
-    return starting_value, commission_cost, raw_data, data, datetime_list, datetime_index, results
+    return starting_value, commission_cost, raw_data, data, datetime_list, results
 
-def pull_data(index, s3link):
-    rawdata = backtrader_helper.s3_data(s3link)
-    start_date = datetime.strptime(rawdata['date'].values[index], '%Y-%m-%d %H:%M:%S')
-    end_date = backtrader_helper.end_date(start_date, 3)
-    symbol = rawdata['symbol'].values[index]
-    mkt_price = rawdata['regularMarketPrice'].values[index]
-    contracts = rawdata['contracts'].values[index]
-    strategy = rawdata['title'].values[index]
-    option_symbol, stratdirection, polygon_df = backtrader_helper.data_pull(symbol, start_date, end_date, mkt_price, strategy, contracts)
-    open_prices = polygon_df['o'].values
-    return start_date, end_date, symbol, mkt_price, strategy, option_symbol, stratdirection, polygon_df, open_prices
+def create_simulation_data(row):
+    # start_date = datetime.strptime(row['date'], '%Y-%m-%d %H:%M:%S')
+    end_date = backtrader_helper.create_end_date(row['date'], 3)
+    symbol = row['symbol']
+    mkt_price = row['regularMarketPrice']
+    contracts = row['contracts']
+    strategy = row['title']
+    # option_symbol, polygon_dfs = backtrader_helper.data_pull(symbol, start_date, end_date, mkt_price, strategy, contracts)
+    trading_aggregates, option_symbols = backtrader_helper.create_options_aggs(symbol, row['date'], end_date, mkt_price, strategy, contracts, spread_length=3)
+    return row['date'], end_date, symbol, mkt_price, strategy, option_symbols, trading_aggregates
 
-def buy_iterate_sell(symbol, mkt_price, optionsymbol, stratdirection, open_prices, strategy, polygon_df, commissioncost):
-
-    #option contract values
-    openPrice = open_prices[0]
+def buy_iterate_sellV2(symbol, mkt_price, option_symbol, open_prices, strategy, polygon_df, commission_cost, quantity):
+    open_price = open_prices[0]
     open_dt = polygon_df['date'][0]
     open_datetime = open_dt.to_pydatetime()
-    open_dt_hrmin = open_datetime.strftime("%Y-%m-%d %H:%M")
-    contract_number = 1
-    contract_size = 100
-    transaction_cost = commissioncost * contract_number
-    total_transaction_cost = transaction_cost * 2
-    contract_cost = round((openPrice * contract_size * contract_number), 2) + transaction_cost
-    inverse_date_time = []
-    target_date_time = []
-    openorderstr = "B"
-    closeorderstr = "S"
+    # open_dt_hrmin = open_datetime.strftime("%Y-%m-%d %H:%M")
+    # transaction_cost = commission_cost * contract_number
+    # total_transaction_cost = transaction_cost * 2
+    contract_cost = round((open_price * 100 * quantity), 2)
+    buy_dict = {"open_price": open_price, "open_datetime": open_datetime, "quantity": quantity, "contract_cost": contract_cost, "option_symbol": option_symbol}
 
-    #Assigns target and inverse price to each strat direction ##CHASE this is execution strategy
-    for i, row in polygon_df.iterrows():
-        if stratdirection == "C":
-            targetprice = (mkt_price * 0.05) + mkt_price
-            inverseprice = mkt_price - (mkt_price * 0.05)
-            if float(row['underlyingPrice']) <= inverseprice:
-                inverse_date_time.append(row['date'])
-            elif float(row['underlyingPrice']) >= targetprice:
-                target_date_time.append(row['date'])
-
-    #Creates dictionary results if price targets have been hit'
-    if len(inverse_date_time) != 0 and len(target_date_time) != 0:
-        if inverse_date_time[0] <= target_date_time[0]:
-            matched_row = polygon_df.loc[polygon_df['date'] == inverse_date_time[0]]
-            orderSource = "max_loss"
-            close_datetime = matched_row['date'].values
-            closePrice = matched_open[0]
-            orderType = "Sell"
-            matched_dt = matched_row['date'].values
-            close_dt = matched_dt[0]
-            close_datetime = backtrader_helper.convertepoch(close_dt)
-
-        elif inverse_date_time[0] >= target_date_time[0]:
-            matched_row = polygon_df.loc[polygon_df['date'] == target_date_time[0]]
-            orderSource = "profit_target"
-            matched_open = matched_row['o'].values
-            closePrice = matched_open[0]
-            orderType = "Sell"
-            matched_dt = matched_row['date'].values
-            close_dt = matched_dt[0]
-            close_datetime = backtrader_helper.convertepoch(close_dt)
-
-        else:
-            matched_row = polygon_df.iloc[-1]
-            orderSource = "max_time"
-            matched_open = matched_row['o'].values
-            closePrice = matched_open[0]
-            orderType = "Sell"
-            matched_dt = matched_row['date'].values
-            close_dt = matched_dt[0]
-            close_datetime = backtrader_helper.convertepoch(close_dt)
-
-    elif len(inverse_date_time) == 0 and len(target_date_time) != 0:
-        matched_row = polygon_df.loc[polygon_df['date'] == target_date_time[0]]
-        orderSource = "profit_target"
-        matched_open = matched_row['o'].values
-        closePrice = matched_open[0]
-        orderType = "Sell"
-        matched_dt = matched_row['date'].values
-        close_dt = matched_dt[0]
-        close_datetime = backtrader_helper.convertepoch(close_dt)
-
-    elif len(inverse_date_time) != 0 and len(target_date_time) == 0:
-        matched_row = polygon_df.loc[polygon_df['date'] == inverse_date_time[0]]
-        orderSource = "max_loss"
-        matched_open = matched_row['o'].values
-        closePrice = matched_open[0]
-        orderType = "Sell"
-        matched_dt = matched_row['date'].values
-        close_dt = matched_dt[0]
-        close_datetime = backtrader_helper.convertepoch(close_dt)
-
-    elif len(inverse_date_time) == 0 and len(target_date_time) == 0:
-        #Because this is the last value in the sheet, and indexed differently, I need to use different methods to pull information
-        #including not using .values and not requiring the convertepoch helper function used above
-        matched_row = polygon_df.iloc[-1]
-        orderSource = "max_time"
-        closePrice = matched_row['o']
-        orderType = "Sell"
-        close_dt = matched_row['date']
-        close_datetime = close_dt.to_pydatetime()
-
-    #Defining other variables to be included in the dictionary "OrderMarker"
-    orderTicker = optionsymbol
-    contract_return = round((closePrice * contract_size),2) + transaction_cost
-    net_value = contract_return - contract_cost
-    roi = net_value / contract_cost
-
-    PositionID = "[Symbol: " + symbol + ", Strategy: " + strategy + ", opendatetime: " + open_dt_hrmin + "]"
-    UniqueOpenStr = "[Buy/Sell: " + openorderstr + ", Ticker: " + orderTicker + ", OpenPrice: " + str(openPrice) + ", PositionID: " + str(PositionID) + "]"
-    UniqueCloseStr = "[Buy/Sell: " +  closeorderstr + ", Ticker: " + orderTicker + ", OpenPrice: " + str(closePrice) + ", PositionID: " + str(PositionID) + "]"
-
+    try:
+        if strategy == "day_gainers":
+            sell_dict = time_decay_alpha_gainers_v0(polygon_df.iloc[1:],open_datetime,quantity)
+        elif strategy == "day_losers":
+            sell_dict = time_decay_alpha_losers_v0(polygon_df.iloc[1:],open_datetime,quantity)
+        elif strategy == "maP":
+            sell_dict = time_decay_alpha_maP_v0(polygon_df.iloc[1:],open_datetime,quantity)
+        elif strategy == "most_actives":
+            sell_dict = time_decay_alpha_ma_v0(polygon_df.iloc[1:],open_datetime,quantity)
+    except Exception as e:
+        print(e)
+        print("Error in sell_dict")
+        print(symbol)
+        return {}, {}, {}, {}
     
-    OrderMarker = {
-        "type": "BUY/SELL",
-        "strategy": strategy,
-        "source": orderSource,
-        "ticker": orderTicker,
-        "openPrice": openPrice,
-        "closePrice": closePrice,
-        "contractCost": contract_cost,
-        "commissionRate": transaction_cost,
-        "transactionCost": total_transaction_cost,
-        "contractReturn": contract_return,
-        "netValue": net_value,
-        "ROI": roi,
-        "openDate": open_datetime,
-        "closeDate": close_datetime,
-        "uniqueopenstr":UniqueOpenStr,
-        "uniqueclosestr": UniqueCloseStr
-        }
-    
-    OpenMarker = {
-        "uniqueopenstr":UniqueOpenStr,
-        "type": "BUY",
-        "source": orderSource,
-        "ticker": orderTicker,
-        "openPrice": openPrice,
-        "contractCost": contract_cost,
-        "transactionCost": total_transaction_cost,
-        "openDate": open_datetime
-        }
-    
-    CloseMarker = {
-        "uniqueclosestr": UniqueCloseStr,
-        "type": "SELL",
-        "ticker": orderTicker,
-        "openPrice": openPrice,
-        "closePrice": closePrice,
-        "contractReturn": contract_return,
-        "netValue": net_value,
-        "ROI": roi,
-        "closeDate": close_datetime
-        }
-    
-    BuySellPair = {
-        "OpenMarker": UniqueOpenStr,
-        "CloseMarker": UniqueCloseStr,
-        "PositionID": PositionID
-        }
+    try:
+        results_dict = backtrader_helper.create_results_dict(buy_dict, sell_dict)
+        transaction_dict = {"buy_dict": buy_dict, "sell_dict":sell_dict, "results_dict": results_dict}
+    except Exception as e:
+        print(e)
+        print("Error in transaction_dict")
+        print(symbol)
+        print(buy_dict)
+        print(sell_dict)
+        print(results_dict)
+    return buy_dict, sell_dict, results_dict, transaction_dict
 
-    # UniqueOpenMarker = {
-    #     "datetime": open_datetime,
-    #     "openstr": UniqueOpenStr
-    # }
 
-    # UniqueCloseMarker = {
-    #     "datetime": close_datetime,
-    #     "closestr": UniqueCloseStr
-    # }
 
-    return OrderMarker, OpenMarker, CloseMarker, open_datetime, close_datetime, BuySellPair
-
-def btfunction(data, datetimelist, starting_value, commission_cost, s3link):
-    print(f"Starting Backtesting {data}")
-    dflist = []
-    buysellmatch = []
-    failed_openlist = []
-    failed_dictlist = []
-    for i, rows in data.iterrows():
-        try:
-            start_date, end_date, symbol, mkt_price, strategy, optionsymbol, stratdirection, polygon_df, open_prices = pull_data(i, s3link)
-            order_marker, OpenMarker, CloseMarker, open_datetime, close_datetime, buy_sell_pair = buy_iterate_sell(symbol, mkt_price, optionsymbol, stratdirection, open_prices, strategy, polygon_df, commission_cost)
-            dflist.append(order_marker)
-            buysellmatch.append(buy_sell_pair)
-            # openlist.append(UniqueOpenMarker)
-            # closelist.append(UniqueCloseMarker)
-            if i >= 10:
-                break
-            print(str(i+1) + "/" + str(len(data.index) + 1))
-        except:
-            try:
-                failed_openlist.append(optionsymbol)
-                print("Failed to pull option data for " + optionsymbol)
-                print(str(i) + "/" + str(len(data.index)))
-            except:
-                next
-            continue
-
-    df_trades = pd.DataFrame(dflist)
-
-    key_list = ["Time", "Buy", "Sell", "ActiveHoldings", "Cost", "Return", "TransactionCosts", "TransactionCostofInterval", "NetValueofInterval", "StartValue", "EndValue"]
-    n = len(datetimelist)
-    transactiondict = []
-    for idx in range(0, n, 1):
-        transactiondict.append({
-            key_list[0]: datetimelist[idx],
-            key_list[1]: [],
-            key_list[2]: [],
-            key_list[3]: [],
-            key_list[4]: [],
-            key_list[5]: [],
-            key_list[6]: [],
-            key_list[7]: [],
-            key_list[8]: 0,
-            key_list[9]: 0,
-            key_list[10]: 0
-            })
+def simulate_trades(data, datetimelist, starting_value, commission_cost, s3link):
+    transactions_list = []
+    positions_list = []
+    purchases_list = []
+    sales_list =[]
+    order_results_list = []
+    for i, row in data.iterrows():
+        trades = []
+        start_date, end_date, symbol, mkt_price, strategy, option_symbols, polygon_dfs = create_simulation_data(row)
+        pos_dt = start_date.strftime("%Y-%m-%d-%H")
+        trade_data_pairs = []
+        position_id = f"{row['symbol']}-{(row['title'].replace('_',''))}-{pos_dt}"
+        contracts = []
+        for df in polygon_dfs:
+            contract_symbol = df.iloc[0]['ticker']
+            price = df.iloc[0]['o']
+            contracts.append({"contract_symbol": contract_symbol, "price": price})
+        contracts, quantity = bet_sizer(contracts,start_date)
+        for df in polygon_dfs:
+            open_prices = df['o'].values
+            ticker = df.iloc[0]['ticker']
+            buy_dict, sell_dict, results_dict, transaction_dict = buy_iterate_sellV2(symbol, mkt_price, ticker, open_prices, strategy, df, commission_cost, quantity)
+            if len(buy_dict) == 0 and len(sell_dict) == 0 and len(results_dict) == 0 and len(transaction_dict) == 0:
+                print("Error in buy_iterate_sellV2")
+                print(symbol)
+                print(ticker)
+                continue
+            transactions_list.append(transaction_dict)
+            purchases_list.append(buy_dict)
+            sales_list.append(sell_dict)
+            order_results_list.append(results_dict)
+            trades.append(results_dict)
+        position_trades = {position_id: trades}
+        positions_list.append(position_trades)
         
-    reference = backtrader.build_dict(transactiondict, key="Time")
+    return purchases_list, sales_list, order_results_list, positions_list
+        
 
-    for i, row in df_trades.iterrows():
-        try:
-            open_info = reference.get(row['openDate'])
-            close_info = reference.get(row['closeDate'])
-            open_index = open_info['index']
-            close_index = close_info['index']
-            openreferencedate = open_info['Time']
-            closereferencedate = close_info['Time']
-            transactiondict[open_index]['Buy'].append(row['uniqueopenstr'])
-            transactiondict[close_index]['Sell'].append(row['uniqueclosestr'])
-            transactiondict[open_index]['Cost'].append(row['contractCost'])
-            transactiondict[close_index]['Return'].append(row['contractReturn'])
-            transactiondict[open_index]['TransactionCosts'].append(row['commissionRate'])
-            transactiondict[close_index]['TransactionCosts'].append(row['commissionRate'])
-        except Exception as e:
-            print(e)
-            print("Failed to add a trade to dict for index" + str(i))
-            failed_dictlist.append({'OpenStr': row['uniqueopenstr'], 'CloseStr': row['uniqueclosestr']})
-            continue
-
-    transactions = pd.DataFrame(transactiondict)
-
-    print(transactions.columns.tolist())
-    # transactions['StartValue'][0] = int(startingvalue)
-
-    # for i, row in transactions.iterrows():
-    #     transactions['ActiveHoldings'][i].extend(transactions['Buy'][i])
-    #     if i > 0:
-    #         transactions['ActiveHoldings'][i].extend(transactions['ActiveHoldings'][i-1])
-    #     holdingslist = transactions['ActiveHoldings'][i]
-    #     soldlist = transactions['Sell'][i]
-    #     for item in soldlist:
-    #         matchdict = next(thing for thing in buysellmatch if thing['CloseMarker'] == item)
-    #         positionid = matchdict['PositionID']
-    #         holdingslist[:] = [x for x in holdingslist if positionid not in x]
-    #     transactions.at[i,'ActiveHoldings'] = holdingslist
-    #     totaltransactioncost = sum(transactions['TransactionCosts'][i])
-    #     transactions['TransactionCostofInterval'][i] = totaltransactioncost
-    #     totalcost = sum(transactions['Cost'][i])
-    #     totalreturn = sum(transactions['Return'][i])
-    #     net = (totalreturn - totalcost) - totaltransactioncost
-    #     transactions['NetValueofInterval'][i] = net
-    #     if i > 0:
-    #         transactions['StartValue'][i] = transactions['EndValue'][i-1]
-    #     startval = transactions['StartValue'][i]
-    #     endval = startval + net
-    #     transactions['EndValue'][i] = endval
-
-    # transactions.to_csv(f'/Users/ogdiz/Projects/APE-Research/APE-Backtester/v1/BT_Results/TEST.csv')
-
-    return transactions, buysellmatch
 
 if __name__ == "__main__":
     s3link = {

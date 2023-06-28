@@ -8,179 +8,194 @@ logger.setLevel(logging.INFO)
 
 ### TRADING ALGORITHMS ###
 
-def time_decay_alpha_gainers_v0(row, current_price, simulation_date):
-    max_value = calculate_floor_pct(row)
-    Target_pct = .05
-    pct_change = (current_price - float(row['underlying_purchase_price']))/float(row['underlying_purchase_price'])
-    Floor_pct = ((max_value - float(row['underlying_purchase_price']))/float(row['underlying_purchase_price']) - .02)
+def time_decay_alpha_gainers_v0(polygon_df, simulation_date, quantity):
+    open_price = polygon_df.iloc[0]['underlying_price']
+    option_open = polygon_df.iloc[0]['o']
+    for index, row in polygon_df.iterrows():
+        max_value = polygon_df.iloc[:index]['underlying_price'].max()
+        Target_pct = .05
+        pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
+        Floor_pct = ((float(max_value) - float(open_price))/float(open_price) - .02)
 
-    if type(Floor_pct) == float:
-        Floor_pct = -0.02
-    if pct_change > 0.1:
-        Floor_pct += 0.01
+        # if type(Floor_pct) == float:
+        #     Floor_pct = -0.02
+        if pct_change > 0.1:
+            Floor_pct += 0.01
 
-    day_diff = get_business_days(row['order_transaction_date'], simulation_date)
-    sell_code = 0
-    reason = ""
-    if day_diff < 2:
-        if pct_change <= Floor_pct:
-            sell_code = 2
-            reason = "Hit exit target, sell."
-            logger.info(f"{reason} POSITION_ID: {row['position_id']} pct_change: {pct_change}")
-    elif day_diff >= 2:
-        if pct_change < Floor_pct:
-            sell_code = 2
-            reason = "Hit point of no confidence, sell."
-            logger.info(f"{reason} POSITION_ID: {row['position_id']}")
-        elif pct_change >= Target_pct:
-            sell_code = 2
-            reason = "Hit exit target, sell."
-            logger.info(f"{reason} POSITION_ID: {row['position_id']}")
-        elif pct_change < (.5*(Target_pct)):
-            sell_code = 2
-            reason = "Failed momentum gate, sell."
-            logger.info(f"{reason} POSITION_ID: {row['position_id']}")
-        else:
-            sell_code = 0
-            reason = "Hold."
-            logger.info(f"{reason} POSITION_ID: {row['position_id']}")
+        # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
+        day_diff = get_business_days(simulation_date, row['date'])
+        sell_code = 0
+        reason = ""
+        if day_diff < 2:
+            if pct_change <= Floor_pct:
+                sell_code = 2
+                reason = "Hit exit target, sell."
+        elif day_diff >= 2:
+            if pct_change < Floor_pct:
+                sell_code = 2
+                reason = "Hit point of no confidence, sell."
+            elif pct_change >= Target_pct:
+                sell_code = 2
+                reason = "Hit exit target, sell."
+            elif pct_change < (.5*(Target_pct)):
+                sell_code = 2
+                reason = "Failed momentum gate, sell."
+            else:
+                sell_code = 0
+                reason = "Hold."
 
-    return sell_code, reason
+        if sell_code == 2:
+            sell_dict = {"close_price": row['o'], "close_datetime": row['date'], "quantity": quantity, "contract_cost": (row['o']*100) * quantity, "option_symbol": row['ticker'],"reason": reason}
+            return sell_dict
+        
+    sell_dict = {"close_price": polygon_df.iloc[-1]['o'], "close_datetime": polygon_df.iloc[-1]['date'], "quantity": quantity, "contract_cost": polygon_df.iloc[-1]['o']*100, "option_symbol": polygon_df.iloc[-1]['ticker'],"reason": "never sold"}
+    return sell_dict
 
-def time_decay_alpha_ma_v0(row, current_price, simulation_date):
-    max_value = calculate_floor_pct(row)
-    Target_pct = .05
-    pct_change = (current_price - float(row['underlying_purchase_price']))/float(row['underlying_purchase_price'])
-    Floor_pct = ((max_value - float(row['underlying_purchase_price']))/float(row['underlying_purchase_price']) - .02)
-    if type(Floor_pct) == float:
-        Floor_pct = -0.02
-    if pct_change > 0.1:
-        Floor_pct += 0.01
+def time_decay_alpha_ma_v0(polygon_df, simulation_date, quantity):
+    open_price = polygon_df.iloc[0]['underlying_price']
+    for index, row in polygon_df.iterrows():
+        max_value = polygon_df.iloc[:index]['underlying_price'].max()
+        Target_pct = .05
+        pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
+        Floor_pct = ((float(max_value) - float(open_price))/float(open_price) - .02)
 
-    print(f"Floor_pct: {Floor_pct} max_value: {pct_change} purchase_price: {float(row['underlying_purchase_price'])} for {row['underlying_symbol']}")
-    day_diff = get_business_days(row['order_transaction_date'], simulation_date)
-    sell_code = 0
-    reason = ""
-    if day_diff < 2:
-        if pct_change <= Floor_pct:
-            sell_code = 2
-            reason = "Hit exit target, sell."
-            logger.info(f"{reason} POSITION_ID: {row['position_id']} pct_change: {pct_change}")
-    elif day_diff >= 2:
-        if pct_change < Floor_pct:
-            sell_code = 2
-            reason = "Hit point of no confidence, sell."
-            logger.info(f"{reason} POSITION_ID: {row['position_id']}")
-        elif pct_change >= Target_pct:
-            sell_code = 2
-            reason = "Hit exit target, sell."
-            logger.info(f"{reason} POSITION_ID: {row['position_id']}")
-        elif pct_change < (.5*(Target_pct)):
-            sell_code = 2
-            reason = "Failed momentum gate, sell."
-            logger.info(f"{reason} POSITION_ID: {row['position_id']}")
-        else:
-            sell_code = 0
-            reason = "Hold."
-            logger.info(f"{reason} POSITION_ID: {row['position_id']}")
+        # if type(Floor_pct) == float:
+        #     Floor_pct = -0.02
+        if pct_change > 0.1:
+            Floor_pct += 0.01
 
-    return sell_code, reason
+        # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
+        day_diff = get_business_days(simulation_date, row['date'])
+        sell_code = 0
+        reason = ""
+        if day_diff < 2:
+            if pct_change <= Floor_pct:
+                sell_code = 2
+                reason = "Hit exit target, sell."
+        elif day_diff >= 2:
+            if pct_change < Floor_pct:
+                sell_code = 2
+                reason = "Hit point of no confidence, sell."
+            elif pct_change >= Target_pct:
+                sell_code = 2
+                reason = "Hit exit target, sell."
+            elif pct_change < (.5*(Target_pct)):
+                sell_code = 2
+                reason = "Failed momentum gate, sell."
+            else:
+                sell_code = 0
+                reason = "Hold."
 
-def time_decay_alpha_maP_v0(row, current_price, simulation_date):
-    max_value = calculate_floor_pct(row)
-    Target_pct = .05
-    pct_change = ((current_price - float(row['underlying_purchase_price']))/float(row['underlying_purchase_price'])) * -1
-    Floor_pct = ((max_value - float(row['underlying_purchase_price']))/float(row['underlying_purchase_price']) - .02) * -1
-    if type(Floor_pct) == float:
-        Floor_pct = -0.02
-    if pct_change > 0.1:
-        Floor_pct += 0.01
-    print(f"Floor_pct: {Floor_pct} max_value: {pct_change} purchase_price: {float(row['underlying_purchase_price'])} for {row['underlying_symbol']}")
+        if sell_code == 2:
+            sell_dict = {"close_price": row['o'], "close_datetime": row['date'], "quantity": quantity, "contract_cost": (row['o']*100)*quantity, "option_symbol": row['ticker'],"reason": reason}
+            return sell_dict
+        
+    sell_dict = {"close_price": polygon_df.iloc[-1]['o'], "close_datetime": polygon_df.iloc[-1]['date'], "quantity": quantity, "contract_cost": (polygon_df.iloc[-1]['o']*100)*quantity, "option_symbol": polygon_df.iloc[-1]['ticker'],"reason": "never sold"}
+    return sell_dict
 
-    day_diff = get_business_days(row['order_transaction_date'], simulation_date)
-    sell_code = 0
-    reason = ""
-    if day_diff < 2:
-        if pct_change <= Floor_pct:
-            sell_code = 2
-            reason = "Hit exit target, sell."
-            logger.info(f"{reason} POSITION_ID: {row['position_id']} pct_change: {pct_change}")
-    elif day_diff >= 2:
-        if pct_change < Floor_pct:
-            sell_code = 2
-            reason = "Hit point of no confidence, sell."
-            logger.info(f"{reason} POSITION_ID: {row['position_id']}")
-        elif pct_change >= Target_pct:
-            sell_code = 2
-            reason = "Hit exit target, sell."
-            logger.info(f"{reason} POSITION_ID: {row['position_id']}")
-        elif pct_change < (.5*(Target_pct)):
-            sell_code = 2
-            reason = "Failed momentum gate, sell."
-            logger.info(f"{reason} POSITION_ID: {row['position_id']}")
-        else:
-            sell_code = 0
-            reason = "Hold."
-            logger.info(f"{reason} POSITION_ID: {row['position_id']}")
+def time_decay_alpha_maP_v0(polygon_df, simulation_date, quantity):
+    open_price = polygon_df.iloc[0]['underlying_price']
+    for index, row in polygon_df.iterrows():
+        max_value = polygon_df.iloc[:index]['underlying_price'].max()
+        Target_pct = -.05
+        pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
+        Floor_pct = ((float(max_value) - float(open_price))/float(open_price) + .02)
 
-    return sell_code, reason
+        # if type(Floor_pct) == float:
+        #     Floor_pct = -0.02
+        if pct_change > 0.1:
+            Floor_pct -= 0.01
 
-def time_decay_alpha_losers_v0(row, current_price, simulation_date):
-    max_value = calculate_floor_pct(row)
-    Target_pct = .06
-    pct_change = ((current_price - float(row['underlying_purchase_price']))/float(row['underlying_purchase_price'])) * -1
-    Floor_pct = ((max_value - float(row['underlying_purchase_price']))/float(row['underlying_purchase_price']) - .025) * -1
+        # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
+        day_diff = get_business_days(simulation_date, row['date'])
+        sell_code = 0
+        reason = ""
+        if day_diff < 2:
+            if pct_change <= Floor_pct:
+                sell_code = 2
+                reason = "Hit exit target, sell."
+        elif day_diff >= 2:
+            if pct_change > Floor_pct:
+                sell_code = 2
+                reason = "Hit point of no confidence, sell."
+            elif pct_change <= Target_pct:
+                sell_code = 2
+                reason = "Hit exit target, sell."
+            elif pct_change > (.5*(Target_pct)):
+                sell_code = 2
+                reason = "Failed momentum gate, sell."
+            else:
+                sell_code = 0
+                reason = "Hold."
 
-    if type(Floor_pct) == float:
-        Floor_pct = -0.025
-    if pct_change > 0.1:
-        Floor_pct += 0.01
+        if sell_code == 2:
+            sell_dict = {"close_price": row['o'], "close_datetime": row['date'], "quantity": quantity, "contract_cost": (row['o']*100)*quantity, "option_symbol": row['ticker'],"reason": reason}
+            return sell_dict
+        
+    sell_dict = {"close_price": polygon_df.iloc[-1]['o'], "close_datetime": polygon_df.iloc[-1]['date'], "quantity": quantity, "contract_cost": (polygon_df.iloc[-1]['o']*100)*quantity, "option_symbol": polygon_df.iloc[-1]['ticker'],"reason": "never sold"}
+    return sell_dict
 
-    day_diff = get_business_days(row['order_transaction_date'], simulation_date)
-    sell_code = 0
-    reason = ""
-    if day_diff < 2:
-        if pct_change <= Floor_pct:
-            sell_code = 2
-            reason = "Hit exit target, sell."
-            logger.info(f"{reason} POSITION_ID: {row['position_id']} pct_change: {pct_change}")
-    elif day_diff >= 2:
-        if pct_change < Floor_pct:
-            sell_code = 2
-            reason = "Hit point of no confidence, sell."
-            logger.info(f"{reason} POSITION_ID: {row['position_id']}")
-        elif pct_change >= Target_pct:
-            sell_code = 2
-            reason = "Hit exit target, sell."
-            logger.info(f"{reason} POSITION_ID: {row['position_id']}")
-        elif pct_change < (.5*(Target_pct)):
-            sell_code = 2
-            reason = "Failed momentum gate, sell."
-            logger.info(f"{reason} POSITION_ID: {row['position_id']}")
-        else:
-            sell_code = 0
-            reason = "Hold."
-            logger.info(f"{reason} POSITION_ID: {row['position_id']}")
+def time_decay_alpha_losers_v0(polygon_df, simulation_date, quantity):
+    open_price = polygon_df.iloc[0]['underlying_price']
+    for index, row in polygon_df.iterrows():
+        max_value = polygon_df.iloc[:index]['underlying_price'].max()
+        Target_pct = -.05
+        pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
+        Floor_pct = ((float(max_value) - float(open_price))/float(open_price) + .02)
 
-    return sell_code, reason
+        # if type(Floor_pct) == float:
+        #     Floor_pct = -0.02
+        if pct_change > 0.1:
+            Floor_pct -= 0.01
+
+        # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
+        day_diff = get_business_days(simulation_date, row['date'])
+        sell_code = 0
+        reason = ""
+        if day_diff < 2:
+            if pct_change <= Floor_pct:
+                sell_code = 2
+                reason = "Hit exit target, sell."
+        elif day_diff >= 2:
+            if pct_change > Floor_pct:
+                sell_code = 2
+                reason = "Hit point of no confidence, sell."
+            elif pct_change <= Target_pct:
+                sell_code = 2
+                reason = "Hit exit target, sell."
+            elif pct_change > (.5*(Target_pct)):
+                sell_code = 2
+                reason = "Failed momentum gate, sell."
+            else:
+                sell_code = 0
+                reason = "Hold."
+
+        if sell_code == 2:
+            sell_dict = {"close_price": row['o'], "close_datetime": row['date'], "quantity": quantity, "contract_cost": (row['o']*100)*quantity, "option_symbol": row['ticker'],"reason": reason}
+            return sell_dict
+        
+    sell_dict = {"close_price": polygon_df.iloc[-1]['o'], "close_datetime": polygon_df.iloc[-1]['date'], "quantity": quantity, "contract_cost": (polygon_df.iloc[-1]['o']*100)*quantity, "option_symbol": polygon_df.iloc[-1]['ticker'],"reason": "never sold"}
+    return sell_dict
 
 
 ### BET SIZING FUNCTIONS ###
 
 def bet_sizer(contracts, date):
-    target_cost = (.01* pull_trading_balance())
+    target_cost = (.008 * pull_trading_balance())
     to_stamp = date.strftime("%Y-%m-%d")
     from_stamp = (date - timedelta(days=2)).strftime("%Y-%m-%d")
     # contracts_details = []
-    for contract in contracts:
-        polygon_result = polygon_call(contract['contractSymbol'],from_stamp, to_stamp,30,"minute")
-        contract['avg_volume'], contract['avg_transactions'] = build_volume_features(polygon_result)
+
+    ##will use down the road
+    # for contract in contracts:
+    #     polygon_result = polygon_call(contract,from_stamp, to_stamp,30,"minute")
+    #     contract['avg_volume'], contract['avg_transactions'] = build_volume_features(polygon_result)
 
     spread_cost = calculate_spread_cost(contracts)
-    sized_contracts = finalize_trade(contracts, spread_cost, target_cost)
-    if sized_contracts != None:
-        sized_spread_cost = calculate_spread_cost(sized_contracts)
-    return sized_contracts
+    contracts, quantity = finalize_trade(contracts, spread_cost, target_cost)
+    if contracts != None:
+        sized_spread_cost = spread_cost * quantity
+    return contracts, quantity
 
 def pull_trading_balance():
     ### This is hardcoded for now, but will be replaced with a call to the tradier API
@@ -189,7 +204,7 @@ def pull_trading_balance():
 def calculate_spread_cost(contracts_details):
     cost = 0
     for contract in contracts_details:
-        cost += (100*contract['lastPrice'])
+        cost += (100*contract['price'])
     return cost
 
 def build_volume_features(df):
@@ -199,26 +214,28 @@ def build_volume_features(df):
 
 def finalize_trade(contracts_details, spread_cost, target_cost):
     if (1.1*target_cost) >= spread_cost >= (.9*target_cost):
-        return contracts_details
+        return contracts_details, 1
     elif spread_cost > (1.1*target_cost):
         spread2_cost = calculate_spread_cost(contracts_details[0:2])
         if spread2_cost < (1.1*target_cost):
-            return contracts_details[0:2]
+            return contracts_details[0:2], 1
         else:
-            single_contract_cost = 100 * contracts_details[0]['lastPrice']
+            single_contract_cost = 100 * contracts_details[0]['price']
             if single_contract_cost > (1.1*target_cost):
-                return []
+                return [], 0
             else:
-                return contracts_details[0:1]    
+                return contracts_details[0:1], 1    
     elif spread_cost < (.9*target_cost):
-        spread_cost, spread_multiplier, contracts_details = add_spread_cost(spread_cost, target_cost, contracts_details)
-        return contracts_details
+        spread_cost, spread_multiplier = add_spread_cost(spread_cost, target_cost, contracts_details)
+        return contracts_details, spread_multiplier
+    else:
+        print("else")
+        return contracts_details, 1
             
 def add_spread_cost(spread_cost, target_cost, contracts_details):
     spread_multiplier = 1
     total_cost = spread_cost
     if spread_cost == 0:
-        print(contracts_details)
         return 0, 0, []
     else:
         while total_cost <= (1.1*target_cost):
@@ -230,8 +247,11 @@ def add_spread_cost(spread_cost, target_cost, contracts_details):
             total_cost -= spread_cost
 
         if total_cost < (.67*target_cost):
-            sized_contracts = contracts_details + contracts_details[0]
+            # this causes errors and will not work with current formatting
+            # sized_contracts = contracts_details + contracts_details[0]
+            sized_contracts = contracts_details
         else:
             sized_contracts = contracts_details * spread_multiplier
 
-    return spread_cost, spread_multiplier, sized_contracts
+
+    return spread_cost, spread_multiplier
