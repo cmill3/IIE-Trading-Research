@@ -8,6 +8,7 @@ import json
 import ast
 import holidays
 import warnings
+import helpers.trading_strategies as ts
 # from pandas._libs.mode_warnings import SettingWithCopyWarning
 
 
@@ -98,13 +99,221 @@ def generate_datetime_range(start_date, end_date):
 
     return datetime_range
 
+def convert_lists_to_dicts(positions_list, datetime_list):
+    portfolio_dict = {}
+    positions_dict = {}
+    sales_dict = {}
+    passed_trades_dict = {}
+
+    for date in datetime_list:
+        date_str = date.strftime("%Y-%m-%d %H:%M:%S")
+        dt = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+        portfolio_dict[dt] = {
+            "contracts_purchased": [],
+            "purchase_costs": 0,
+            "contracts_sold": [],
+            "sale_returns": 0,
+            "portfolio_cash": 0,
+            "active_holdings": [],
+            "period_net_returns": 0,
+            "open_positions": [],
+        }
+
+    for position in positions_list:
+        try:
+            if positions_dict.get(position['open_datetime']) is None:
+                positions_dict[position['open_datetime']] = [position]
+                #     "contracts_purchased": [f"{purchase['option_symbol']}_{purchase['quantity']}"],
+                #     "purchase_costs": purchase['contract_cost']*purchase['quantity'],
+                # }
+            else:
+                positions_dict[position['open_datetime']].append(position)
+                # purchases_dict[purchase['open_datetime']]['contracts_purchased'].append(f"{purchase['option_symbol']}_{purchase['quantity']}")
+                # purchases_dict[purchase['open_datetime']]['purchase_costs'] += (purchase['contract_cost']*purchase['quantity'])
+        except Exception as e:
+            print(e)
+            print(position)
+            continue
+
+    
+    # for purchase in purchases_list:
+    #     try:
+    #         if purchases_dict.get(purchase['open_datetime']) is None:
+    #             purchases_dict[purchase['open_datetime']] = [purchase]
+    #             #     "contracts_purchased": [f"{purchase['option_symbol']}_{purchase['quantity']}"],
+    #             #     "purchase_costs": purchase['contract_cost']*purchase['quantity'],
+    #             # }
+    #         else:
+    #             purchases_dict[purchase['open_datetime']].append(purchase)
+    #             # purchases_dict[purchase['open_datetime']]['contracts_purchased'].append(f"{purchase['option_symbol']}_{purchase['quantity']}")
+    #             # purchases_dict[purchase['open_datetime']]['purchase_costs'] += (purchase['contract_cost']*purchase['quantity'])
+    #     except Exception as e:
+    #         print(e)
+    #         print(purchase)
+    #         continue
+
+    # for sale in sales_list:
+    #     try:
+    #         if sales_dict.get(sale['close_datetime']) is None:
+    #             sales_dict[sale['close_datetime']] = [sale]
+    #             #     "contracts_sold": [f"{sale['option_symbol']}_{sale['quantity']}"],
+    #             #     "sale_returns": (sale['contract_cost']*sale['quantity']),
+    #             # }
+    #         else:
+    #             sales_dict[sale['close_datetime']].append(sale)
+    #             # sales_dict[sale['open_datetime']]['contracts_sold'].append(f"{sale['option_symbol']}_{sale['quantity']}")
+    #             # sales_dict[sale['open_datetime']]['sale_returns'] += (sale['contract_cost']*sale['quantity'])
+    #     except Exception as e:
+    #         print(e)
+    #         print(sale)
+    #         continue
+    return portfolio_dict, positions_dict, passed_trades_dict
+
+def simulate_portfolio(positions_list, datetime_list, portfolio_cash):
+    positions_taken = []
+    contracts_bought = []
+    contracts_sold = []
+    starting_cash = portfolio_cash
+    # starting_date = datetime_list[0]
+    # print(starting_date)
+    purchases_dict = {}
+    sales_dict = {}
+    portfolio_dict, positions_dict, passed_trades_dict = convert_lists_to_dicts(positions_list, datetime_list)
+
+    ## What we need is to at this point build the trade. We need to send through the package of contracts in 
+    ## their bundle of a "position", then we can approximate bet sizing and the contract sizing at this point in time.
+    ## Then from there we can build the results of the trade, and then we can build the portfolio from there.
+    ## This will give us dynamic and rective sizing.
+    
+    i = 0
+    for key, value in portfolio_dict.items():
+        print(key)
+        print()
+        if i == 0:
+            value['portfolio_cash'] = portfolio_cash
+            current_positions = []
+            # current_holdings = []
+
+            if positions_dict.get(key) is not None:
+                for position in positions_dict[key]:
+                    if value['portfolio_cash'] > (0.5 * starting_cash):
+                        sized_buys, sized_sells = ts.build_trade(position, value['portfolio_cash'])
+                        print(sized_sells)
+                        for index, order in enumerate(sized_buys):
+                            if order != None:
+                                value['contracts_purchased'].append(f"{order['option_symbol']}_{order['order_id']}")
+                                value['purchase_costs'] += (order['contract_cost'] * order['quantity'])
+                                value['portfolio_cash'] -= order['contract_cost']
+                                contracts_bought.append(f"{order['option_symbol']}_{order['order_id']}")
+                                sale_values = sized_sells[index]
+                                ## How do we integrate this with sales at a later date?
+                                if sales_dict.get(sized_sells[index]['close_datetime']) is None:
+                                    sales_dict[sized_sells[index]['close_datetime']] = [sized_sells[index]]
+                                else:
+                                    sales_dict[sized_sells[index]['close_datetime']].append(sized_sells[index])
+                        positions_taken.append(position['position_id'])
+                        # if purchase['position_id'] not in value['open_positions']:
+                        #     value['open_positions'].append(purchase['position_id'])
+                        #     current_positions.append(purchase['position_id'])
+                        #     positions_taken.append(purchase['position_id'])
+                    else:
+                        if passed_trades_dict.get(key) is not None:
+                            passed_trades_dict[key]['trades'].append(position)
+                        else:
+                            passed_trades_dict[key] = {
+                                "trades": [position]
+                            }
+                i += 1
+                continue
+        else:
+            value['portfolio_cash'] = portfolio_dict[key - timedelta(minutes=15)]['portfolio_cash']
+            value['active_holdings'] = portfolio_dict[key - timedelta(minutes=15)]['active_holdings']
+            value['open_positions'] = portfolio_dict[key - timedelta(minutes=15)]['open_positions']
+        
+
+        # try:
+        # print(sales_dict)
+        # if positions_dict.get(key) is not None:
+        #         for position in positions_dict[key]:
+        #             if value['portfolio_cash'] > (0.5 * starting_cash):
+        #                 sized_buys, sized_sells = ts.build_trade(position, value['portfolio_cash'])
+        #                 for index, order in enumerate(sized_buys):
+        #                     if order != None:
+        #                         value['contracts_purchased'].append(f"{order['option_symbol']}_{order['order_id']}")
+        #                         value['purchase_costs'] += (order['contract_cost'] * order['quantity'])
+        #                         value['portfolio_cash'] -= order['contract_cost']
+        #                         contracts_bought.append(f"{order['option_symbol']}_{order['order_id']}")
+        #                         sale_values = sized_sells[index]
+        #                         ## How do we integrate this with sales at a later date?
+        #                         if sales_dict.get(sized_sells[index]['close_datetime']) is None:
+        #                             sales_dict[sized_sells[index]['close_datetime']] = [sized_sells[index]]
+        #                         else:
+        #                             sales_dict[sized_sells[index]['close_datetime']].append(sized_sells[index])
+        #                 positions_taken.append(position['position_id'])
+        #         else:
+        #             if passed_trades_dict.get(key) is not None:
+        #                 passed_trades_dict[key]['trades'].append(position)
+        #             else:
+        #                 passed_trades_dict[key] = {
+        #                     "trades": [position]
+        #                 }
+
+        if sales_dict.get(key) is not None:
+            print("In sales dict")
+            print()
+            for sale in sales_dict[key]:
+                if (f"{sale['option_symbol']}_{sale['order_id']}") in contracts_bought:
+                    value['contracts_sold'].append(f"{sale['option_symbol']}_{sale['order_id']}")
+                    value['sale_returns'] += sale['contract_cost']
+                    # current_holdings.remove(f"{sale['option_symbol']}_{sale['quantity']}")
+                    value['portfolio_cash'] += sale['contract_cost']
+                    contracts_sold.append(f"{sale['option_symbol']}_{sale['order_id']}")
+                    if sale['position_id'] in current_positions:
+                        current_positions.remove(sale['position_id'])    
+
+        if positions_dict.get(key) is not None:
+                for position in positions_dict[key]:
+                    if value['portfolio_cash'] > (0.5 * starting_cash):
+                        sized_buys, sized_sells = ts.build_trade(position, value['portfolio_cash'])
+                        for index, order in enumerate(sized_buys):
+                            if order != None:
+                                value['contracts_purchased'].append(f"{order['option_symbol']}_{order['order_id']}")
+                                value['purchase_costs'] += (order['contract_cost'] * order['quantity'])
+                                value['portfolio_cash'] -= order['contract_cost']
+                                contracts_bought.append(f"{order['option_symbol']}_{order['order_id']}")
+                                sale_values = sized_sells[index]
+                                ## How do we integrate this with sales at a later date?
+                                if sales_dict.get(sized_sells[index]['close_datetime']) is None:
+                                    sales_dict[sized_sells[index]['close_datetime']] = [sized_sells[index]]
+                                else:
+                                    sales_dict[sized_sells[index]['close_datetime']].append(sized_sells[index])
+                        positions_taken.append(position['position_id'])
+                else:
+                    if passed_trades_dict.get(key) is not None:
+                        passed_trades_dict[key]['trades'].append(position)
+                    else:
+                        passed_trades_dict[key] = {
+                            "trades": [position]
+                        }
+        value['active_holdings'] = current_holdings
+        value['current_positions'] = current_positions
+        
+
+        value['period_net_returns'] = (value['sale_returns'] - value['purchase_costs'])
+   
+        # except Exception as e:
+        #     print(e)
+        #     print(key)
+        #     continue
+
+    portfolio_df = pd.DataFrame.from_dict(portfolio_dict, orient='index')
+    passed_trades_df = pd.DataFrame.from_dict(passed_trades_dict, orient='index')
+    diff = list(set(contracts_bought) - set(contracts_sold))
+    print("Elements in bought but not in sold:")
+    print(diff)
+    return portfolio_df, passed_trades_df, positions_taken, portfolio_dict 
 
 def build_results_df(purchases_list, sales_list, datetime_list):
-    """
-        This current idea is not working. Current plan is to create a master dict, with each datetime that is possible as the keys
-        and the values can then be derived by looping through all of the transactions. Those can then be returned into the template 
-        from which the final df can be constructed.
-    """
     portfolio_df = pd.DataFrame(columns=['datetime', 'value'])
     portfolio_value = 100000
     full_results_dict = {}
@@ -217,9 +426,10 @@ def build_positions_df(positions_list):
                 "underlying_symbol": position_underlying,
                 "strategy": strategy,
                 "open_datetime": trades[0]['open_trade_dt'],
+                "close_datetime": trades[-1]['close_trade_dt'],
             }
     positions_df = pd.DataFrame.from_dict(positions_dict, orient='index')
-    return positions_df
+    return positions_df, positions_dict
 
 def polygon_optiondata(options_ticker, from_date, to_date):
     #This is for option data
@@ -299,15 +509,15 @@ def convertepoch(time):
     finaldate = datetime.strptime(closedate, '%Y-%m-%d %H:%M:%S')
     return finaldate
 
-def build_table(start_date, end_date):
-    datetimeindex = pd.date_range(start_date, end_date, freq='15min', name = 'Time')
+def create_datetime_index(start_date, end_date):
+    datetime_index = pd.date_range(start_date, end_date, freq='15min', name = 'Time')
     days = []
-    for time in datetimeindex:
+    for time in datetime_index:
         convertedtime = time.strftime('%Y-%m-%d %H:%M:%S')
         finaldate = datetime.strptime(convertedtime, '%Y-%m-%d %H:%M:%S')
         days.append(finaldate)
     results = pd.DataFrame(index=days)
-    return days, datetimeindex, results
+    return days, datetime_index, results
 
 def build_dict(seq, key):
     return dict((d[key], dict(d, index=index)) for (index, d) in enumerate(seq))
@@ -354,4 +564,118 @@ def pull_modeling_results(alerts_df):
     merged_df = pd.merge(alerts_df, model_results, on=['symbol', 'hour','title'], how='inner')
     merged_df.drop(["Unnamed: 0_x","Unnamed: 0_y","Unnamed: 0.1"], axis=1, inplace=True)
     return merged_df
+
+# def create_full_date_list(start_date, end_date):
+#     start_time = datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S')
+#     end_date = create_end_date(start_time, 4)
+#     datetime_list = create_datetime_index(start_time, end_date)
+#     return datetime_list
     
+def create_portfolio_date_list(start_date, end_date):
+    start_time = datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S')
+    end_time = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
+    end_date = create_end_date(end_time, 3)
+    date_list, _, _  = create_datetime_index(start_time, end_date)
+    return date_list
+
+
+
+
+# def simulate_portfolio(positions_list, datetime_list, portfolio_cash):
+#     positions_taken = []
+#     contracts_bought = []
+#     contracts_sold = []
+#     starting_cash = portfolio_cash
+#     # starting_date = datetime_list[0]
+#     # print(starting_date)
+#     portfolio_dict, positions_dict, passed_trades_dict = convert_lists_to_dicts(positions_list, datetime_list)
+
+#     ## What we need is to at this point build the trade. We need to send through the package of contracts in 
+#     ## their bundle of a "position", then we can approximate bet sizing and the contract sizing at this point in time.
+#     ## Then from there we can build the results of the trade, and then we can build the portfolio from there.
+#     ## This will give us dynamic and rective sizing.
+    
+#     i = 0
+#     for key, value in portfolio_dict.items():
+#         if i == 0:
+#             value['portfolio_cash'] = portfolio_cash
+#             current_positions = []
+#             # current_holdings = []
+
+#             if positions_dict.get(key) is not None:
+#                 for purchase in positions_dict[key]:
+#                     if value['portfolio_cash'] > (0.5 * starting_cash):
+#                         contracts, quantity = ts.bet_sizer(contracts, value['portfolio_cash'])
+#                         value['contracts_purchased'].append(f"{purchase['option_symbol']}_{purchase['order_id']}")
+#                         value['purchase_costs'] += purchase['contract_cost']
+#                         # current_holdings.append(f"{purchase['option_symbol']}_{purchase['quantity']}")
+#                         value['portfolio_cash'] -= purchase['contract_cost']
+#                         contracts_bought.append(f"{purchase['option_symbol']}_{purchase['order_id']}")
+#                         if purchase['position_id'] not in value['open_positions']:
+#                             value['open_positions'].append(purchase['position_id'])
+#                             current_positions.append(purchase['position_id'])
+#                             positions_taken.append(purchase['position_id'])
+#                     else:
+#                         if passed_trades_dict.get(key) is not None:
+#                             passed_trades_dict[key]['trades'].append(purchase)
+#                         else:
+#                             passed_trades_dict[key] = {
+#                                 "trades": [purchase]
+#                             }
+#                 i += 1
+#                 continue
+#         else:
+#             value['portfolio_cash'] = portfolio_dict[key - timedelta(minutes=15)]['portfolio_cash']
+#             value['active_holdings'] = portfolio_dict[key - timedelta(minutes=15)]['active_holdings']
+#             value['open_positions'] = portfolio_dict[key - timedelta(minutes=15)]['open_positions']
+        
+
+#         # try:
+#         if sales_dict.get(key) is not None:
+#             for sale in sales_dict[key]:
+#                 if (f"{sale['option_symbol']}_{sale['order_id']}") in contracts_bought:
+#                     value['contracts_sold'].append(f"{sale['option_symbol']}_{sale['order_id']}")
+#                     value['sale_returns'] += sale['contract_cost']
+#                     # current_holdings.remove(f"{sale['option_symbol']}_{sale['quantity']}")
+#                     value['portfolio_cash'] += sale['contract_cost']
+#                     contracts_sold.append(f"{sale['option_symbol']}_{sale['order_id']}")
+#                     if sale['position_id'] in current_positions:
+#                         current_positions.remove(sale['position_id'])    
+
+#         if purchases_dict.get(key) is not None:
+#             for purchase in purchases_dict[key]:
+#                 if value['portfolio_cash'] > (0.5 * starting_cash):
+#                     value['contracts_purchased'].append(f"{purchase['option_symbol']}_{purchase['order_id']}")
+#                     value['purchase_costs'] += purchase['contract_cost']
+#                     # current_holdings.append(f"{purchase['option_symbol']}_{purchase['quantity']}")
+#                     value['portfolio_cash'] -= purchase['contract_cost']
+#                     contracts_bought.append(f"{purchase['option_symbol']}_{purchase['order_id']}")
+#                     if purchase['position_id'] not in value['open_positions']:
+#                         value['open_positions'].append(purchase['position_id'])
+#                         current_positions.append(purchase['position_id'])
+#                 else:
+#                     if passed_trades_dict.get(key) is not None:
+#                         passed_trades_dict[key]['trades'].append(purchase)
+#                     else:
+#                         passed_trades_dict[key] = {
+#                             "trades": [purchase]
+#                         }
+#         # value['active_holdings'] = current_holdings
+#         value['current_positions'] = current_positions
+        
+
+#         value['period_net_returns'] = (value['sale_returns'] - value['purchase_costs'])
+   
+#         # except Exception as e:
+#         #     print(e)
+#         #     print(key)
+#         #     continue
+
+#     portfolio_df = pd.DataFrame.from_dict(portfolio_dict, orient='index')
+#     passed_trades_df = pd.DataFrame.from_dict(passed_trades_dict, orient='index')
+#     print(contracts_bought)
+#     print(contracts_sold)
+#     diff = list(set(contracts_bought) - set(contracts_sold))
+#     print("Elements in bought but not in sold:")
+#     print(diff)
+#     return portfolio_df, passed_trades_df, positions_taken, portfolio_dict 

@@ -180,10 +180,54 @@ def time_decay_alpha_losers_v0(polygon_df, simulation_date, quantity):
 
 ### BET SIZING FUNCTIONS ###
 
-def bet_sizer(contracts, date):
-    target_cost = (.008 * pull_trading_balance())
-    to_stamp = date.strftime("%Y-%m-%d")
-    from_stamp = (date - timedelta(days=2)).strftime("%Y-%m-%d")
+def build_trade(position, available_funds):
+    buy_orders = []
+    sell_orders = []
+    contract_costs = []
+    transactions = position['transactions']
+    for transaction in transactions:
+        # print(type(trade_info))
+        # print(position_id)
+        # print(trade_info[0])
+        # trades = trade_info[0]
+        buy_orders.append(transaction['buy_dict'])
+        sell_orders.append(transaction['sell_dict'])
+        contract_costs.append(transaction['buy_dict']['contract_cost'])
+    
+    sized_buys, sized_sells = size_trade(contract_costs, buy_orders, sell_orders, available_funds)
+    return sized_buys, sized_sells
+
+def size_trade(contract_costs, buy_orders, sell_orders, available_funds):
+    target_cost = (.01 * available_funds)
+    spread_cost = sum(contract_costs)
+    if (1.1*target_cost) >= spread_cost >= (.9*target_cost):
+        quantities = [1] * len(buy_orders)
+    elif spread_cost < (.9*target_cost):
+        quantity = add_spread_cost(spread_cost, target_cost)
+        quantities = [quantity] * len(buy_orders)
+    elif spread_cost > (1.1*target_cost):
+        quantities = reduce_spread(contract_costs, target_cost)
+
+    for i, value in enumerate(quantities):
+        if value == 0:
+            buy_orders[i] = None
+            sell_orders[i] = None
+        else:
+            try:
+                buy_orders[i]['quantity'] = value
+                sell_orders[i]['quantity'] = value
+            except Exception as e:
+                print(e)
+                print(buy_orders)
+
+    return buy_orders, sell_orders
+    
+
+
+def bet_sizer(contracts, available_funds):
+    target_cost = (.01 * available_funds)
+    # to_stamp = date.strftime("%Y-%m-%d")
+    # from_stamp = (date - timedelta(days=2)).strftime("%Y-%m-%d")
     # contracts_details = []
 
     ##will use down the road
@@ -232,26 +276,39 @@ def finalize_trade(contracts_details, spread_cost, target_cost):
         print("else")
         return contracts_details, 1
             
-def add_spread_cost(spread_cost, target_cost, contracts_details):
+def add_spread_cost(spread_cost, target_cost):
     spread_multiplier = 1
     total_cost = spread_cost
     if spread_cost == 0:
-        return 0, 0, []
+        return 0, 0
     else:
-        while total_cost <= (1.1*target_cost):
+        while total_cost <= target_cost:
             spread_multiplier += 1
             total_cost = spread_cost * spread_multiplier
         
-        if total_cost > (1.1*target_cost):
+        if total_cost > target_cost:
             spread_multiplier -= 1
             total_cost -= spread_cost
 
-        if total_cost < (.67*target_cost):
-            # this causes errors and will not work with current formatting
-            # sized_contracts = contracts_details + contracts_details[0]
-            sized_contracts = contracts_details
+        # if total_cost < (.67*target_cost):
+        #     # this causes errors and will not work with current formatting
+        #     # sized_contracts = contracts_details + contracts_details[0]
+        #     spread_multiplier = spread_multiplier
+        # else:
+        #     sized_contracts = contracts_details * spread_multiplier
+
+
+    return spread_multiplier
+
+def reduce_spread(contract_costs, target_cost):
+    if contract_costs[0] < target_cost:
+        if sum(contract_costs[0:2]):
+            return [1,1,0]
         else:
-            sized_contracts = contracts_details * spread_multiplier
-
-
-    return spread_cost, spread_multiplier
+            return [1,0,0]
+    elif contract_costs[0] > target_cost:
+        if sum(contract_costs[1:3]) > target_cost:
+            return [0,0,1]
+        else:
+            return [0,1,1]
+        
