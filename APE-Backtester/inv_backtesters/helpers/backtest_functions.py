@@ -48,6 +48,14 @@ def buy_iterate_sellV2(symbol, mkt_price, option_symbol, open_prices, strategy, 
     contract_cost = round((open_price * 100 * quantity), 2)
     buy_dict = {"open_price": open_price, "open_datetime": open_datetime, "quantity": quantity, "contract_cost": contract_cost, "option_symbol": option_symbol, "position_id": position_id}
 
+    # if strategy == "day_gainers":
+    #     sell_dict = time_decay_alpha_gainers_v0(polygon_df.iloc[1:],open_datetime,quantity)
+    # elif strategy == "day_losers":
+    #     sell_dict = time_decay_alpha_losers_v0(polygon_df.iloc[1:],open_datetime,quantity)
+    # elif strategy == "maP":
+    #     sell_dict = time_decay_alpha_maP_v0(polygon_df.iloc[1:],open_datetime,quantity)
+    # elif strategy == "most_actives":
+    #     sell_dict = time_decay_alpha_ma_v0(polygon_df.iloc[1:],open_datetime,quantity)
     try:
         if strategy == "day_gainers":
             sell_dict = time_decay_alpha_gainers_v0(polygon_df.iloc[1:],open_datetime,quantity)
@@ -68,6 +76,11 @@ def buy_iterate_sellV2(symbol, mkt_price, option_symbol, open_prices, strategy, 
         results_dict = backtrader_helper.create_results_dict(buy_dict, sell_dict)
         results_dict['position_id'] = position_id
         transaction_dict = {"buy_dict": buy_dict, "sell_dict":sell_dict, "results_dict": results_dict}
+        if buy_dict['open_datetime'] > sell_dict['close_datetime']:
+            print("Date Mismatch")
+            print(buy_dict)
+            print(sell_dict)
+            print()
     except Exception as e:
         print(e)
         print("Error in transaction_dict")
@@ -85,20 +98,22 @@ def simulate_trades(data, datetimelist, starting_value, commission_cost, s3link)
     sales_list =[]
     order_results_list = []
     order_id = 0
+
     for i, row in data.iterrows():
         transactions_list = []
         trades = []
         start_date, end_date, symbol, mkt_price, strategy, option_symbols, polygon_dfs = create_simulation_data(row)
+        order_dt = start_date.strftime("%m+%d")
         pos_dt = start_date.strftime("%Y-%m-%d-%H")
         trade_data_pairs = []
         position_id = f"{row['symbol']}-{(row['title'].replace('_',''))}-{pos_dt}"
         contracts = []
+
         for df in polygon_dfs:
-            if row['symbol'] == 'NU':
-                print(df)
             contract_symbol = df.iloc[0]['ticker']
             price = df.iloc[0]['o']
             contracts.append({"contract_symbol": contract_symbol, "price": price})
+
         for df in polygon_dfs:
             open_prices = df['o'].values
             ticker = df.iloc[0]['ticker']
@@ -107,15 +122,19 @@ def simulate_trades(data, datetimelist, starting_value, commission_cost, s3link)
                 print("Error in buy_iterate_sellV2")
                 print(symbol)
                 print(ticker)
+                print(f"{order_id}_{order_dt}")
                 continue
-            buy_dict['order_id'] = order_id
-            sell_dict['order_id'] = order_id
+
+            buy_dict['order_id'] = f"{order_id}_{order_dt}"
+            sell_dict['order_id'] = f"{order_id}_{order_dt}"
+
             transactions_list.append(transaction_dict)
             purchases_list.append(buy_dict)
             sales_list.append(sell_dict)
             order_results_list.append(results_dict)
             trades.append(results_dict)
             order_id += 1
+
         position_trades = {"position_id": position_id, "transactions": transactions_list, "open_datetime": start_date}
         positions_list.append(position_trades)
         

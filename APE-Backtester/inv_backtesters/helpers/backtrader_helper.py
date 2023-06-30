@@ -187,8 +187,6 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash):
     
     i = 0
     for key, value in portfolio_dict.items():
-        print(key)
-        print()
         if i == 0:
             value['portfolio_cash'] = portfolio_cash
             current_positions = []
@@ -203,7 +201,7 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash):
                             if order != None:
                                 value['contracts_purchased'].append(f"{order['option_symbol']}_{order['order_id']}")
                                 value['purchase_costs'] += (order['contract_cost'] * order['quantity'])
-                                value['portfolio_cash'] -= order['contract_cost']
+                                value['portfolio_cash'] -= order['contract_cost'] * order['quantity']
                                 contracts_bought.append(f"{order['option_symbol']}_{order['order_id']}")
                                 sale_values = sized_sells[index]
                                 ## How do we integrate this with sales at a later date?
@@ -211,7 +209,7 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash):
                                     sales_dict[sized_sells[index]['close_datetime']] = [sized_sells[index]]
                                 else:
                                     sales_dict[sized_sells[index]['close_datetime']].append(sized_sells[index])
-                        positions_taken.append(position['position_id'])
+                        positions_taken.append(position)
                         # if purchase['position_id'] not in value['open_positions']:
                         #     value['open_positions'].append(purchase['position_id'])
                         #     current_positions.append(purchase['position_id'])
@@ -230,43 +228,13 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash):
             value['active_holdings'] = portfolio_dict[key - timedelta(minutes=15)]['active_holdings']
             value['open_positions'] = portfolio_dict[key - timedelta(minutes=15)]['open_positions']
         
-
-        # try:
-        # print(sales_dict)
-        # if positions_dict.get(key) is not None:
-        #         for position in positions_dict[key]:
-        #             if value['portfolio_cash'] > (0.5 * starting_cash):
-        #                 sized_buys, sized_sells = ts.build_trade(position, value['portfolio_cash'])
-        #                 for index, order in enumerate(sized_buys):
-        #                     if order != None:
-        #                         value['contracts_purchased'].append(f"{order['option_symbol']}_{order['order_id']}")
-        #                         value['purchase_costs'] += (order['contract_cost'] * order['quantity'])
-        #                         value['portfolio_cash'] -= order['contract_cost']
-        #                         contracts_bought.append(f"{order['option_symbol']}_{order['order_id']}")
-        #                         sale_values = sized_sells[index]
-        #                         ## How do we integrate this with sales at a later date?
-        #                         if sales_dict.get(sized_sells[index]['close_datetime']) is None:
-        #                             sales_dict[sized_sells[index]['close_datetime']] = [sized_sells[index]]
-        #                         else:
-        #                             sales_dict[sized_sells[index]['close_datetime']].append(sized_sells[index])
-        #                 positions_taken.append(position['position_id'])
-        #         else:
-        #             if passed_trades_dict.get(key) is not None:
-        #                 passed_trades_dict[key]['trades'].append(position)
-        #             else:
-        #                 passed_trades_dict[key] = {
-        #                     "trades": [position]
-        #                 }
-
         if sales_dict.get(key) is not None:
-            print("In sales dict")
-            print()
             for sale in sales_dict[key]:
                 if (f"{sale['option_symbol']}_{sale['order_id']}") in contracts_bought:
                     value['contracts_sold'].append(f"{sale['option_symbol']}_{sale['order_id']}")
                     value['sale_returns'] += sale['contract_cost']
                     # current_holdings.remove(f"{sale['option_symbol']}_{sale['quantity']}")
-                    value['portfolio_cash'] += sale['contract_cost']
+                    value['portfolio_cash'] += sale['contract_cost'] * sale['quantity']
                     contracts_sold.append(f"{sale['option_symbol']}_{sale['order_id']}")
                     if sale['position_id'] in current_positions:
                         current_positions.remove(sale['position_id'])    
@@ -279,7 +247,7 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash):
                             if order != None:
                                 value['contracts_purchased'].append(f"{order['option_symbol']}_{order['order_id']}")
                                 value['purchase_costs'] += (order['contract_cost'] * order['quantity'])
-                                value['portfolio_cash'] -= order['contract_cost']
+                                value['portfolio_cash'] -= order['contract_cost'] * order['quantity']
                                 contracts_bought.append(f"{order['option_symbol']}_{order['order_id']}")
                                 sale_values = sized_sells[index]
                                 ## How do we integrate this with sales at a later date?
@@ -287,7 +255,7 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash):
                                     sales_dict[sized_sells[index]['close_datetime']] = [sized_sells[index]]
                                 else:
                                     sales_dict[sized_sells[index]['close_datetime']].append(sized_sells[index])
-                        positions_taken.append(position['position_id'])
+                        positions_taken.append(position)
                 else:
                     if passed_trades_dict.get(key) is not None:
                         passed_trades_dict[key]['trades'].append(position)
@@ -295,7 +263,7 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash):
                         passed_trades_dict[key] = {
                             "trades": [position]
                         }
-        value['active_holdings'] = current_holdings
+        # value['active_holdings'] = current_holdings
         value['current_positions'] = current_positions
         
 
@@ -305,13 +273,12 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash):
         #     print(e)
         #     print(key)
         #     continue
-
     portfolio_df = pd.DataFrame.from_dict(portfolio_dict, orient='index')
     passed_trades_df = pd.DataFrame.from_dict(passed_trades_dict, orient='index')
     diff = list(set(contracts_bought) - set(contracts_sold))
     print("Elements in bought but not in sold:")
     print(diff)
-    return portfolio_df, passed_trades_df, positions_taken, portfolio_dict 
+    return portfolio_df, passed_trades_df, positions_taken, positions_dict 
 
 def build_results_df(purchases_list, sales_list, datetime_list):
     portfolio_df = pd.DataFrame(columns=['datetime', 'value'])
@@ -448,6 +415,7 @@ def polygon_optiondata(options_ticker, from_date, to_date):
     response_data = json.loads(response.text)
     res_option_df = pd.DataFrame(response_data['results'])
     res_option_df['t'] = res_option_df['t'].apply(lambda x: int(x/1000))
+    res_option_df['t']  = res_option_df['t'] + timedelta(hours=4).total_seconds()
     res_option_df['date'] = res_option_df['t'].apply(lambda x: datetime.fromtimestamp(x))
     res_option_df['ticker'] = options_ticker
     #res_option_df.to_csv(f'/Users/ogdiz/Projects/APE-Research/APE-BAcktester/APE-Backtester-Results/Testing_Research_Data_CSV_{x}_{from_date}.csv')
@@ -471,6 +439,7 @@ def polygon_stockdata(x, from_date, to_date, df_optiondata):
     response_data = json.loads(response.text)
     stock_df = pd.DataFrame(response_data['results'])
     stock_df['t'] = stock_df['t'].apply(lambda x: int(x/1000))
+    stock_df['t']  = stock_df['t'] + timedelta(hours=4).total_seconds()
     stock_df['date'] = stock_df['t'].apply(lambda x: datetime.fromtimestamp(x))
     underlying_price = []
     for i, row in df_optiondata.iterrows():
