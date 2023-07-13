@@ -296,6 +296,9 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash):
                 for position in positions_dict[key]:
                     if value['portfolio_cash'] > (0.5 * starting_cash):
                         sized_buys, sized_sells = ts.build_trade(position, value['portfolio_cash'])
+                        if sized_buys == None:
+                            print(position)
+                            continue
                         for index, order in enumerate(sized_buys):
                             if order != None:
                                 value['contracts_purchased'].append(f"{order['option_symbol']}_{order['order_id']}")

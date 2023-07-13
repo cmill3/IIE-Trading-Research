@@ -550,6 +550,8 @@ def size_trade(contract_costs, buy_orders, sell_orders, available_funds):
     elif spread_cost > (1.1*target_cost):
         quantities = reduce_spread(contract_costs, target_cost)
 
+    if len(quantities) == 0:
+        return None, None
     for i, value in enumerate(quantities):
         try:
             if value == 0:
