@@ -26,8 +26,8 @@ def pull_data(s3link):
 
 def pull_data_invalerts(bucket_name, object_key, file_name):
     dfs = []
-    # prefixes = ["gainers","gainersP","losers","losersC","ma","maP","vdiffC","vdiffP"]
-    prefixes = ["gainers","gainersP","losers","losersC","ma","maP"]
+    prefixes = ["gainers","gainersP","losers","losersC","ma","maP","vdiffC","vdiffP"]
+    prefixes = ["gainers55pct","losers55pct","ma","maP","vdiff_gainC","vdiff_gainP"]
     for prefix in prefixes:
         print(f"{object_key}/{prefix}/{file_name}")
         obj = s3.get_object(Bucket=bucket_name, Key=f"{object_key}/{prefix}/{file_name}")
