@@ -351,7 +351,7 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit)
         if positions_dict.get(key) is not None:
                 for position in positions_dict[key]:
                     if approve_trade(value['portfolio_cash'],(.5 * starting_cash),position['position_id'].split("-")[0] + position['position_id'].split("-")[1], current_positions):
-                        sized_buys, sized_sells = ts.build_trade(position, value['portfolio_cash'])
+                        sized_buys, sized_sells = ts.build_trade(position, value['portfolio_cash'],risk_unit)
                         if sized_buys == None:
                             print(position)
                             continue

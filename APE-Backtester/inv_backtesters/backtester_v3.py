@@ -35,10 +35,10 @@ def build_backtest_data(file_name):
     return positions_list
     # return full_purchases_list, full_positions_list, full_sales_list, datetime_list
 
-def run_trades_simulation(full_positions_list,portfolio_cash, start_date, end_date):
+def run_trades_simulation(full_positions_list,portfolio_cash, start_date, end_date, risk_unit):
     # results_df = backtrader.build_results_df(full_purchases_list, full_sales_list, datetime_list)
     full_date_list = helper.create_portfolio_date_list(start_date.replace("/","-")+" 13:00:00", end_date.replace("/","-")+" 20:00:00")
-    portfolio_df, passed_trades_df, positions_taken, positions_dict = helper.simulate_portfolio(full_positions_list, full_date_list,portfolio_cash=portfolio_cash)
+    portfolio_df, passed_trades_df, positions_taken, positions_dict = helper.simulate_portfolio(full_positions_list, full_date_list,portfolio_cash=portfolio_cash, risk_unit=risk_unit)
     # positions_df, positions_dict = helper.build_positions_df(full_positions_list, positions_dict)
     positions_df = pd.DataFrame.from_dict(positions_taken)
     return portfolio_df, positions_df
