@@ -6,7 +6,7 @@ import pandas as pd
 import requests
 import json
 import ast
-import holidays
+# import holidays
 import warnings
 import helpers.trading_strategies as ts
 from yahooquery import Ticker
