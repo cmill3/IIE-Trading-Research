@@ -108,7 +108,9 @@ if __name__ == "__main__":
                   "2023-04-24","2023-05-01","2023-05-08","2023-05-15","2023-05-22","2023-05-29","2023-06-05"]
     portfolio_df, positions_df = run_backtest_inv_alerts(file_names)    
 
+    # portfolio_df.to_csv(f'/Users/charlesmiller/Documents/Code/IIE/Icarus/APE-Research/APE-Backtester/portfolio_report1001X.csv')
+    # positions_df.to_csv(f'/Users/charlesmiller/Documents/Code/IIE/Icarus/APE-Research/APE-Backtester/positions_report1001X.csv')
     
-    portfolio_df.to_csv(f'/Users/charlesmiller/Documents/Code/IIE/Icarus/APE-Research/APE-Backtester/data/{trading_strat}/2023-01-02-2023-06-05/portfolio_report1001X.csv')
-    positions_df.to_csv(f'/Users/charlesmiller/Documents/Code/IIE/Icarus/APE-Research/APE-Backtester/data/{trading_strat}/2023-01-02-2023-06-05/positions_report1001X.csv')
+    portfolio_df.to_csv(f'/Users/charlesmiller/Code/PycharmProjects/FFACAP/Icarus/APE-Research/APE-Backtester/inv_backtesters/data/{trading_strat}/2023-01-02-2023-06-05/portfolio_report1001X.csv')
+    positions_df.to_csv(f'/Users/charlesmiller/Code/PycharmProjects/FFACAP/Icarus/APE-Research/APE-Backtester/inv_backtesters/data/{trading_strat}/2023-01-02-2023-06-05/positions_report1001X.csv')
     print("Done!")
