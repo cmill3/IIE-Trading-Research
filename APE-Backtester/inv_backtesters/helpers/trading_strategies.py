@@ -519,6 +519,52 @@ def time_decay_alpha_vdiffP_v0_inv(polygon_df, simulation_date, quantity):
     sell_dict = {"close_price": polygon_df.iloc[-1]['o'], "close_datetime": polygon_df.iloc[-1]['date'].to_pydatetime(), "quantity": quantity, "contract_cost": (polygon_df.iloc[-1]['o']*100)*quantity, "option_symbol": polygon_df.iloc[-1]['ticker'],"reason": "never sold"}
     return sell_dict
 
+### RelativeVol STRATEGIES ###
+def time_decay_alpha_vdiffP_v0_relvol(polygon_df, simulation_date, quantity):
+    ## The change here is the target will be the ration of pct/stddev. The floor can be derived from the std dev. Some fraction of that
+    ## In the case where it is standard alerts, the target will be affected by the standard deviation of returns same with floor. Still need to figure out how
+    ## The vol ratio could be a multiplier of sorts for the target. For a strat thats more volatile 1.5*stdDev. Less volatile 1*stdDev
+    open_price = polygon_df.iloc[0]['underlying_price']
+    for index, row in polygon_df.iterrows():
+        max_value = polygon_df.iloc[:index]['underlying_price'].max()
+        Target_pct = -.03
+        pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
+        Floor_pct = ((float(max_value) - float(open_price))/float(open_price) + .0125)
+
+        # if type(Floor_pct) == float:
+        #     Floor_pct = -0.02
+        if pct_change > 0.1:
+            Floor_pct -= 0.01
+
+        # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
+        day_diff = get_business_days(simulation_date, row['date'])
+        sell_code = 0
+        reason = ""
+        if day_diff < 2:
+            if pct_change <= Floor_pct:
+                sell_code = 2
+                reason = "Hit exit target, sell."
+        elif day_diff >= 2:
+            if pct_change > Floor_pct:
+                sell_code = 2
+                reason = "Hit point of no confidence, sell."
+            elif pct_change <= Target_pct:
+                sell_code = 2
+                reason = "Hit exit target, sell."
+            elif pct_change > (.5*(Target_pct)):
+                sell_code = 2
+                reason = "Failed momentum gate, sell."
+            else:
+                sell_code = 0
+                reason = "Hold."
+
+        if sell_code == 2:
+            sell_dict = {"close_price": row['o'], "close_datetime": row['date'].to_pydatetime(), "quantity": quantity, "contract_cost": (row['o']*100)*quantity, "option_symbol": row['ticker'],"reason": reason}
+            return sell_dict
+        
+    sell_dict = {"close_price": polygon_df.iloc[-1]['o'], "close_datetime": polygon_df.iloc[-1]['date'].to_pydatetime(), "quantity": quantity, "contract_cost": (polygon_df.iloc[-1]['o']*100)*quantity, "option_symbol": polygon_df.iloc[-1]['ticker'],"reason": "never sold"}
+    return sell_dict
+
 
 ### BET SIZING FUNCTIONS ###
 

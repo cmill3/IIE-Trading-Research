@@ -25,7 +25,7 @@ def build_backtest_data(file_name):
     full_sales_list = []
 
 
-    data, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts_contracts", file_name = f"{file_name}.csv")
+    data, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/priceFeaturesnoPCR", file_name = f"{file_name}.csv")
     ## What we will do is instead of simulating one trade at a time we will do one time period at a time and then combine and create results then.
     purchases_list, sales_list, order_results_list, positions_list, = back_tester.simulate_trades_invalerts(data)
     full_purchases_list.extend(purchases_list)
@@ -80,5 +80,5 @@ if __name__ == "__main__":
     port_csv = portfolio_df.to_csv()
     pos_csv = positions_df.to_csv()
     s3.put_object(Body=port_csv, Bucket="icarus-research-data", Key=f'backtesting_reports/{trading_strat}/{start_str}-{end_str}/{cash_risk}/portfolio_report.csv')
-    s3.put_object(Body=port_csv, Bucket="icarus-research-data", Key=f'backtesting_reports/{trading_strat}/{start_str}-{end_str}/{cash_risk}/positions_report.csv')
+    s3.put_object(Body=pos_csv, Bucket="icarus-research-data", Key=f'backtesting_reports/{trading_strat}/{start_str}-{end_str}/{cash_risk}/positions_report.csv')
     print("Done!")
