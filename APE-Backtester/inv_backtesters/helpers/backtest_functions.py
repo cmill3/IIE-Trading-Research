@@ -26,14 +26,18 @@ def pull_data(s3link):
 
 def pull_data_invalerts(bucket_name, object_key, file_name):
     dfs = []
-    # prefixes = ["gainers","gainersP","losers","losersC","ma","maP","vdiffC","vdiffP"]
-    prefixes = ["gainers","gainersP","losers","losersC","ma","maP"]
+    prefixes = ["gainers","gainersP","losers","losersC","ma","maP","vdiffC","vdiffP"]
+    # prefixes = ["gainers55pct","losers55pct","ma","maP","vdiff_gainC","vdiff_gainP"]
     for prefix in prefixes:
-        print(f"{object_key}/{prefix}/{file_name}")
-        obj = s3.get_object(Bucket=bucket_name, Key=f"{object_key}/{prefix}/{file_name}")
-        df = pd.read_csv(obj.get("Body"))
-        df['strategy'] = prefix
-        dfs.append(df)
+        try:
+            print(f"{object_key}/{prefix}/{file_name}")
+            obj = s3.get_object(Bucket=bucket_name, Key=f"{object_key}/{prefix}/{file_name}")
+            df = pd.read_csv(obj.get("Body"))
+            df['strategy'] = prefix
+            dfs.append(df)
+        except:
+            print(f"no file for {prefix}")
+            continue
     full_data = pd.concat(dfs)
     data = full_data[full_data.predictions == 1]
     start_time = datetime.strptime(data['date'].values[0], '%Y-%m-%d %H:%M:%S')

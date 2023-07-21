@@ -522,7 +522,7 @@ def time_decay_alpha_vdiffP_v0_inv(polygon_df, simulation_date, quantity):
 
 ### BET SIZING FUNCTIONS ###
 
-def build_trade(position, available_funds):
+def build_trade(position, available_funds, risk_unit):
     buy_orders = []
     sell_orders = []
     contract_costs = []
@@ -536,11 +536,11 @@ def build_trade(position, available_funds):
         sell_orders.append(transaction['sell_dict'])
         contract_costs.append(transaction['buy_dict']['contract_cost'])
     
-    sized_buys, sized_sells = size_trade(contract_costs, buy_orders, sell_orders, available_funds)
+    sized_buys, sized_sells = size_trade(contract_costs, buy_orders, sell_orders, available_funds, risk_unit)
     return sized_buys, sized_sells
 
-def size_trade(contract_costs, buy_orders, sell_orders, available_funds):
-    target_cost = (.01 * available_funds)
+def size_trade(contract_costs, buy_orders, sell_orders, available_funds, risk_unit):
+    target_cost = (risk_unit * available_funds)
     spread_cost = sum(contract_costs)
     if (1.1*target_cost) >= spread_cost >= (.9*target_cost):
         quantities = [1] * len(buy_orders)

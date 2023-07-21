@@ -266,7 +266,7 @@ def convert_lists_to_dicts_inv(positions_list, datetime_list):
     #         continue
     return portfolio_dict, positions_dict, passed_trades_dict
 
-def simulate_portfolio(positions_list, datetime_list, portfolio_cash):
+def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit):
     positions_taken = []
     contracts_bought = []
     contracts_sold = []
@@ -295,7 +295,7 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash):
             if positions_dict.get(key) is not None:
                 for position in positions_dict[key]:
                     if value['portfolio_cash'] > (0.5 * starting_cash):
-                        sized_buys, sized_sells = ts.build_trade(position, value['portfolio_cash'])
+                        sized_buys, sized_sells = ts.build_trade(position, value['portfolio_cash'],risk_unit)
                         if sized_buys == None:
                             print(position)
                             continue
@@ -351,7 +351,7 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash):
         if positions_dict.get(key) is not None:
                 for position in positions_dict[key]:
                     if approve_trade(value['portfolio_cash'],(.5 * starting_cash),position['position_id'].split("-")[0] + position['position_id'].split("-")[1], current_positions):
-                        sized_buys, sized_sells = ts.build_trade(position, value['portfolio_cash'])
+                        sized_buys, sized_sells = ts.build_trade(position, value['portfolio_cash'],risk_unit)
                         if sized_buys == None:
                             print(position)
                             continue
