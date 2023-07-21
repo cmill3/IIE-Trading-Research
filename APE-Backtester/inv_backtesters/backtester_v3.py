@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
 import holidays
-from xone import calendar
 import boto3
 import helpers.backtest_functions as back_tester
 import helpers.backtrader_helper as helper
@@ -60,13 +59,13 @@ def backtest_orchestrator(start_date, end_date, portfolio_cash, risk_unit,file_n
 
 if __name__ == "__main__":
     s3 = boto3.client('s3')
-    start_date = '2023/05/15'
-    end_date = '2023/06/05'
+    start_date = '2023/05/29'
+    end_date = '2023/06/12'
     start_str = start_date.split("/")[1] + start_date.split("/")[2]
     end_str = end_date.split("/")[1] + end_date.split("/")[2]
-    trading_strat = "inv_test"
-    portfolio_cash = 80000
-    risk_unit =.01
+    trading_strat = "inv_basic"
+    portfolio_cash = 60000
+    risk_unit =.005
     cash_risk = f"{portfolio_cash}_{risk_unit}"
     # portfolio_df, positions_df = run_backtest(start_date, end_date)
 
@@ -74,7 +73,7 @@ if __name__ == "__main__":
                   "2023-02-13","2023-02-20","2023-02-27","2023-03-06"
                   ,"2023-03-13","2023-03-20","2023-03-27","2023-04-03","2023-04-10","2023-04-17",
                   "2023-04-24","2023-05-01","2023-05-08","2023-05-15","2023-05-22","2023-05-29","2023-06-05"]
-    portfolio_df, positions_df = backtest_orchestrator(start_date, end_date,portfolio_cash=portfolio_cash,risk_unit=risk_unit,file_names=file_names[-4:])    
+    portfolio_df, positions_df = backtest_orchestrator(start_date, end_date,portfolio_cash=portfolio_cash,risk_unit=risk_unit,file_names=file_names)    
 
     
     port_csv = portfolio_df.to_csv()
