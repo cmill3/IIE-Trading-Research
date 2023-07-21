@@ -26,7 +26,8 @@ def pull_data(s3link):
 
 def pull_data_invalerts(bucket_name, object_key, file_name):
     dfs = []
-    prefixes = ["gainers","gainersP","losers","losersC","ma","maP","vdiffC","vdiffP"]
+    leveraged_etfs = ["TQQQ","SQQQ","SPXS","SPXL","SOXL","SOXS"]
+    prefixes = ["gainers","losers","ma","maP"]
     # prefixes = ["gainers55pct","losers55pct","ma","maP","vdiff_gainC","vdiff_gainP"]
     for prefix in prefixes:
         try:
@@ -39,7 +40,8 @@ def pull_data_invalerts(bucket_name, object_key, file_name):
             print(f"no file for {prefix}")
             continue
     full_data = pd.concat(dfs)
-    data = full_data[full_data.predictions == 1]
+    filter = full_data[~full_data['symbol'].isin(leveraged_etfs)]
+    data = filter[filter.predictions == 1]
     start_time = datetime.strptime(data['date'].values[0], '%Y-%m-%d %H:%M:%S')
     end_date = backtrader_helper.create_end_date(data['date'].values[-1], 4)
     datetime_list, datetime_index, results = backtrader_helper.create_datetime_index(start_time, end_date)
@@ -64,15 +66,15 @@ def create_simulation_data_inv(row):
     trading_aggregates, option_symbols = backtrader_helper.create_options_aggs_inv(row['symbol'],row['contracts'],datetime.strptime(row['date'],'%Y-%m-%d %H:%M:%S'),end_date=end_date,market_price=row['o'],strategy=row['strategy'],spread_length=3)
     return row['date'], end_date, row['symbol'], row['o'], row['strategy'], option_symbols, trading_aggregates
 
-def buy_iterate_sellV2(symbol, option_symbol, open_prices, strategy, polygon_df, quantity, position_id):
+def buy_iterate_sellV2(symbol, option_symbol, open_prices, strategy, polygon_df, position_id):
     open_price = open_prices[0]
     open_dt = polygon_df['date'][0]
     open_datetime = open_dt.to_pydatetime()
     # open_dt_hrmin = open_datetime.strftime("%Y-%m-%d %H:%M")
     # transaction_cost = commission_cost * contract_number
     # total_transaction_cost = transaction_cost * 2
-    contract_cost = round((open_price * 100 * quantity), 2)
-    buy_dict = {"open_price": open_price, "open_datetime": open_datetime, "quantity": quantity, "contract_cost": contract_cost, "option_symbol": option_symbol, "position_id": position_id}
+    contract_cost = round(open_price * 100, 2)
+    buy_dict = {"open_price": open_price, "open_datetime": open_datetime, "quantity": 1, "contract_cost": contract_cost, "option_symbol": option_symbol, "position_id": position_id}
 
     # if strategy == "day_gainers":
     #     sell_dict = time_decay_alpha_gainers_v0(polygon_df.iloc[1:],open_datetime,quantity)
@@ -84,13 +86,13 @@ def buy_iterate_sellV2(symbol, option_symbol, open_prices, strategy, polygon_df,
     #     sell_dict = time_decay_alpha_ma_v0(polygon_df.iloc[1:],open_datetime,quantity)
     try:
         if strategy == "day_gainers":
-            sell_dict = trade.time_decay_alpha_gainers_v0(polygon_df.iloc[1:],open_datetime,quantity)
+            sell_dict = trade.time_decay_alpha_gainers_v0(polygon_df.iloc[1:],open_datetime,1)
         elif strategy == "day_losers":
-            sell_dict = trade.time_decay_alpha_losers_v0(polygon_df.iloc[1:],open_datetime,quantity)
+            sell_dict = trade.time_decay_alpha_losers_v0(polygon_df.iloc[1:],open_datetime,1)
         elif strategy == "maP":
-            sell_dict = trade.time_decay_alpha_maP_v0(polygon_df.iloc[1:],open_datetime,quantity)
+            sell_dict = trade.time_decay_alpha_maP_v0(polygon_df.iloc[1:],open_datetime,1)
         elif strategy == "most_actives":
-            sell_dict = trade.time_decay_alpha_ma_v0(polygon_df.iloc[1:],open_datetime,quantity)
+            sell_dict = trade.time_decay_alpha_ma_v0(polygon_df.iloc[1:],open_datetime,1)
     except Exception as e:
         print(e)
         print("Error in sell_dict")
@@ -116,30 +118,30 @@ def buy_iterate_sellV2(symbol, option_symbol, open_prices, strategy, polygon_df,
         print(results_dict)
     return buy_dict, sell_dict, results_dict, transaction_dict, open_datetime
 
-def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, polygon_df, quantity, position_id):
+def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, polygon_df, position_id):
     open_price = open_prices[0]
     open_dt = polygon_df['date'][0]
     open_datetime = open_dt.to_pydatetime()
-    contract_cost = round((open_price * 100 * quantity), 2)
-    buy_dict = {"open_price": open_price, "open_datetime": open_datetime, "quantity": quantity, "contract_cost": contract_cost, "option_symbol": option_symbol, "position_id": position_id}
+    contract_cost = round(open_price * 100,2)
+    buy_dict = {"open_price": open_price, "open_datetime": open_datetime, "quantity": 1, "contract_cost": contract_cost, "option_symbol": option_symbol, "position_id": position_id}
 
     try:
         if strategy == "gainers":
-            sell_dict = trade.time_decay_alpha_gainers_v0_inv(polygon_df.iloc[1:],open_datetime,quantity)
-        elif strategy == "gainersP":
-            sell_dict = trade.time_decay_alpha_gainersP_v0_inv(polygon_df.iloc[1:],open_datetime,quantity)
+            sell_dict = trade.time_decay_alpha_gainers_v0_inv(polygon_df.iloc[1:],open_datetime,1)
+        # elif strategy == "gainersP":
+        #     sell_dict = trade.time_decay_alpha_gainersP_v0_inv(polygon_df.iloc[1:],open_datetime,1)
         elif strategy == "losers":
-            sell_dict = trade.time_decay_alpha_losers_v0_inv(polygon_df.iloc[1:],open_datetime,quantity)
-        elif strategy == "losersC":
-            sell_dict = trade.time_decay_alpha_losersC_v0_inv(polygon_df.iloc[1:],open_datetime,quantity)
+            sell_dict = trade.time_decay_alpha_losers_v0_inv(polygon_df.iloc[1:],open_datetime,1)
+        # elif strategy == "losersC":
+        #     sell_dict = trade.time_decay_alpha_losersC_v0_inv(polygon_df.iloc[1:],open_datetime,1)
         elif strategy == "ma":
-            sell_dict = trade.time_decay_alpha_ma_v0_inv(polygon_df.iloc[1:],open_datetime,quantity)
+            sell_dict = trade.time_decay_alpha_ma_v0_inv(polygon_df.iloc[1:],open_datetime,1)
         elif strategy == "maP":
-            sell_dict = trade.time_decay_alpha_maP_v0_inv(polygon_df.iloc[1:],open_datetime,quantity)
-        elif strategy == "vdiffC":
-            sell_dict = trade.time_decay_alpha_vdiffC_v0(polygon_df.iloc[1:],open_datetime,quantity)
-        elif strategy == "vdiffP":
-            sell_dict = trade.time_decay_alpha_vdiffP_v0(polygon_df.iloc[1:],open_datetime,quantity)
+            sell_dict = trade.time_decay_alpha_maP_v0_inv(polygon_df.iloc[1:],open_datetime,1)
+        elif strategy == "vdiff_gainC":
+            sell_dict = trade.time_decay_alpha_vdiffC_v0_inv(polygon_df.iloc[1:],open_datetime,1)
+        elif strategy == "vdiff_gainP":
+            sell_dict = trade.time_decay_alpha_vdiffP_v0_inv(polygon_df.iloc[1:],open_datetime,1)
     except Exception as e:
         print(e)
         print("Error in sell_dict")
@@ -224,7 +226,7 @@ def simulate_trades_invalerts(data):
     for i, row in data.iterrows():
         transactions_list = []
         trades = []
-        start_date, end_date, symbol, mkt_price, strategy, option_symbols, polygon_dfs = create_simulation_data_inv(row)
+        start_date, end_date, symbol, mkt_price, strategy, option_symbols, enriched_options_aggregates = create_simulation_data_inv(row)
         start_dt = datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S')
         order_dt = start_dt.strftime("%m+%d")
         pos_dt = start_dt.strftime("%Y-%m-%d-%H")
@@ -232,15 +234,19 @@ def simulate_trades_invalerts(data):
         position_id = f"{row['symbol']}-{(row['strategy'].replace('_',''))}-{pos_dt}"
         contracts = []
 
-        for df in polygon_dfs:
+        print(len(enriched_options_aggregates))
+        for df in enriched_options_aggregates:
             contract_symbol = df.iloc[0]['ticker']
             price = df.iloc[0]['o']
+            avg_volume = df['v'].mean()
+            if avg_volume < 40:
+                continue
             contracts.append({"contract_symbol": contract_symbol, "price": price})
 
-        for df in polygon_dfs:
+        for df in enriched_options_aggregates:
             open_prices = df['o'].values
             ticker = df.iloc[0]['ticker']
-            buy_dict, sell_dict, results_dict, transaction_dict, open_datetime = buy_iterate_sellV2_invalerts(symbol, ticker, open_prices, strategy, df, 1, position_id)
+            buy_dict, sell_dict, results_dict, transaction_dict, open_datetime = buy_iterate_sellV2_invalerts(symbol, ticker, open_prices, strategy, df, position_id)
             if len(buy_dict) == 0 and len(sell_dict) == 0 and len(results_dict) == 0 and len(transaction_dict) == 0:
                 print("Error in buy_iterate_sellV2")
                 print(symbol)
