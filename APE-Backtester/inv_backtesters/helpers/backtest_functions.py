@@ -26,9 +26,9 @@ def pull_data(s3link):
 
 def pull_data_invalerts(bucket_name, object_key, file_name):
     dfs = []
+    # prefixes = ["gainers","gainersP","losers","losersC","ma","maP","vdiffC","vdiffP"]
+    prefixes = ["gainers55pct","losers55pct","ma","maP","vdiff_gainC","vdiff_gainP"]
     leveraged_etfs = ["TQQQ","SQQQ","SPXS","SPXL","SOXL","SOXS"]
-    prefixes = ["gainers","losers","ma","maP"]
-    # prefixes = ["gainers55pct","losers55pct","ma","maP","vdiff_gainC","vdiff_gainP"]
     for prefix in prefixes:
         try:
             print(f"{object_key}/{prefix}/{file_name}")
@@ -126,11 +126,11 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
     buy_dict = {"open_price": open_price, "open_datetime": open_datetime, "quantity": 1, "contract_cost": contract_cost, "option_symbol": option_symbol, "position_id": position_id}
 
     try:
-        if strategy == "gainers":
+        if strategy == "gainers55pct":
             sell_dict = trade.time_decay_alpha_gainers_v0_inv(polygon_df.iloc[1:],open_datetime,1)
         # elif strategy == "gainersP":
         #     sell_dict = trade.time_decay_alpha_gainersP_v0_inv(polygon_df.iloc[1:],open_datetime,1)
-        elif strategy == "losers":
+        elif strategy == "losers55pct":
             sell_dict = trade.time_decay_alpha_losers_v0_inv(polygon_df.iloc[1:],open_datetime,1)
         # elif strategy == "losersC":
         #     sell_dict = trade.time_decay_alpha_losersC_v0_inv(polygon_df.iloc[1:],open_datetime,1)
