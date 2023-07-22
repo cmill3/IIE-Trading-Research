@@ -8,6 +8,7 @@ boto3 = "*"
 pandas = "*"
 requests = "*"
 yahooquery = "*"
+holidays = "*"
 
 [dev-packages]
 
