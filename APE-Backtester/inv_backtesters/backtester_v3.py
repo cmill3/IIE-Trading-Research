@@ -43,7 +43,7 @@ def run_trades_simulation(full_positions_list,portfolio_cash, start_date, end_da
     return portfolio_df, positions_df
 
 def backtest_orchestrator(start_date, end_date, portfolio_cash, risk_unit,file_names):
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         # Submit the processing tasks to the ThreadPoolExecutor
         processed_weeks_futures = [executor.submit(build_backtest_data, file_name) for file_name in file_names]
 
@@ -59,13 +59,13 @@ def backtest_orchestrator(start_date, end_date, portfolio_cash, risk_unit,file_n
 
 if __name__ == "__main__":
     s3 = boto3.client('s3')
-    start_date = '2023/05/29'
+    start_date = '2023/05/08'
     end_date = '2023/06/12'
     start_str = start_date.split("/")[1] + start_date.split("/")[2]
     end_str = end_date.split("/")[1] + end_date.split("/")[2]
-    trading_strat = "inv_basic"
-    portfolio_cash = 60000
-    risk_unit =.005
+    trading_strat = "inv_basic_PF"
+    portfolio_cash = 250000
+    risk_unit =.01
     cash_risk = f"{portfolio_cash}_{risk_unit}"
     # portfolio_df, positions_df = run_backtest(start_date, end_date)
 
@@ -73,7 +73,7 @@ if __name__ == "__main__":
                   "2023-02-13","2023-02-20","2023-02-27","2023-03-06"
                   ,"2023-03-13","2023-03-20","2023-03-27","2023-04-03","2023-04-10","2023-04-17",
                   "2023-04-24","2023-05-01","2023-05-08","2023-05-15","2023-05-22","2023-05-29","2023-06-05"]
-    portfolio_df, positions_df = backtest_orchestrator(start_date, end_date,portfolio_cash=portfolio_cash,risk_unit=risk_unit,file_names=file_names)    
+    portfolio_df, positions_df = backtest_orchestrator(start_date, end_date,portfolio_cash=portfolio_cash,risk_unit=risk_unit,file_names=file_names[-5:])    
 
     
     port_csv = portfolio_df.to_csv()
