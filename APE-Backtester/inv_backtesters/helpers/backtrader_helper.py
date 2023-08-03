@@ -84,14 +84,19 @@ def s3_data_inv(bucket_name, object_key, prefixes):
     return df
 
 def create_results_dict(buy_dict, sell_dict):
+    print()
+    print("RESULTS")
+    print(buy_dict)
+    print(sell_dict)
     price_change = sell_dict['close_price'] - buy_dict['open_price']
-    pct_gain = price_change / buy_dict['open_price']
+    pct_gain = (price_change / buy_dict['open_price']) *100
     total_gain = (price_change*100) * buy_dict['quantity']
     results_dict = {
                     "price_change":price_change, "pct_gain":pct_gain, "total_gain":total_gain, 
-                    "open_trade_dt": buy_dict['open_datetime'], "option_contract": buy_dict['option_symbol'],
-                    "close_trade_dt": sell_dict['close_datetime'],
+                    "open_trade_dt": buy_dict['open_datetime'].strftime('%Y-%m-%d %H:%M'), "option_contract": buy_dict['option_symbol'],
+                    "close_trade_dt": sell_dict['close_datetime'].strftime('%Y-%m-%d %H:%M'),
                     }
+    print(results_dict)
     return results_dict
 
 def create_options_aggs(symbol, start_date, end_date,price, direction, contracts, spread_length):
@@ -115,30 +120,36 @@ def create_options_aggs(symbol, start_date, end_date,price, direction, contracts
 
 def create_options_aggs_inv(symbol, contracts, start_date, end_date, market_price, strategy, spread_length):
     print("Creating options aggregates...")
+    print(start_date)
+    print(end_date)
     options = []
     enriched_options_aggregates = []
     t_2wk = timedelta((11 - start_date.weekday()) % 14)
     expiry = (start_date + t_2wk).strftime("%y%m%d")
     strike = symbol + expiry
-
     # contracts = build_contracts(symbol, start_date, end_date, market_price, strategy, spread_length)
     underlying_agg_data = polygon_stockdata_inv(symbol,start_date,end_date)
-    contracts = ast.literal_eval(contracts)
+    underlying_agg_data.rename(columns={'o':'underlying_price'}, inplace=True)
+    try:
+        contracts = ast.literal_eval(contracts)
+    except Exception as e:
+        print(e)
+        print(symbol)
+        print(strategy)
+        return [], []
     filtered_contracts = [k for k in contracts if strike in k]
-    for contract in filtered_contracts:
+    options_df = build_options_df(filtered_contracts, symbol, strategy,market_price)
+    for index,contract in options_df.iterrows():
         try:
-            options_agg_data = polygon_optiondata(contract, start_date, end_date)
-            underlying_price = []
-            for i, row in options_agg_data.iterrows():
-                matched_row = underlying_agg_data.loc[underlying_agg_data['date'] == row['date']]
-                open_price = matched_row.o.values
-                underlying_price.append(str(round(open_price[0],2)))
-            options_agg_data['underlying_price'] = underlying_price
-            enriched_options_aggregates.append(options_agg_data)
+            options_agg_data = polygon_optiondata(contract['contract_symbol'], start_date, end_date)
+            enriched_df = pd.merge(options_agg_data, underlying_agg_data[['date', 'underlying_price']], on='date', how='left')
+            enriched_df.dropna(inplace=True)
+            enriched_options_aggregates.append(enriched_df)
             options.append(contract)
             if len(options) >= spread_length:
                 break
         except Exception as e:
+            print("options agg")
             print(contract)
             print(strategy)
             print(e)
@@ -216,7 +227,8 @@ def convert_lists_to_dicts_inv(positions_list, datetime_list):
         }
 
     for position in positions_list:
-        pos_dt = datetime.strptime(position['open_datetime'], "%Y-%m-%d %H:%M:%S")
+        # pos_dt = datetime.strptime(position['open_datetime'], "%Y-%m-%d %H:%M:%S")
+        pos_dt = position['open_datetime']
         try:
             if positions_dict.get(pos_dt) is None:
                 positions_dict[pos_dt] = [position]
@@ -295,23 +307,26 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit)
             if positions_dict.get(key) is not None:
                 for position in positions_dict[key]:
                     if value['portfolio_cash'] > (0.5 * starting_cash):
+                        quantities = []
                         sized_buys, sized_sells = ts.build_trade(position, value['portfolio_cash'],risk_unit)
                         if sized_buys == None:
+                            print("no buys")
                             print(position)
                             continue
                         for index, order in enumerate(sized_buys):
                             if order != None:
                                 value['contracts_purchased'].append(f"{order['option_symbol']}_{order['order_id']}")
                                 value['purchase_costs'] += (order['contract_cost'] * order['quantity'])
-                                value['portfolio_cash'] -= order['contract_cost'] * order['quantity']
+                                value['portfolio_cash'] -= (order['contract_cost'] * order['quantity'])
                                 contracts_bought.append(f"{order['option_symbol']}_{order['order_id']}")
-                                sale_values = sized_sells[index]
+                                quantities.append(order['quantity'])
                                 if sales_dict.get(sized_sells[index]['close_datetime']) is None:
                                     sales_dict[sized_sells[index]['close_datetime']] = [sized_sells[index]]
                                 else:
                                     sales_dict[sized_sells[index]['close_datetime']].append(sized_sells[index])
                         current_positions.append((position['position_id'].split("-")[0] + position['position_id'].split("-")[1]))
-                        positions_taken.append(position)
+                        results_dicts = extract_results_dict(position)
+                        positions_taken.append({'position_id':position['position_id'],"results":results_dicts,"quantity":quantities})
                         value['period_net_returns'] = (value['sale_returns'] - value['purchase_costs'])
                         # if purchase['position_id'] not in value['open_positions']:
                         #     value['open_positions'].append(purchase['position_id'])
@@ -375,7 +390,8 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit)
                             if (position['position_id'].split("-")[0] + position['position_id'].split("-")[1]) not in current_positions:
                                 current_positions.append((position['position_id'].split("-")[0] + position['position_id'].split("-")[1]))
                             if position not in positions_taken:
-                                positions_taken.append(position)
+                                results_dicts = extract_results_dict(position)
+                                positions_taken.append({'position_id':position['position_id'],"results":results_dicts})
                 else:
                     if passed_trades_dict.get(key) is not None:
                         passed_trades_dict[key]['trades'].append(position)
@@ -523,6 +539,13 @@ def build_positions_df(positions_list):
     positions_df = pd.DataFrame.from_dict(positions_dict, orient='index')
     return positions_df, positions_dict
 
+def extract_results_dict(positions_list):
+    results_dicts = []
+    transactions = positions_list['transactions']
+    for transaction in transactions:
+        results_dicts.append(transaction['results_dict'])
+    return results_dicts
+
 def polygon_optiondata(options_ticker, from_date, to_date):
     #This is for option data
     multiplier = "15"
@@ -542,7 +565,7 @@ def polygon_optiondata(options_ticker, from_date, to_date):
     response_data = json.loads(response.text)
     res_option_df = pd.DataFrame(response_data['results'])
     res_option_df['t'] = res_option_df['t'].apply(lambda x: int(x/1000))
-    res_option_df['t']  = res_option_df['t'] + timedelta(hours=4).total_seconds()
+    # res_option_df['t']  = res_option_df['t'] + timedelta(hours=4).total_seconds()
     res_option_df['date'] = res_option_df['t'].apply(lambda x: datetime.fromtimestamp(x))
     res_option_df['ticker'] = options_ticker
     #res_option_df.to_csv(f'/Users/ogdiz/Projects/APE-Research/APE-BAcktester/APE-Backtester-Results/Testing_Research_Data_CSV_{x}_{from_date}.csv')
@@ -589,8 +612,14 @@ def polygon_stockdata_inv(symbol, from_date, to_date):
     response_data = json.loads(response.text)
     stock_df = pd.DataFrame(response_data['results'])
     stock_df['t'] = stock_df['t'].apply(lambda x: int(x/1000))
-    stock_df['t']  = stock_df['t'] + timedelta(hours=4).total_seconds()
+    # stock_df['t']  = stock_df['t'] + timedelta(hours=4).total_seconds()
     stock_df['date'] = stock_df['t'].apply(lambda x: datetime.fromtimestamp(x))
+    stock_df['time'] = stock_df['date'].apply(lambda x: x.time())
+    stock_df['hour'] = stock_df['date'].apply(lambda x: x.hour)
+    stock_df['minute'] = stock_df['date'].apply(lambda x: x.minute)
+
+    stock_df = stock_df[stock_df['hour'] < 16]
+    stock_df = stock_df.loc[stock_df['time'] >= datetime.strptime("09:45:00", "%H:%M:%S").time()]
     return stock_df
 
 def data_pull(symbol, start_date, end_date, mktprice, strategy, contracts):
@@ -861,3 +890,46 @@ def approve_trade(portfolio_cash, threshold_cash, position_id, current_positions
     else:
         print("Not enough cash")
         return False
+    
+def build_options_df(contracts, underlying_symbol, strategy, market_price):
+    if strategy == 'losers' or strategy == 'gainersP' or strategy == 'vdiff_gainP' or strategy == 'maP':
+        option_type = 'puts'
+    elif strategy == 'gainers' or strategy == 'vdiff_gainC' or strategy == 'ma' or strategy == 'losersC':
+        option_type = 'calls'
+
+    
+    df = pd.DataFrame(contracts, columns=['contract_symbol'])
+    df['underlying_symbol'] = underlying_symbol
+    df['option_type'] = option_type
+    try:
+        df['strike'] = df.apply(lambda x: extract_strike(x),axis=1)
+    except:
+        print("Error building options df")
+        print(df)
+        print(contracts)
+        print(underlying_symbol)
+        return df
+
+    if option_type == "puts":
+        df = df.loc[df['strike']< market_price]
+    elif option_type == "calls":
+        df = df.loc[df['strike']> market_price]
+    
+    return df
+
+
+
+def extract_strike(row):
+    str = row['contract_symbol'].split(row['underlying_symbol'])[1]
+    if row['option_type'] == 'puts':
+        str = str.split('P')[1]
+    elif row['option_type'] == 'calls':
+        str = str.split('C')[1]
+    strike = str[:-3]
+    for i in range(len(strike)):
+        if strike[i] == '0':
+            continue
+        else:
+            return int(strike[i:])
+        
+    return 0
