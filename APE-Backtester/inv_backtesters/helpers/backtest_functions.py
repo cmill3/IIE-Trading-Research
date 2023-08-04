@@ -314,5 +314,3 @@ if __name__ == "__main__":
     'bucketname': 'icarus-research-data',
     'objectkey': 'training_datasets/expanded_1d_datasets/2023/05/12.csv'
     }
-    starting_value, commission_cost, rawdata, data, datetime_list, datetimeindex, results,  = kickoff(s3link)
-    transactions = btfunction(data, datetime_list, starting_value, commission_cost, s3link)

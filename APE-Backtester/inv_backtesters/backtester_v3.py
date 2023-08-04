@@ -25,7 +25,6 @@ def build_backtest_data(file_name):
 
 
     data, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/fixed_hourstop30T", file_name = f"{file_name}.csv",prefixes=["ma","maP","vdiff_gainC","vdiff_gainP","gainers","losers"])
-    data = data.iloc[0:20]
     # gain, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/priceFeaturesgainers45pct", file_name = f"{file_name}.csv",prefixes=[])
     # gain['strategy'] = "gainers45pct"
     # loss, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/priceFeatures/losers45pct", file_name = f"{file_name}.csv",prefixes=[])
@@ -50,7 +49,7 @@ def run_trades_simulation(full_positions_list,portfolio_cash, start_date, end_da
     return portfolio_df, positions_df
 
 def backtest_orchestrator(start_date, end_date, portfolio_cash, risk_unit,file_names):
-    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
         # Submit the processing tasks to the ThreadPoolExecutor
         processed_weeks_futures = [executor.submit(build_backtest_data, file_name) for file_name in file_names]
 
@@ -82,7 +81,7 @@ def backtest_orchestrator(start_date, end_date, portfolio_cash, risk_unit,file_n
 
 if __name__ == "__main__":
     s3 = boto3.client('s3')
-    start_date = '2023/05/29'
+    start_date = '2023/05/15'
     end_date = '2023/06/12'
     start_str = start_date.split("/")[1] + start_date.split("/")[2]
     end_str = end_date.split("/")[1] + end_date.split("/")[2]
@@ -96,7 +95,7 @@ if __name__ == "__main__":
                   "2023-02-13","2023-02-20","2023-02-27","2023-03-06"
                   ,"2023-03-13","2023-03-20","2023-03-27","2023-04-03","2023-04-10","2023-04-17",
                   "2023-04-24","2023-05-01","2023-05-08","2023-05-15","2023-05-22","2023-05-29","2023-06-05"]
-    portfolio_df, positions_df = backtest_orchestrator(start_date, end_date,portfolio_cash=portfolio_cash,risk_unit=risk_unit,file_names=file_names[-2:])    
+    portfolio_df, positions_df = backtest_orchestrator(start_date, end_date,portfolio_cash=portfolio_cash,risk_unit=risk_unit,file_names=file_names[-4:])    
 
     
     port_csv = portfolio_df.to_csv()

@@ -307,7 +307,6 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit)
             if positions_dict.get(key) is not None:
                 for position in positions_dict[key]:
                     if value['portfolio_cash'] > (0.5 * starting_cash):
-                        quantities = []
                         sized_buys, sized_sells = ts.build_trade(position, value['portfolio_cash'],risk_unit)
                         if sized_buys == None:
                             print("no buys")
@@ -319,7 +318,7 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit)
                                 value['purchase_costs'] += (order['contract_cost'] * order['quantity'])
                                 value['portfolio_cash'] -= (order['contract_cost'] * order['quantity'])
                                 contracts_bought.append(f"{order['option_symbol']}_{order['order_id']}")
-                                quantities.append(order['quantity'])
+                                quantities = order['quantity']
                                 if sales_dict.get(sized_sells[index]['close_datetime']) is None:
                                     sales_dict[sized_sells[index]['close_datetime']] = [sized_sells[index]]
                                 else:
@@ -380,6 +379,7 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit)
                                 value['purchase_costs'] += (order['contract_cost'] * order['quantity'])
                                 value['portfolio_cash'] -= (order['contract_cost'] * order['quantity'])
                                 contracts_bought.append(f"{order['option_symbol']}_{order['order_id']}")
+                                quantities = order['quantity']
                                 # current_holdings.append(f"{order['option_symbol']}_{order['order_id']}")
                                 sale_values = sized_sells[index]
                                 ## How do we integrate this with sales at a later date?
@@ -391,7 +391,7 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit)
                                 current_positions.append((position['position_id'].split("-")[0] + position['position_id'].split("-")[1]))
                             if position not in positions_taken:
                                 results_dicts = extract_results_dict(position)
-                                positions_taken.append({'position_id':position['position_id'],"results":results_dicts})
+                                positions_taken.append({'position_id':position['position_id'],"results":results_dicts,"quantity":quantities})
                 else:
                     if passed_trades_dict.get(key) is not None:
                         passed_trades_dict[key]['trades'].append(position)
