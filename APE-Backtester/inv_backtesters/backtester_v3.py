@@ -23,14 +23,22 @@ def build_backtest_data(file_name):
     full_positions_list = []
     full_sales_list = []
 
-
-    data, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/fixed_hourstop30T", file_name = f"{file_name}.csv",prefixes=["ma","maP","vdiff_gainC","vdiff_gainP","gainers","losers"])
+    ## We are employing two seperate modeling strategies here so we need the two calls to get the contract data from two seperate places.
+    # data1, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/fiveDFeaturesPrice_top30FLtuned", file_name = f"{file_name}.csv",prefixes=["ma"])
+    data2, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/fiveDFeaturesPrice_top30FL", file_name = f"{file_name}.csv",prefixes=["vdiff_gainP"])
+    data3, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/fiveDFeaturesPrice_top30FLvdiff_gainC", file_name = f"{file_name}.csv",prefixes=["vdiff_gainC"])
+    # data4, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/custom_top30FLtuned", file_name = f"{file_name}.csv",prefixes=["maP","gainers","losers"])
+    # data1 = data1.iloc[:20]
+    # data2 = data2.iloc[:20]
+    # data3 = data3.iloc[:20]
+    # data4 = data4.iloc[:20]
     # gain, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/priceFeaturesgainers45pct", file_name = f"{file_name}.csv",prefixes=[])
     # gain['strategy'] = "gainers45pct"
     # loss, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/priceFeatures/losers45pct", file_name = f"{file_name}.csv",prefixes=[])
     # loss['strategy'] = "losers45pct"
     # gain_loss, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/priceFeatures", file_name = f"{file_name}.csv", prefixes=["gainers45pct","losers45pct"])
-    # data = pd.concat([data,gain,loss],ignore_index=True)
+    # data = pd.concat([data1,data2,data3,data4],ignore_index=True)
+    data = pd.concat([data2,data3],ignore_index=True)
     ## What we will do is instead of simulating one trade at a time we will do one time period at a time and then combine and create results then.
     purchases_list, sales_list, order_results_list, positions_list, = back_tester.simulate_trades_invalerts(data)
     full_purchases_list.extend(purchases_list)
@@ -49,7 +57,7 @@ def run_trades_simulation(full_positions_list,portfolio_cash, start_date, end_da
     return portfolio_df, positions_df
 
 def backtest_orchestrator(start_date, end_date, portfolio_cash, risk_unit,file_names):
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
         # Submit the processing tasks to the ThreadPoolExecutor
         processed_weeks_futures = [executor.submit(build_backtest_data, file_name) for file_name in file_names]
 
@@ -81,11 +89,11 @@ def backtest_orchestrator(start_date, end_date, portfolio_cash, risk_unit,file_n
 
 if __name__ == "__main__":
     s3 = boto3.client('s3')
-    start_date = '2023/05/15'
+    start_date = '2023/05/01'
     end_date = '2023/06/12'
     start_str = start_date.split("/")[1] + start_date.split("/")[2]
     end_str = end_date.split("/")[1] + end_date.split("/")[2]
-    trading_strat = "inv_basic_reducedPuts"
+    trading_strat = "test2"
     portfolio_cash = 500000
     risk_unit =.01
     cash_risk = f"{portfolio_cash}_{risk_unit}"
@@ -95,7 +103,7 @@ if __name__ == "__main__":
                   "2023-02-13","2023-02-20","2023-02-27","2023-03-06"
                   ,"2023-03-13","2023-03-20","2023-03-27","2023-04-03","2023-04-10","2023-04-17",
                   "2023-04-24","2023-05-01","2023-05-08","2023-05-15","2023-05-22","2023-05-29","2023-06-05"]
-    portfolio_df, positions_df = backtest_orchestrator(start_date, end_date,portfolio_cash=portfolio_cash,risk_unit=risk_unit,file_names=file_names[-4:])    
+    portfolio_df, positions_df = backtest_orchestrator(start_date, end_date,portfolio_cash=portfolio_cash,risk_unit=risk_unit,file_names=file_names[-6:])    
 
     
     port_csv = portfolio_df.to_csv()

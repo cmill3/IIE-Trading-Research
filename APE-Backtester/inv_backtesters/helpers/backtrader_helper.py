@@ -223,7 +223,8 @@ def convert_lists_to_dicts_inv(positions_list, datetime_list):
             "portfolio_cash": 0,
             "active_holdings": [],
             "period_net_returns": 0,
-            "open_positions": [],
+            "open_positions_start": [],
+            "open_positions_end": [],
         }
 
     for position in positions_list:
@@ -299,10 +300,9 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit)
     i = 0
     for key, value in portfolio_dict.items():
         current_positions = []
-        # current_holdings = []
         if i == 0:
             value['portfolio_cash'] = portfolio_cash
-            # current_holdings = []
+            value['open_positions_start'].extend(current_positions)
 
             if positions_dict.get(key) is not None:
                 for position in positions_dict[key]:
@@ -327,10 +327,6 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit)
                         results_dicts = extract_results_dict(position)
                         positions_taken.append({'position_id':position['position_id'],"results":results_dicts,"quantity":quantities})
                         value['period_net_returns'] = (value['sale_returns'] - value['purchase_costs'])
-                        # if purchase['position_id'] not in value['open_positions']:
-                        #     value['open_positions'].append(purchase['position_id'])
-                        #     current_positions.append(purchase['position_id'])
-                        #     positions_taken.append(purchase['position_id'])
                     else:
                         if passed_trades_dict.get(key) is not None:
                             passed_trades_dict[key]['trades'].append(position)
@@ -339,24 +335,21 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit)
                                 "trades": [position]
                             }
                 i += 1
-                value['open_positions'].extend(current_positions)
-                # value['active_holdings'].extend(contracts_bought)
-                # total_positions.append(current_positions)
+                value['open_positions_end'].extend(current_positions)
+                positions_end = current_positions
                 continue
         else:
+            positions_open = positions_end
+            positions_end = []
             value['portfolio_cash'] = portfolio_dict[key - timedelta(minutes=15)]['portfolio_cash']
-            # current_holdings = portfolio_dict[key - timedelta(minutes=15)]['active_holdings']
-            # current_positions = total_positions[-1]
-            current_positions = portfolio_dict[key - timedelta(minutes=15)]['open_positions']
-
-            # open_positions = portfolio_dict[key - timedelta(minutes=15)]['open_positions']
+            current_positions = positions_open
+            value['open_positions_start'].extend(current_positions)
         
         if sales_dict.get(key) is not None:
             for sale in sales_dict[key]:
                 if (f"{sale['option_symbol']}_{sale['order_id']}") in contracts_bought:
                     value['contracts_sold'].append(f"{sale['option_symbol']}_{sale['order_id']}")
                     value['sale_returns'] += (sale['contract_cost'] * sale['quantity'])
-                    # current_holdings.remove(f"{sale['option_symbol']}_{sale['quantity']}")
                     value['portfolio_cash'] += (sale['contract_cost'] * sale['quantity'])
                     contracts_sold.append(f"{sale['option_symbol']}_{sale['order_id']}")
                     if (sale['position_id'].split("-")[0] + sale['position_id'].split("-")[1]) in current_positions:
@@ -380,7 +373,6 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit)
                                 value['portfolio_cash'] -= (order['contract_cost'] * order['quantity'])
                                 contracts_bought.append(f"{order['option_symbol']}_{order['order_id']}")
                                 quantities = order['quantity']
-                                # current_holdings.append(f"{order['option_symbol']}_{order['order_id']}")
                                 sale_values = sized_sells[index]
                                 ## How do we integrate this with sales at a later date?
                                 if sales_dict.get(sized_sells[index]['close_datetime']) is None:
@@ -389,9 +381,8 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit)
                                     sales_dict[sized_sells[index]['close_datetime']].append(sized_sells[index])
                             if (position['position_id'].split("-")[0] + position['position_id'].split("-")[1]) not in current_positions:
                                 current_positions.append((position['position_id'].split("-")[0] + position['position_id'].split("-")[1]))
-                            if position not in positions_taken:
-                                results_dicts = extract_results_dict(position)
-                                positions_taken.append({'position_id':position['position_id'],"results":results_dicts,"quantity":quantities})
+                        results_dicts = extract_results_dict(position)
+                        positions_taken.append({'position_id':position['position_id'],"results":results_dicts,"quantity":quantities})
                 else:
                     if passed_trades_dict.get(key) is not None:
                         passed_trades_dict[key]['trades'].append(position)
@@ -399,19 +390,12 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit)
                         passed_trades_dict[key] = {
                             "trades": [position]
                         }
-        # value['active_holdings'] = current_holdings
-        # total_holdings.append(current_positions)
         
-        value['open_positions'].extend(current_positions)
-        # value['active_holdings'].extend(current_holdings)
+        value['open_positions_end'].extend(current_positions)
+        positions_end = current_positions
         value['period_net_returns'] = (value['sale_returns'] - value['purchase_costs'])
-   
-        # except Exception as e:
-        #     print(e)
-        #     print(key)
-        #     continue
+
     portfolio_df = pd.DataFrame.from_dict(portfolio_dict, orient='index')
-    # portfolio_df['open_positions'] = total_holdings
     passed_trades_df = pd.DataFrame.from_dict(passed_trades_dict, orient='index')
     print("Elements in bought but not in sold:")
     diff = list(set(contracts_bought) - set(contracts_sold))

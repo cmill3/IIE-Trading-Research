@@ -188,16 +188,16 @@ def time_decay_alpha_gainers_v0_inv(polygon_df, simulation_date, quantity):
     option_open = polygon_df.iloc[0]['o']
     for index, row in polygon_df.iterrows():
         max_value = polygon_df.iloc[:index]['underlying_price'].max()
-        Target_pct = .32
+        Target_pct = .027
         pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
-        Floor_pct = ((float(max_value) - float(open_price))/float(open_price) - .012)
+        Floor_pct = ((float(max_value) - float(open_price))/float(open_price) - .014)
 
         # if type(Floor_pct) == float:
         #     Floor_pct = -0.02
         if pct_change > (2*Target_pct):
-            Floor_pct += 0.01
+            Floor_pct += 0.012
         elif pct_change > Target_pct:
-            Floor_pct += 0.0055
+            Floor_pct += 0.0095
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         day_diff = get_business_days(simulation_date, row['date'])
@@ -281,16 +281,16 @@ def time_decay_alpha_ma_v0_inv(polygon_df, simulation_date, quantity):
     open_price = polygon_df.iloc[0]['underlying_price']
     for index, row in polygon_df.iterrows():
         max_value = polygon_df.iloc[:index]['underlying_price'].max()
-        Target_pct = .0285
+        Target_pct = .0225
         pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
-        Floor_pct = ((float(max_value) - float(open_price))/float(open_price) - .01)
+        Floor_pct = ((float(max_value) - float(open_price))/float(open_price) - .012)
 
         # if type(Floor_pct) == float:
         #     Floor_pct = -0.02
         if pct_change > (2*Target_pct):
-            Floor_pct += 0.0085
+            Floor_pct += 0.01
         elif pct_change > Target_pct:
-            Floor_pct += 0.006
+            Floor_pct += 0.0075
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         day_diff = get_business_days(simulation_date, row['date'])
@@ -328,16 +328,16 @@ def time_decay_alpha_maP_v0_inv(polygon_df, simulation_date, quantity):
     open_price = polygon_df.iloc[0]['underlying_price']
     for index, row in polygon_df.iterrows():
         max_value = polygon_df.iloc[:index]['underlying_price'].max()
-        Target_pct = -.0295
+        Target_pct = -.023
         pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
-        Floor_pct = ((float(max_value) - float(open_price))/float(open_price) + .01)
+        Floor_pct = ((float(max_value) - float(open_price))/float(open_price) + .012)
 
         # if type(Floor_pct) == float:
         #     Floor_pct = -0.02
         if pct_change < (2*Target_pct):
-            Floor_pct -= 0.009
+            Floor_pct -= 0.01
         elif pct_change < Target_pct:
-            Floor_pct -= 0.006
+            Floor_pct -= 0.075
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         day_diff = get_business_days(simulation_date, row['date'])
@@ -375,9 +375,9 @@ def time_decay_alpha_losers_v0_inv(polygon_df, simulation_date, quantity):
     open_price = polygon_df.iloc[0]['underlying_price']
     for index, row in polygon_df.iterrows():
         max_value = polygon_df.iloc[:index]['underlying_price'].max()
-        Target_pct = -.0325
+        Target_pct = -.026
         pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
-        Floor_pct = ((float(max_value) - float(open_price))/float(open_price) + .0125)
+        Floor_pct = ((float(max_value) - float(open_price))/float(open_price) + .013)
 
         # if type(Floor_pct) == float:
         #     Floor_pct = -0.02
@@ -468,16 +468,16 @@ def time_decay_alpha_vdiffC_v0_inv(polygon_df, simulation_date, quantity):
     open_price = polygon_df.iloc[0]['underlying_price']
     for index, row in polygon_df.iterrows():
         max_value = polygon_df.iloc[:index]['underlying_price'].max()
-        Target_pct = .0275
+        Target_pct = .0225
         pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
-        Floor_pct = ((float(max_value) - float(open_price))/float(open_price) - .01)
+        Floor_pct = ((float(max_value) - float(open_price))/float(open_price) - .012)
 
         # if type(Floor_pct) == float:
         #     Floor_pct = -0.02
         if pct_change > (2*Target_pct):
             Floor_pct += 0.01
         elif pct_change > Target_pct:
-            Floor_pct += 0.006
+            Floor_pct += 0.0075
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         day_diff = get_business_days(simulation_date, row['date'])
@@ -515,7 +515,7 @@ def time_decay_alpha_vdiffP_v0_inv(polygon_df, simulation_date, quantity):
     open_price = polygon_df.iloc[0]['underlying_price']
     for index, row in polygon_df.iterrows():
         max_value = polygon_df.iloc[:index]['underlying_price'].max()
-        Target_pct = -.03
+        Target_pct = -.025
         pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
         Floor_pct = ((float(max_value) - float(open_price))/float(open_price) + .012)
 
@@ -524,7 +524,7 @@ def time_decay_alpha_vdiffP_v0_inv(polygon_df, simulation_date, quantity):
         if pct_change < (2*Target_pct):
             Floor_pct -= 0.01
         elif pct_change < Target_pct:
-            Floor_pct -= 0.006
+            Floor_pct -= 0.0075
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         day_diff = get_business_days(simulation_date, row['date'])

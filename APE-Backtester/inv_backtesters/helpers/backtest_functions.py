@@ -40,15 +40,22 @@ def pull_data_invalerts(bucket_name, object_key, file_name, prefixes):
     #         pass
     # else:
     for prefix in prefixes:
-        try:
+        if prefix == "vdiff_gainC":
             print(f"{object_key}/{prefix}/{file_name}")
-            obj = s3.get_object(Bucket=bucket_name, Key=f"{object_key}/{prefix}/{file_name}")
+            obj = s3.get_object(Bucket=bucket_name, Key=f"{object_key}/{file_name}")
             df = pd.read_csv(obj.get("Body"))
             df['strategy'] = prefix
             dfs.append(df)
-        except:
-            print(f"no file for {prefix}")
-            continue
+        else:
+            try:
+                print(f"{object_key}/{prefix}/{file_name}")
+                obj = s3.get_object(Bucket=bucket_name, Key=f"{object_key}/{prefix}/{file_name}")
+                df = pd.read_csv(obj.get("Body"))
+                df['strategy'] = prefix
+                dfs.append(df)
+            except:
+                print(f"no file for {prefix}")
+                continue
     full_data = pd.concat(dfs)
     filter = full_data[~full_data['symbol'].isin(leveraged_etfs)]
     data = filter[filter.predictions == 1]
