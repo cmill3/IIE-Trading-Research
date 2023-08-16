@@ -18,29 +18,23 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 bucket_name = 'icarus-research-data'  #s3 bucket name
 object_keybase = 'training_datasets/expanded_1d_datasets/' #s3 key not including date, date is added in pullcsv func
 
-def build_backtest_data(file_name):
+def build_backtest_data(file_name, local_data,time_span):
     full_purchases_list = []
     full_positions_list = []
     full_sales_list = []
 
-    ## We are employing two seperate modeling strategies here so we need the two calls to get the contract data from two seperate places.
-    # data1, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/fiveDFeaturesPrice_top30FLtuned", file_name = f"{file_name}.csv",prefixes=["ma"])
-    data2, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/fiveDFeaturesPrice_top30FL", file_name = f"{file_name}.csv",prefixes=["vdiff_gainP"])
-    data3, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/fiveDFeaturesPrice_top30FLvdiff_gainC", file_name = f"{file_name}.csv",prefixes=["vdiff_gainC"])
-    # data4, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/custom_top30FLtuned", file_name = f"{file_name}.csv",prefixes=["maP","gainers","losers"])
-    # data1 = data1.iloc[:20]
-    # data2 = data2.iloc[:20]
-    # data3 = data3.iloc[:20]
-    # data4 = data4.iloc[:20]
-    # gain, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/priceFeaturesgainers45pct", file_name = f"{file_name}.csv",prefixes=[])
-    # gain['strategy'] = "gainers45pct"
-    # loss, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/priceFeatures/losers45pct", file_name = f"{file_name}.csv",prefixes=[])
-    # loss['strategy'] = "losers45pct"
-    # gain_loss, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/priceFeatures", file_name = f"{file_name}.csv", prefixes=["gainers45pct","losers45pct"])
-    # data = pd.concat([data1,data2,data3,data4],ignore_index=True)
-    data = pd.concat([data2,data3],ignore_index=True)
+    if local_data:
+        data = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/{file_name}.csv')
+    else:
+        ## We are employing two seperate modeling strategies here so we need the two calls to get the contract data from two seperate places.
+        data1, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/fiveDFeaturesPrice_top30FLtuned", file_name = f"{file_name}.csv",prefixes=["ma"])
+        data2, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/fiveDFeaturesPrice_top30FL", file_name = f"{file_name}.csv",prefixes=["vdiff_gainP"])
+        data3, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/fiveDFeaturesPrice_top30FLvdiff_gainC", file_name = f"{file_name}.csv",prefixes=["vdiff_gainC"])
+        data4, datetime_list = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/custom_top30FLtuned", file_name = f"{file_name}.csv",prefixes=["maP","gainers","losers"])
+        data = pd.concat([data1,data2,data3,data4],ignore_index=True)
+
     ## What we will do is instead of simulating one trade at a time we will do one time period at a time and then combine and create results then.
-    purchases_list, sales_list, order_results_list, positions_list, = back_tester.simulate_trades_invalerts(data)
+    purchases_list, sales_list, order_results_list, positions_list, = back_tester.simulate_trades_invalerts(data, time_span)
     full_purchases_list.extend(purchases_list)
     full_positions_list.extend(positions_list)
     full_sales_list.extend(sales_list)
@@ -56,10 +50,10 @@ def run_trades_simulation(full_positions_list,portfolio_cash, start_date, end_da
     positions_df = pd.DataFrame.from_dict(positions_taken)
     return portfolio_df, positions_df
 
-def backtest_orchestrator(start_date, end_date, portfolio_cash, risk_unit,file_names):
+def backtest_orchestrator(start_date, end_date, portfolio_cash, risk_unit,file_names,local_data,time_span):
     with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
         # Submit the processing tasks to the ThreadPoolExecutor
-        processed_weeks_futures = [executor.submit(build_backtest_data, file_name) for file_name in file_names]
+        processed_weeks_futures = [executor.submit(build_backtest_data,file_name,local_data,time_span) for file_name in file_names]
 
     # Step 4: Retrieve the results from the futures
     processed_weeks_results = [future.result() for future in processed_weeks_futures]
@@ -89,12 +83,12 @@ def backtest_orchestrator(start_date, end_date, portfolio_cash, risk_unit,file_n
 
 if __name__ == "__main__":
     s3 = boto3.client('s3')
-    start_date = '2023/05/01'
+    start_date = '2023/03/06'
     end_date = '2023/06/12'
     start_str = start_date.split("/")[1] + start_date.split("/")[2]
     end_str = end_date.split("/")[1] + end_date.split("/")[2]
-    trading_strat = "test2"
-    portfolio_cash = 500000
+    trading_strat = "reducedPuts75"
+    portfolio_cash = 200000
     risk_unit =.01
     cash_risk = f"{portfolio_cash}_{risk_unit}"
     # portfolio_df, positions_df = run_backtest(start_date, end_date)
@@ -103,7 +97,7 @@ if __name__ == "__main__":
                   "2023-02-13","2023-02-20","2023-02-27","2023-03-06"
                   ,"2023-03-13","2023-03-20","2023-03-27","2023-04-03","2023-04-10","2023-04-17",
                   "2023-04-24","2023-05-01","2023-05-08","2023-05-15","2023-05-22","2023-05-29","2023-06-05"]
-    portfolio_df, positions_df = backtest_orchestrator(start_date, end_date,portfolio_cash=portfolio_cash,risk_unit=risk_unit,file_names=file_names[-6:])    
+    portfolio_df, positions_df = backtest_orchestrator(start_date, end_date,portfolio_cash=portfolio_cash,risk_unit=risk_unit,file_names=file_names[-14:],local_data=True, time_span="3D") 
 
     
     port_csv = portfolio_df.to_csv()
@@ -111,3 +105,5 @@ if __name__ == "__main__":
     s3.put_object(Body=port_csv, Bucket="icarus-research-data", Key=f'backtesting_reports/{trading_strat}/{start_str}-{end_str}/{cash_risk}/portfolio_report.csv')
     s3.put_object(Body=pos_csv, Bucket="icarus-research-data", Key=f'backtesting_reports/{trading_strat}/{start_str}-{end_str}/{cash_risk}/positions_report.csv')
     print("Done!")
+
+

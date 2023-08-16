@@ -32,6 +32,7 @@ def round_up_to_base(x, base=5):
 def round_down_to_base(x, base=5):
     return x - (x % base)
 
+
 def create_end_date(date, trading_days_to_add):
     #Trading days only
     date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')

@@ -40,22 +40,22 @@ def pull_data_invalerts(bucket_name, object_key, file_name, prefixes):
     #         pass
     # else:
     for prefix in prefixes:
-        if prefix == "vdiff_gainC":
+        # if prefix == "vdiff_gainC":
+        #     print(f"{object_key}/{prefix}/{file_name}")
+        #     obj = s3.get_object(Bucket=bucket_name, Key=f"{object_key}/{file_name}")
+        #     df = pd.read_csv(obj.get("Body"))
+        #     df['strategy'] = prefix
+        #     dfs.append(df)
+        # else:
+        try:
             print(f"{object_key}/{prefix}/{file_name}")
-            obj = s3.get_object(Bucket=bucket_name, Key=f"{object_key}/{file_name}")
+            obj = s3.get_object(Bucket=bucket_name, Key=f"{object_key}/{prefix}/{file_name}")
             df = pd.read_csv(obj.get("Body"))
             df['strategy'] = prefix
             dfs.append(df)
-        else:
-            try:
-                print(f"{object_key}/{prefix}/{file_name}")
-                obj = s3.get_object(Bucket=bucket_name, Key=f"{object_key}/{prefix}/{file_name}")
-                df = pd.read_csv(obj.get("Body"))
-                df['strategy'] = prefix
-                dfs.append(df)
-            except:
-                print(f"no file for {prefix}")
-                continue
+        except:
+            print(f"no file for {prefix}")
+            continue
     full_data = pd.concat(dfs)
     filter = full_data[~full_data['symbol'].isin(leveraged_etfs)]
     data = filter[filter.predictions == 1]
@@ -63,6 +63,14 @@ def pull_data_invalerts(bucket_name, object_key, file_name, prefixes):
     end_date = backtrader_helper.create_end_date(data['date'].values[-1], 4)
     datetime_list, datetime_index, results = backtrader_helper.create_datetime_index(start_time, end_date)
     return data, datetime_list
+
+def s3_to_local(file_name):
+    data1, datetime_list = pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/fiveDFeaturesPrice_top30FLtuned", file_name = f"{file_name}.csv",prefixes=["ma"])
+    data2, datetime_list = pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/fiveDFeaturesPrice_top30FL", file_name = f"{file_name}.csv",prefixes=["vdiff_gainP"])
+    data3, datetime_list = pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/fiveDFeaturesPrice_top30FLvdiff_gainC", file_name = f"{file_name}.csv",prefixes=["vdiff_gainC"])
+    data4, datetime_list = pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/custom_top30FLtuned", file_name = f"{file_name}.csv",prefixes=["maP","gainers","losers"])
+    data = pd.concat([data1,data2,data3,data4],ignore_index=True)
+    data.to_csv(f'/Users/charlesmiller/Documents/backtesting_data/{file_name}.csv', index=False)
 
 
 def create_simulation_data(row):
@@ -136,7 +144,7 @@ def buy_iterate_sellV2(symbol, option_symbol, open_prices, strategy, polygon_df,
         print(results_dict)
     return buy_dict, sell_dict, results_dict, transaction_dict, open_datetime
 
-def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, polygon_df, position_id, trading_date, alert_hour):
+def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, polygon_df, position_id, trading_date, alert_hour, time_span):
     open_price = open_prices[0]
     # open_date = polygon_df['trading_date'][0]
     open_datetime = datetime(int(trading_date.split("-")[0]),int(trading_date.split("-")[1]),int(trading_date.split("-")[2]),int(alert_hour),0,0)
@@ -149,22 +157,32 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
     buy_dict = {"open_price": open_price, "open_datetime": open_datetime, "quantity": 1, "contract_cost": contract_cost, "option_symbol": option_symbol, "position_id": position_id, "contract_type": contract_type}
 
     try:
-        if strategy == "gainers":
-            sell_dict = trade.time_decay_alpha_gainers_v0_inv(polygon_df.iloc[1:],open_datetime,1)
-        # elif strategy == "gainersP":
-        #     sell_dict = trade.time_decay_alpha_gainersP_v0_inv(polygon_df.iloc[1:],open_datetime,1)
-        elif strategy == "losers":
-            sell_dict = trade.time_decay_alpha_losers_v0_inv(polygon_df.iloc[1:],open_datetime,1)
-        # elif strategy == "losersC":
-        #     sell_dict = trade.time_decay_alpha_losersC_v0_inv(polygon_df.iloc[1:],open_datetime,1)
-        elif strategy == "ma":
-            sell_dict = trade.time_decay_alpha_ma_v0_inv(polygon_df.iloc[1:],open_datetime,1)
-        elif strategy == "maP":
-            sell_dict = trade.time_decay_alpha_maP_v0_inv(polygon_df.iloc[1:],open_datetime,1)
-        elif strategy == "vdiff_gainC":
-            sell_dict = trade.time_decay_alpha_vdiffC_v0_inv(polygon_df.iloc[1:],open_datetime,1)
-        elif strategy == "vdiff_gainP":
-            sell_dict = trade.time_decay_alpha_vdiffP_v0_inv(polygon_df.iloc[1:],open_datetime,1)
+        if time_span == "3D":
+            if strategy == "gainers":
+                sell_dict = trade.time_decay_alpha_gainers_v0_inv(polygon_df.iloc[1:],open_datetime,1)
+            elif strategy == "losers":
+                sell_dict = trade.time_decay_alpha_losers_v0_inv(polygon_df.iloc[1:],open_datetime,1)
+            elif strategy == "ma":
+                sell_dict = trade.time_decay_alpha_ma_v0_inv(polygon_df.iloc[1:],open_datetime,1)
+            elif strategy == "maP":
+                sell_dict = trade.time_decay_alpha_maP_v0_inv(polygon_df.iloc[1:],open_datetime,1)
+            elif strategy == "vdiff_gainC":
+                sell_dict = trade.time_decay_alpha_vdiffC_v0_inv(polygon_df.iloc[1:],open_datetime,1)
+            elif strategy == "vdiff_gainP":
+                sell_dict = trade.time_decay_alpha_vdiffP_v0_inv(polygon_df.iloc[1:],open_datetime,1)
+        elif time_span == "1D":
+            if strategy == "gainers":
+                sell_dict = trade.time_decay_alpha_gainers_v0_inv1D(polygon_df.iloc[1:],open_datetime,1)
+            elif strategy == "losers":
+                sell_dict = trade.time_decay_alpha_losers_v0_inv1D(polygon_df.iloc[1:],open_datetime,1)
+            elif strategy == "ma":
+                sell_dict = trade.time_decay_alpha_ma_v0_inv1D(polygon_df.iloc[1:],open_datetime,1)
+            elif strategy == "maP":
+                sell_dict = trade.time_decay_alpha_maP_v0_inv1D(polygon_df.iloc[1:],open_datetime,1)
+            elif strategy == "vdiff_gainC":
+                sell_dict = trade.time_decay_alpha_vdiffC_v0_inv1D(polygon_df.iloc[1:],open_datetime,1)
+            elif strategy == "vdiff_gainP":
+                sell_dict = trade.time_decay_alpha_vdiffP_v0_inv1D(polygon_df.iloc[1:],open_datetime,1)
     except Exception as e:
         print(e)
         print("Error in sell_dict")
@@ -241,7 +259,7 @@ def simulate_trades(data, datetimelist, starting_value, commission_cost, s3link)
         
     return purchases_list, sales_list, order_results_list, positions_list
 
-def simulate_trades_invalerts(data):
+def simulate_trades_invalerts(data, time_span):
     positions_list = []
     purchases_list = []
     sales_list =[]
@@ -317,7 +335,9 @@ def simulate_trades_invalerts(data):
 
 
 if __name__ == "__main__":
-    s3link = {
-    'bucketname': 'icarus-research-data',
-    'objectkey': 'training_datasets/expanded_1d_datasets/2023/05/12.csv'
-    }
+    file_names = ["2023-01-02","2023-01-09","2023-01-16","2023-01-23","2023-01-30","2023-02-06",
+                  "2023-02-13","2023-02-20","2023-02-27","2023-03-06"
+                  ,"2023-03-13","2023-03-20","2023-03-27","2023-04-03","2023-04-10","2023-04-17",
+                  "2023-04-24","2023-05-01","2023-05-08","2023-05-15","2023-05-22","2023-05-29","2023-06-05"]
+    for file_name in file_names:
+        s3_to_local(file_name)
