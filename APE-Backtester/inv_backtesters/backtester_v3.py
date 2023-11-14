@@ -5,6 +5,7 @@ import holidays
 import boto3
 import helpers.backtest_functions as back_tester
 import helpers.backtrader_helper as helper
+import helpers.portfolio_simulation as portfolio_sim
 import warnings
 import concurrent.futures
 # from pandas._libs.mode_warnings import SettingWithCopyWarning
@@ -31,18 +32,14 @@ def build_backtest_data(file_name,strategies):
     backtest_data = pd.concat(dfs,ignore_index=True)
 
     ## What we will do is instead of simulating one trade at a time we will do one time period at a time and then combine and create results then.
-    purchases_list, sales_list, order_results_list, positions_list, = back_tester.simulate_trades_invalerts(backtest_data)
-    full_purchases_list.extend(purchases_list)
+    positions_list = back_tester.simulate_trades_invalerts(backtest_data)
     full_positions_list.extend(positions_list)
-    full_sales_list.extend(sales_list)
 
     return positions_list
 
 def run_trades_simulation(full_positions_list,portfolio_cash, start_date, end_date, risk_unit):
     full_date_list = helper.create_portfolio_date_list(start_date, end_date)
-    print(full_date_list)
-    print()
-    portfolio_df, passed_trades_df, positions_taken, positions_dict = helper.simulate_portfolio(full_positions_list, full_date_list,portfolio_cash=portfolio_cash, risk_unit=risk_unit)
+    portfolio_df, passed_trades_df, positions_taken, positions_dict = portfolio_sim.simulate_portfolio(full_positions_list, full_date_list,portfolio_cash=portfolio_cash, risk_unit=risk_unit)
     positions_df = pd.DataFrame.from_dict(positions_taken)
     return portfolio_df, positions_df
 
@@ -69,9 +66,9 @@ if __name__ == "__main__":
     end_date = '2023/08/17'
     start_str = start_date.split("/")[1] + start_date.split("/")[2]
     end_str = end_date.split("/")[1] + end_date.split("/")[2]
-    trading_strat = "test"
+    trading_strat = "test_noposlimit"
     portfolio_cash = 200000
-    risk_unit =.01
+    risk_unit =.002
     cash_risk = f"{portfolio_cash}_{risk_unit}"
     strategies = ["BFC","BFC_1D","BFP","BFP_1D"]
     # portfolio_df, positions_df = run_backtest(start_date, end_date)

@@ -1049,13 +1049,17 @@ def build_trade(position, available_funds, risk_unit):
         # print(type(trade_info))
         # print(position_id)
         # print(trade_info[0])
-        # trades = trade_info[0]
-        buy_orders.append(transaction['buy_dict'])
-        sell_orders.append(transaction['sell_dict'])
-        contract_costs.append(transaction['buy_dict']['contract_cost'])
-        contract_type = transaction['buy_dict']['contract_type']
+        transaction['sell_info']['close_trade_dt'] = transaction['close_trade_dt']
+        buy_orders.append(transaction['buy_info'])
+        sell_orders.append(transaction['sell_info'])
+        contract_costs.append(transaction['buy_info']['contract_cost'])
+        contract_type = transaction['buy_info']['contract_type']
     
     sized_buys, sized_sells = size_trade(contract_costs, buy_orders, sell_orders, available_funds, risk_unit, contract_type)
+    print(sized_buys)
+    print(sized_sells)
+    print("HERE ARE SIZED Orders")
+    print()
     return sized_buys, sized_sells
 
 def size_trade(contract_costs, buy_orders, sell_orders, available_funds, risk_unit, contract_type):
