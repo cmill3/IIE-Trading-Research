@@ -6,19 +6,18 @@ s3 = boto3.client('s3')
 
 def add_contract_data_to_local(weeks,strategy_info):
     print(strategy_info)
-    dfs = []
+    # dfs = []
     for week in weeks:
             data, _ = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key=f"backtesting_data/inv_alerts/{strategy_info['file_path']}", 
                                                       file_name = f"{week}.csv",prefixes=[strategy],time_span=strategy_info['time_span'])
             # data.drop(columns=['Unnamed: 0.6','Unnamed: 0.3','Unnamed: 0.2','Unnamed: 0.1','Unnamed: 0'],inplace=True)
             data.drop(columns=['Unnamed: 0.2','Unnamed: 0.1','Unnamed: 0'],inplace=True)
             data['side'] = strategy_info['side']
-            test = data.loc[data['symbol'].isin(['AAPL','GOOG','MSFT','AMZN','META','NFLX'])]
-            dfs.append(test)
-    data = pd.concat(dfs,ignore_index=True)
-    data['contracts']= data.apply(lambda x: pull_contract_data(x),axis=1)
-    data['expiries'] = data['date'].apply(lambda x: generate_expiry_dates_row(x))
-    data.to_csv(f'/Users/charlesmiller/Documents/backtesting_data/{strategy}/{week}.csv', index=False)
+            data['contracts']= data.apply(lambda x: pull_contract_data(x),axis=1)
+            data['expiries'] = data['date'].apply(lambda x: generate_expiry_dates_row(x))
+            data.to_csv(f'/Users/charlesmiller/Documents/backtesting_data/{strategy}/{week}.csv', index=False)
+    #         dfs.append(data)
+    # data = pd.concat(dfs,ignore_index=True)
     
 
         
@@ -26,18 +25,28 @@ def pull_contract_data(row):
     date = row['date'].split(" ")[0]
     year, month, day = date.split("-")
     key = f"options_snapshot/{year}/{month}/{day}/{row['symbol']}.csv"
-    contracts = s3.get_object(Bucket="icarus-research-data", Key=key)
+    try:
+        contracts = s3.get_object(Bucket="icarus-research-data", Key=key)
+    except Exception as e:
+        print(f"Error: {e} for {row['symbol']}")
+        return []
     contracts = pd.read_csv(contracts['Body'])
-    contracts['date'] = contracts['symbol'].apply(lambda x: x[-15:-9])
-    contracts['side'] = contracts['symbol'].apply(lambda x: x[-9])
-    contracts['year'] = contracts['date'].apply(lambda x: f"20{x[:2]}")
-    contracts['month'] = contracts['date'].apply(lambda x: x[2:4])
-    contracts['day'] = contracts['date'].apply(lambda x: x[4:])
-    contracts['date'] = contracts['year'] + "-" + contracts['month'] + "-" + contracts['day']
-    expiry_dates = generate_expiry_dates(date)
-    filtered_contracts = contracts[contracts['date'].isin(expiry_dates)]
-    filtered_contracts = filtered_contracts[filtered_contracts['side'] == row['side']]
-    contracts_list = filtered_contracts['symbol'].tolist()
+    try:
+        contracts['date'] = contracts['symbol'].apply(lambda x: x[-15:-9])
+        contracts['side'] = contracts['symbol'].apply(lambda x: x[-9])
+        contracts['year'] = contracts['date'].apply(lambda x: f"20{x[:2]}")
+        contracts['month'] = contracts['date'].apply(lambda x: x[2:4])
+        contracts['day'] = contracts['date'].apply(lambda x: x[4:])
+        contracts['date'] = contracts['year'] + "-" + contracts['month'] + "-" + contracts['day']
+        expiry_dates = generate_expiry_dates(date)
+        filtered_contracts = contracts[contracts['date'].isin(expiry_dates)]
+        filtered_contracts = filtered_contracts[filtered_contracts['side'] == row['side']]
+        contracts_list = filtered_contracts['symbol'].tolist()
+    except Exception as e:
+        print(f"Error: {e} for {row['symbol']}")
+        print(row)
+        print(contracts)
+        return []
     return contracts_list
 
 def s3_to_local(file_name):
@@ -140,6 +149,7 @@ if __name__ == "__main__":
               "side": "C"
          }
     }
-    file_names = ["2023-08-14"]
+    file_names = ['2023-01-02', '2023-01-09', '2023-01-16', '2023-01-23', 
+         '2023-01-30', '2023-02-06', '2023-02-13', '2023-02-20', '2023-02-27', '2023-03-06', '2023-03-13']
     for strategy in strategy_info:
         add_contract_data_to_local(file_names,strategy_info[strategy])

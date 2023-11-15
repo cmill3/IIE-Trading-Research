@@ -83,8 +83,6 @@ def s3_data_inv(bucket_name, object_key, prefixes):
     return df
 
 def create_results_dict(buy_dict, sell_dict,order_id):
-    print()
-    print("RESULTS")
     price_change = sell_dict['close_price'] - buy_dict['open_price']
     pct_gain = (price_change / buy_dict['open_price']) *100
     total_gain = (price_change*100) * buy_dict['quantity']
@@ -120,6 +118,8 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length):
         return [], []
     filtered_contracts = [k for k in contracts if strike in k]
     options_df = build_options_df(filtered_contracts, row)
+    ## change spread start here
+    options_df = options_df.iloc[2:]
     for index,contract in options_df.iterrows():
         try:
             options_agg_data = polygon_optiondata(contract['contract_symbol'], start_date, end_date)
@@ -172,7 +172,6 @@ def convert_lists_to_dicts_inv(positions_list, datetime_list):
             "open_positions_start": [],
             "open_positions_end": [],
         }
-
     for position in positions_list:
         pos_dt = datetime.strptime(position['open_datetime'], "%Y-%m-%d %H:%M")
         # pos_dt = position['open_datetime']

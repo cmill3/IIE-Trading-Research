@@ -43,19 +43,25 @@ def run_trades_simulation(full_positions_list,portfolio_cash, start_date, end_da
     positions_df = pd.DataFrame.from_dict(positions_taken)
     return portfolio_df, positions_df
 
-def backtest_orchestrator(start_date, end_date, portfolio_cash, risk_unit,file_names,strategies):
-    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
-        # Submit the processing tasks to the ThreadPoolExecutor
-        processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies) for file_name in file_names]
+def backtest_orchestrator(start_date, end_date, portfolio_cash, risk_unit,file_names,strategies, local_data=False):
 
-    # Step 4: Retrieve the results from the futures
-    processed_weeks_results = [future.result() for future in processed_weeks_futures]
+    if not local_data:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+            # Submit the processing tasks to the ThreadPoolExecutor
+            processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies) for file_name in file_names]
 
-    merged_positions = []
-    for week_results in processed_weeks_results:
-        merged_positions.extend(week_results)
+        # Step 4: Retrieve the results from the futures
+        processed_weeks_results = [future.result() for future in processed_weeks_futures]
 
-    print(merged_positions)
+        merged_positions = []
+        for week_results in processed_weeks_results:
+            merged_positions.extend(week_results)
+
+        # merged_df = pd.DataFrame.from_dict(merged_positions)
+        # merged_df.to_csv(f'/Users/charlesmiller/Documents/backtesting_data/merged_positions.csv', index=False)
+    else:
+        merged_positions = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/merged_positions.csv')
+        merged_positions = merged_positions.to_dict('records')
 
     portfolio_df, positions_df = run_trades_simulation(merged_positions,portfolio_cash, start_date, end_date, risk_unit)
     return portfolio_df, positions_df
@@ -63,12 +69,12 @@ def backtest_orchestrator(start_date, end_date, portfolio_cash, risk_unit,file_n
 if __name__ == "__main__":
     s3 = boto3.client('s3')
     start_date = '2023/08/14'
-    end_date = '2023/08/17'
+    end_date = '2023/10/09'
     start_str = start_date.split("/")[1] + start_date.split("/")[2]
     end_str = end_date.split("/")[1] + end_date.split("/")[2]
-    trading_strat = "test_noposlimit"
+    trading_strat = "default_noposlimit_2out_noresize"
     portfolio_cash = 200000
-    risk_unit =.002
+    risk_unit =.004
     cash_risk = f"{portfolio_cash}_{risk_unit}"
     strategies = ["BFC","BFC_1D","BFP","BFP_1D"]
     # portfolio_df, positions_df = run_backtest(start_date, end_date)
@@ -88,7 +94,16 @@ if __name__ == "__main__":
          '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02', '2023-10-09', '2023-10-16', '2023-10-23', '2023-10-30', 
          '2023-11-06'
          ]
-    portfolio_df, positions_df = backtest_orchestrator(start_date, end_date,portfolio_cash=portfolio_cash,risk_unit=risk_unit,file_names=["2023-08-14"],strategies=strategies) 
+    # test_files = [ 
+    #     '2023-01-02', '2023-01-09', '2023-01-16', '2023-01-23', 
+    #      '2023-01-30', '2023-02-06', '2023-02-13', '2023-02-20', '2023-02-27', '2023-03-06', '2023-03-13', '2023-03-20', 
+    #      '2023-03-27', '2023-04-03', '2023-04-10', '2023-04-17', '2023-04-24', '2023-05-01', '2023-05-08', '2023-05-15', 
+    #      '2023-05-22', '2023-05-29', '2023-06-05', '2023-06-12', '2023-06-19', '2023-06-26', '2023-07-03', '2023-07-10', 
+    #      '2023-07-17', '2023-07-24', '2023-07-31', '2023-08-07', '2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
+    #      '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02']
+    test_files =  ['2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
+    '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02']
+    portfolio_df, positions_df = backtest_orchestrator(start_date, end_date,portfolio_cash=portfolio_cash,risk_unit=risk_unit,file_names=test_files,strategies=strategies,local_data=False) 
 
     
     port_csv = portfolio_df.to_csv()

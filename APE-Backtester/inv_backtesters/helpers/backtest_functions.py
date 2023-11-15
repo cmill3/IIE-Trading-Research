@@ -66,13 +66,16 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
         print(e)
         print("Error in sell_dict")
         print(symbol)
-        return {}, {}, {}, {}, "error"
+        return {}
     
     # sell_dict['position_id'] = position_id
     try:
         sell_dict['position_id'] = position_id
         results_dict = backtrader_helper.create_results_dict(buy_dict, sell_dict, order_id)
         results_dict['position_id'] = position_id
+        print("RESULTS")
+        print(results_dict)
+        print()
         # transaction_dict = {"buy_dict": buy_dict, "sell_dict":sell_dict, "results_dict": results_dict}
         if buy_dict['open_datetime'] > sell_dict['close_datetime']:
             print(f"Date Mismatch for {symbol}")
@@ -90,18 +93,12 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
 
 def simulate_trades_invalerts(data):
     positions_list = []
-    purchases_list = []
-    sales_list =[]
-    order_results_list = []
-    order_num = 0
+    order_num = 1
     for i, row in data.iterrows():
         ## These variables are crucial for controlling the buy/sell flow of the simulation.
         alert_hour = row['hour']
         trading_date = row['date']
         trading_date = trading_date.split(" ")[0]
-        year, month, day = trading_date.split("-")
-        transactions_list = []
-        trades = []
         start_date, end_date, symbol, mkt_price, strategy, option_symbols, enriched_options_aggregates = create_simulation_data_inv(row)
         order_dt = start_date.strftime("%m+%d")
         pos_dt = start_date.strftime("%Y-%m-%d-%H")
@@ -123,25 +120,22 @@ def simulate_trades_invalerts(data):
                     print(f"{order_id}_{order_dt}")
                     continue
 
-                print(results_dict)
-                print()
-                # transactions_list.append(transaction_dict)
-                # purchases_list.append(buy_dict)
-                # sales_list.append(sell_dict)
-                # order_results_list.append(results_dict)
-                # trades.append(results_dict)
                 results.append(results_dict)
                 order_num += 1
             except Exception as e:
                 print("error in buy_iterate_sellV2_invalerts")
                 print(df)
                 continue
-
-        position_trades = {"position_id": position_id, "transactions": results, "open_datetime": results_dict['open_trade_dt']}
+        
+        try:
+            position_trades = {"position_id": position_id, "transactions": results, "open_datetime": results_dict['open_trade_dt']}
+        except Exception as e:
+            print(f"Error in position_trades for {position_id}")
+            print(results)
+            print()
+            continue
         positions_list.append(position_trades)
     
-    print("trades done")
-    print(positions_list)
     return positions_list
     # return purchases_list, sales_list, order_results_list, positions_list
 
