@@ -5,11 +5,11 @@ import json
 import warnings
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
+import pytz
 
 # warnings.filterwarnings("ignore", category=FutureWarning)
 # warnings.filterwarnings("ignore", category=DeprecationWarning)
 # warnings.filterwarnings("ignore", category=pd.core.common.SettingWithCopyWarning)
-
 
 def get_business_days(transaction_date, current_date):
     """
@@ -44,54 +44,6 @@ def get_business_days(transaction_date, current_date):
     business_days = days - weekends
     return business_days 
 
-def calculate_floor_pct_call(row):
-   from_stamp = row['order_transaction_date'].split('T')[0]
-   time_stamp = datetime.strptime(row['order_transaction_date'], "%Y-%m-%dT%H:%M:%S.%fZ").timestamp() - timedelta(hours=4).total_seconds()
-   prices = polygon_call_stocks(row['underlying_symbol'], from_stamp, current_date, "1", "hour")
-   trimmed_df = prices.loc[prices['t'] > time_stamp]
-   high_price = trimmed_df['h'].max()
-   low_price = trimmed_df['l'].min()
-   if row['trading_strategy'] in ['maP', 'day_losers']:
-       return low_price
-   elif row['trading_strategy'] in ['most_actives', 'day_gainers']:
-       return high_price
-   else:
-        return 0
-   
-
-def calculate_floor_pct(row):
-   from_stamp = row['order_transaction_date'].split('T')[0]
-   time_stamp = datetime.strptime(row['order_transaction_date'], "%Y-%m-%dT%H:%M:%S.%fZ").timestamp() - timedelta(hours=4).total_seconds()
-   prices = polygon_call_stocks(row['underlying_symbol'], from_stamp, current_date, "1", "hour")
-   trimmed_df = prices.loc[prices['t'] > time_stamp]
-   high_price = trimmed_df['h'].max()
-   low_price = trimmed_df['l'].min()
-   if row['trading_strategy'] in ['maP', 'day_losers']:
-       return low_price
-   elif row['trading_strategy'] in ['most_actives', 'day_gainers']:
-       return high_price
-   else:
-        return 0
-   
-
-def polygon_call(contract, from_stamp, to_stamp, multiplier, timespan):
-    url = f"https://api.polygon.io/v2/aggs/ticker/O:{contract}/range/{multiplier}/{timespan}/{from_stamp}/{to_stamp}?adjusted=true&sort=asc&limit={limit}&apiKey={key}"
-
-    response = execute_polygon_call(url)
-    res_df = pd.DataFrame(json.loads(response.text)['results'])
-    res_df['t'] = res_df['t'].apply(lambda x: int(x/1000))
-    res_df['date'] = res_df['t'].apply(lambda x: datetime.fromtimestamp(x))
-    return res_df
-
-def polygon_call_stocks(contract, from_stamp, to_stamp, multiplier, timespan):
-    url = f"https://api.polygon.io/v2/aggs/ticker/{contract}/range/{multiplier}/{timespan}/{from_stamp}/{to_stamp}?adjusted=true&sort=asc&limit={limit}&apiKey={key}"
-
-    response = execute_polygon_call(url)
-    res_df = pd.DataFrame(json.loads(response.text)['results'])
-    res_df['t'] = res_df['t'].apply(lambda x: int(x/1000))
-    res_df['date'] = res_df['t'].apply(lambda x: datetime.fromtimestamp(x))
-    return res_df
-
 
 def build_spread(chain_df, spread_length, cp):
     contract_list = []
@@ -115,44 +67,13 @@ def build_spread(chain_df, spread_length, cp):
     
     return contract_list
 
-class CustomRetry(Retry):
-    def is_retry(self, method, status_code, has_retry_after=False):
-        """ Return True if we should retry the request, otherwise False. """
-        if status_code != 200:
-            return True
-        return super().is_retry(method, status_code, has_retry_after)
-    
-def setup_session_retries(
-    retries: int = 3,
-    backoff_factor: float = 0.05,
-    status_forcelist: tuple = (500, 502, 504),
-):
-    """
-    Sets up a requests Session with retries.
-    
-    Parameters:
-    - retries: Number of retries before giving up. Default is 3.
-    - backoff_factor: A factor to use for exponential backoff. Default is 0.3.
-    - status_forcelist: A tuple of HTTP status codes that should trigger a retry. Default is (500, 502, 504).
 
-    Returns:
-    - A requests Session object with retry configuration.
-    """
-    retry_strategy = CustomRetry(
-        total=retries,
-        backoff_factor=backoff_factor,
-        status_forcelist=status_forcelist,
-        allowed_methods=frozenset(["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"]),
-        raise_on_status=False
-    )
-    adapter = HTTPAdapter(max_retries=retry_strategy)
-    session = requests.Session()
-    session.mount("http://", adapter)
-    session.mount("https://", adapter)
+def convert_timestamp_est(timestamp):
+    # Create a naive datetime object from the UNIX timestamp
+    dt_naive = datetime.utcfromtimestamp(timestamp)
+    # Convert the naive datetime object to a timezone-aware one (UTC)
+    dt_utc = pytz.utc.localize(dt_naive)
+    # Convert the UTC datetime to EST
+    dt_est = dt_utc.astimezone(pytz.timezone('US/Eastern'))
     
-    return session
-
-def execute_polygon_call(url):
-    session = setup_session_retries()
-    response = session.request("GET", url, headers={}, data={})
-    return response 
+    return dt_est
