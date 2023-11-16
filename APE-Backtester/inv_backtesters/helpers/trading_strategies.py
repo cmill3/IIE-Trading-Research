@@ -1072,7 +1072,7 @@ def bet_sizer(contract_costs, buy_orders, sell_orders, risk_unit, contract_type)
     if contract_type == "calls":
         target_cost = (risk_unit * available_funds)
     elif contract_type == "puts":
-        target_cost = ((risk_unit * available_funds))
+        target_cost = ((risk_unit * available_funds)*.85)
     else:
         target_cost = (risk_unit * available_funds)
         print("ERROR")

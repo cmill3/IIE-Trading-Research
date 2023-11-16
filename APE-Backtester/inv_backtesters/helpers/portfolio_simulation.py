@@ -90,7 +90,7 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit)
                     print(value['portfolio_cash'])
                     if value['portfolio_cash'] > (0.5 * starting_cash):
                         print(f"Trade for {position['position_id']} approved")
-                        sized_buys, sized_sells = ts.build_trade(position, value['portfolio_cash'],risk_unit)
+                        sized_buys, sized_sells = ts.build_trade(position,risk_unit)
                         orders_taken = False
                         for index, order in enumerate(sized_buys):
                             if order != None:

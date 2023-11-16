@@ -118,8 +118,8 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length):
         return [], []
     filtered_contracts = [k for k in contracts if strike in k]
     options_df = build_options_df(filtered_contracts, row)
-    ## change spread start here
-    options_df = options_df.iloc[2:]
+    ## SPREAD ADJUSTMENT
+    # options_df = options_df.iloc[2:]
     for index,contract in options_df.iterrows():
         try:
             options_agg_data = polygon_optiondata(contract['contract_symbol'], start_date, end_date)
