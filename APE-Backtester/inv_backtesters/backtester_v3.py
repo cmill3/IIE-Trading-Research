@@ -72,7 +72,7 @@ if __name__ == "__main__":
     end_date = '2023/10/09'
     start_str = start_date.split("/")[1] + start_date.split("/")[2]
     end_str = end_date.split("/")[1] + end_date.split("/")[2]
-    trading_strat = "modelsv1_noposlimit_0out_85put_noresize"
+    trading_strat = "modelsv2_noposlimit_0out_100put_noresize"
     portfolio_cash = 200000
     risk_unit =.004
     cash_risk = f"{portfolio_cash}_{risk_unit}"
@@ -101,7 +101,8 @@ if __name__ == "__main__":
     #      '2023-05-22', '2023-05-29', '2023-06-05', '2023-06-12', '2023-06-19', '2023-06-26', '2023-07-03', '2023-07-10', 
     #      '2023-07-17', '2023-07-24', '2023-07-31', '2023-08-07', '2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
     #      '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02']
-    test_files =  ['2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
+    test_files =  ['2023-06-05', '2023-06-12', '2023-06-19', '2023-06-26', '2023-07-03', '2023-07-10', 
+         '2023-07-17', '2023-07-24', '2023-07-31', '2023-08-07','2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
     '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02']
     portfolio_df, positions_df = backtest_orchestrator(start_date, end_date,portfolio_cash=portfolio_cash,risk_unit=risk_unit,file_names=test_files,strategies=strategies,local_data=False) 
 

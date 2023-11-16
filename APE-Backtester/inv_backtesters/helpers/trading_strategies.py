@@ -259,9 +259,9 @@ def time_decay_alpha_BFP1D_v0_inv(polygon_df, simulation_date, quantity):
 
 
         if pct_change < (2*Target_pct):
-            Floor_pct -= 0.01
+            Floor_pct -= 0.006
         elif pct_change < Target_pct:
-            Floor_pct -= 0.075
+            Floor_pct -= 0.035
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         day_diff = get_business_days(simulation_date, row['date'])
@@ -306,9 +306,9 @@ def time_decay_alpha_BFC1D_v0_inv(polygon_df, simulation_date, quantity):
         # if type(Floor_pct) == float:
         #     Floor_pct = -0.02
         if pct_change > (2*Target_pct):
-            Floor_pct += 0.01
+            Floor_pct += 0.006
         elif pct_change > Target_pct:
-            Floor_pct += 0.0075
+            Floor_pct += 0.0035
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         day_diff = get_business_days(simulation_date, row['date'])
