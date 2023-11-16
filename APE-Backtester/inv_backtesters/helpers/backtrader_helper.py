@@ -9,6 +9,8 @@ import ast
 # import holidays
 import warnings
 import helpers.trading_strategies as ts
+import helpers.helper as helper
+import helpers.polygon_helper as ph
 import pytz
 
 
@@ -18,7 +20,6 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-KEY = "A_vXSwpuQ4hyNRj_8Rlw1WwVDWGgHbjp"
 s3 = boto3.client('s3', aws_access_key_id = AWS_ACCESS_KEY_ID, aws_secret_access_key = AWS_SECRET_ACCESS_KEY)
 
 def startbacktrader(Starting_Cash):
@@ -109,20 +110,34 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length):
             expiry = expiries[0]
     
     strike = row['symbol'] + expiry
-    underlying_agg_data = polygon_stockdata_inv(row['symbol'],start_date,end_date)
+    try:
+        underlying_agg_data = ph.polygon_stockdata_inv(row['symbol'],start_date,end_date)
+    except Exception as e:
+        print(f"Error: {e} in underlying agg for {row['symbol']} of {row['strategy']}")
+        try:
+            underlying_agg_data = ph.polygon_stockdata_inv(row['symbol'],start_date,end_date)
+        except Exception as e:
+            print(f"Error: {e} in underlying agg for 2ND {row['symbol']} of {row['strategy']}")
+            try: 
+                underlying_agg_data = ph.polygon_stockdata_inv(row['symbol'],start_date,end_date)
+            except Exception as e:
+                print(f"Error: {e} in underlying agg for FINAL {row['symbol']} of {row['strategy']}")
+                return [], []
+            
     underlying_agg_data.rename(columns={'o':'underlying_price'}, inplace=True)
     try:
         contracts = ast.literal_eval(row['contracts'])
     except Exception as e:
         print(f"Error: {e} in contracts for {row['symbol']} of {row['strategy']}")
         return [], []
+    
     filtered_contracts = [k for k in contracts if strike in k]
     options_df = build_options_df(filtered_contracts, row)
     ## SPREAD ADJUSTMENT
     # options_df = options_df.iloc[2:]
     for index,contract in options_df.iterrows():
         try:
-            options_agg_data = polygon_optiondata(contract['contract_symbol'], start_date, end_date)
+            options_agg_data = ph.polygon_optiondata(contract['contract_symbol'], start_date, end_date)
             enriched_df = pd.merge(options_agg_data, underlying_agg_data[['date', 'underlying_price']], on='date', how='left')
             enriched_df.dropna(inplace=True)
             enriched_options_aggregates.append(enriched_df)
@@ -313,58 +328,20 @@ def extract_results_dict(positions_list):
     results_dicts = []
     transactions = positions_list['transactions']
     for transaction in transactions:
-        results_dicts.append({"price_change": transaction['price_change'], "pct_gain": transaction['pct_gain'], "total_gain": transaction['total_gain'], "open_trade_dt": transaction['open_trade_dt'], "close_trade_dt": transaction['close_trade_dt']})
+        sell_dict = transaction['sell_info']
+        print('SELL DICT')
+        print(sell_dict)
+        print()
+        results_dicts.append(
+        {
+            "price_change": transaction['price_change'], "pct_gain": transaction['pct_gain'],
+            "total_gain": transaction['total_gain'], "open_trade_dt": transaction['open_trade_dt'], 
+            "close_trade_dt": transaction['close_trade_dt'],"max_gain_before": sell_dict['max_value_before_pct_change'],
+            "max_gain_after": sell_dict['max_value_after_pct_change'],
+            "max_value_before_date": sell_dict['max_value_before_date'], "max_value_after_date": sell_dict['max_value_after_date'],
+            "max_value_before_idx": sell_dict['max_value_before_idx'], "max_value_after_idx": sell_dict['max_value_after_idx']
+        })
     return results_dicts
-
-def polygon_optiondata(options_ticker, from_date, to_date):
-    #This is for option data
-    from_stamp = int(from_date.timestamp() * 1000)
-    to_stamp = int(to_date.timestamp() * 1000)
-
-    url = f"https://api.polygon.io/v2/aggs/ticker/{options_ticker}/range/15/minute/{from_stamp}/{to_stamp}?adjusted=true&sort=asc&limit=50000&apiKey={KEY}"
-    response = requests.request("GET", url, headers={}, data={})
-    response_data = json.loads(response.text)
-
-    res_option_df = pd.DataFrame(response_data['results'])
-    res_option_df['t'] = res_option_df['t'].apply(lambda x: int(x/1000))
-    res_option_df['date'] = res_option_df['t'].apply(lambda x: convert_timestamp_est(x))
-    res_option_df['time'] = res_option_df['date'].apply(lambda x: x.time())
-    res_option_df['hour'] = res_option_df['date'].apply(lambda x: x.hour)
-    res_option_df['ticker'] = options_ticker
-
-    res_option_df =res_option_df[res_option_df['hour'] < 16]
-    res_option_df =res_option_df.loc[res_option_df['time'] >= datetime.strptime("09:45:00", "%H:%M:%S").time()]
-    return res_option_df
-
-def polygon_stockdata_inv(symbol, from_date, to_date):
-    key = "A_vXSwpuQ4hyNRj_8Rlw1WwVDWGgHbjp"
-    from_stamp = int(from_date.timestamp() * 1000)
-    to_stamp = int(to_date.timestamp() * 1000)
-
-    url = f"https://api.polygon.io/v2/aggs/ticker/{symbol}/range/15/minute/{from_stamp}/{to_stamp}?adjusted=true&sort=asc&limit=50000&apiKey={key}"
-    response = requests.request("GET", url, headers={}, data={})
-
-    response_data = json.loads(response.text)
-    stock_df = pd.DataFrame(response_data['results'])
-    stock_df['t'] = stock_df['t'].apply(lambda x: int(x/1000))
-    stock_df['date'] = stock_df['t'].apply(lambda x: convert_timestamp_est(x))
-    stock_df['time'] = stock_df['date'].apply(lambda x: x.time())
-    stock_df['hour'] = stock_df['date'].apply(lambda x: x.hour)
-    stock_df['minute'] = stock_df['date'].apply(lambda x: x.minute)
-
-    stock_df = stock_df[stock_df['hour'] < 16]
-    stock_df = stock_df.loc[stock_df['time'] >= datetime.strptime("09:45:00", "%H:%M:%S").time()]
-    return stock_df
-
-def convert_timestamp_est(timestamp):
-    # Create a naive datetime object from the UNIX timestamp
-    dt_naive = datetime.utcfromtimestamp(timestamp)
-    # Convert the naive datetime object to a timezone-aware one (UTC)
-    dt_utc = pytz.utc.localize(dt_naive)
-    # Convert the UTC datetime to EST
-    dt_est = dt_utc.astimezone(pytz.timezone('US/Eastern'))
-    
-    return dt_est
 
 
 def create_datetime_index(start_date, end_date):

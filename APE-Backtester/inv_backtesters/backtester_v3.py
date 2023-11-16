@@ -27,7 +27,7 @@ def build_backtest_data(file_name,strategies):
     dfs = []
     for strategy in strategies:
         data = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/{strategy}/{file_name}.csv')
-        dfs.append(data)
+        dfs.append(data[0:2])
 
     backtest_data = pd.concat(dfs,ignore_index=True)
 
