@@ -55,13 +55,13 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
 
     try:
         if strategy == "BFP":
-            sell_dict = trade.time_decay_alpha_BFP_v0_vc(polygon_df.iloc[1:],open_datetime,1)
+            sell_dict = trade.time_decay_alpha_BFP_v0_inv(polygon_df.iloc[1:],open_datetime,1)
         elif strategy == "BFC":
-            sell_dict = trade.time_decay_alpha_BFC_v0_vc(polygon_df.iloc[1:],open_datetime,1)
+            sell_dict = trade.time_decay_alpha_BFC_v0_inv(polygon_df.iloc[1:],open_datetime,1)
         elif strategy == "BFC_1D":
-            sell_dict = trade.time_decay_alpha_BFC1D_v0_vc(polygon_df.iloc[1:],open_datetime,1)
+            sell_dict = trade.time_decay_alpha_BFC1D_v0_inv(polygon_df.iloc[1:],open_datetime,1)
         elif strategy == "BFP_1D":
-            sell_dict = trade.time_decay_alpha_BFP1D_v0_vc(polygon_df.iloc[1:],open_datetime,1)
+            sell_dict = trade.time_decay_alpha_BFP1D_v0_inv(polygon_df.iloc[1:],open_datetime,1)
     except Exception as e:
         print(e)
         print("Error in sell_dict")
