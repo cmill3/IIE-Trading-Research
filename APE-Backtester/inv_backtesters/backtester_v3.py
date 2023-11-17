@@ -19,7 +19,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 bucket_name = 'icarus-research-data'  #s3 bucket name
 object_keybase = 'training_datasets/expanded_1d_datasets/' #s3 key not including date, date is added in pullcsv func
 
-def build_backtest_data(file_name,strategies):
+def build_backtest_data(file_name,strategies,config):
     full_purchases_list = []
     full_positions_list = []
     full_sales_list = []
@@ -27,28 +27,31 @@ def build_backtest_data(file_name,strategies):
     dfs = []
     for strategy in strategies:
         data = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/{strategy}/{file_name}.csv')
-        dfs.append(data[0:2])
+        dfs.append(data)
 
     backtest_data = pd.concat(dfs,ignore_index=True)
+    backtest_data = backtest_data[backtest_data['probabilities'] > config['probability']]
 
     ## What we will do is instead of simulating one trade at a time we will do one time period at a time and then combine and create results then.
-    positions_list = back_tester.simulate_trades_invalerts(backtest_data)
+    positions_list = back_tester.simulate_trades_invalerts(backtest_data,config)
     full_positions_list.extend(positions_list)
 
     return positions_list
 
-def run_trades_simulation(full_positions_list,portfolio_cash, start_date, end_date, risk_unit):
+def run_trades_simulation(full_positions_list,start_date,end_date,config):
     full_date_list = helper.create_portfolio_date_list(start_date, end_date)
-    portfolio_df, passed_trades_df, positions_taken, positions_dict = portfolio_sim.simulate_portfolio(full_positions_list, full_date_list,portfolio_cash=portfolio_cash, risk_unit=risk_unit)
+    portfolio_df, passed_trades_df, positions_taken, positions_dict = portfolio_sim.simulate_portfolio(
+        full_positions_list, full_date_list,portfolio_cash=config['portfolio_cash'], risk_unit=config['risk_unit'],put_adjustment=config['put_pct']
+        )
     positions_df = pd.DataFrame.from_dict(positions_taken)
     return portfolio_df, positions_df
 
-def backtest_orchestrator(start_date, end_date, portfolio_cash, risk_unit,file_names,strategies, local_data=False):
+def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,config):
 
     if not local_data:
-        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=12) as executor:
             # Submit the processing tasks to the ThreadPoolExecutor
-            processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies) for file_name in file_names]
+            processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies,config) for file_name in file_names]
 
         # Step 4: Retrieve the results from the futures
         processed_weeks_results = [future.result() for future in processed_weeks_futures]
@@ -63,22 +66,11 @@ def backtest_orchestrator(start_date, end_date, portfolio_cash, risk_unit,file_n
         merged_positions = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/merged_positions.csv')
         merged_positions = merged_positions.to_dict('records')
 
-    portfolio_df, positions_df = run_trades_simulation(merged_positions,portfolio_cash, start_date, end_date, risk_unit)
+    portfolio_df, positions_df = run_trades_simulation(merged_positions, start_date, end_date, config)
     return portfolio_df, positions_df
 
 if __name__ == "__main__":
     s3 = boto3.client('s3')
-    start_date = '2023/06/05'
-    end_date = '2023/10/09'
-    start_str = start_date.split("/")[1] + start_date.split("/")[2]
-    end_str = end_date.split("/")[1] + end_date.split("/")[2]
-    trading_strat = "modelsv2_noposlimit_0out_100put_noresize"
-    portfolio_cash = 200000
-    risk_unit =.004
-    cash_risk = f"{portfolio_cash}_{risk_unit}"
-    strategies = ["BFC","BFC_1D","BFP","BFP_1D"]
-    # portfolio_df, positions_df = run_backtest(start_date, end_date)
-
     file_names = [
          '2022-01-03', '2022-01-10', '2022-01-17', '2022-01-24', '2022-01-31', '2022-02-07', '2022-02-14', '2022-02-21', 
          '2022-02-28', '2022-03-07', '2022-03-14', '2022-03-21', '2022-03-28', '2022-04-04', '2022-04-11', '2022-04-18', 
@@ -101,16 +93,34 @@ if __name__ == "__main__":
     #      '2023-05-22', '2023-05-29', '2023-06-05', '2023-06-12', '2023-06-19', '2023-06-26', '2023-07-03', '2023-07-10', 
     #      '2023-07-17', '2023-07-24', '2023-07-31', '2023-08-07', '2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
     #      '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02']
-    test_files =  ['2023-06-05', '2023-06-12', '2023-06-19', '2023-06-26', '2023-07-03', '2023-07-10', 
-         '2023-07-17', '2023-07-24', '2023-07-31', '2023-08-07','2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
-    '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02']
-    portfolio_df, positions_df = backtest_orchestrator(start_date, end_date,portfolio_cash=portfolio_cash,risk_unit=risk_unit,file_names=test_files,strategies=strategies,local_data=False) 
 
-    
-    port_csv = portfolio_df.to_csv()
-    pos_csv = positions_df.to_csv()
-    s3.put_object(Body=port_csv, Bucket="icarus-research-data", Key=f'backtesting_reports/{trading_strat}/{start_str}-{end_str}/{cash_risk}/portfolio_report.csv')
-    s3.put_object(Body=pos_csv, Bucket="icarus-research-data", Key=f'backtesting_reports/{trading_strat}/{start_str}-{end_str}/{cash_risk}/positions_report.csv')
-    print("Done!")
+    test_files =  ['2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
+    '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02']
+
+
+    start_date = '2023/08/14'
+    end_date = '2023/10/09'
+    start_str = start_date.split("/")[1] + start_date.split("/")[2]
+    end_str = end_date.split("/")[1] + end_date.split("/")[2]
+    strategies = ["BFC","BFC_1D","BFP","BFP_1D"]
+
+    backtest_configs = [{
+        "put_pct": 1, 
+        "spread_adjustment": 0,
+        "aa": 1,
+        "risk_unit": .002,
+        "vc": False,
+        "vc_level":"nvc",
+        "portfolio_cash": 200000,
+        "risk_adjustment": .003,
+        "probability": 0.5
+    }]
+
+    for config in backtest_configs:
+        trading_strat = f"modelsv2_noposlimit_{config['spread_adjustment']}out_{config['put_pct']}put_noresize_risk{config['risk_adjustment']}_AA{config['aa']}_{config['vc_level']}_prob{config['probability']}"
+        portfolio_df, positions_df = backtest_orchestrator(start_date, end_date,file_names=test_files,strategies=strategies,local_data=False, config=config) 
+        s3.put_object(Body=portfolio_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/portfolio_report.csv')
+        s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/positions_report.csv')
+        print(f"Done with {trading_strat}!")
 
 
