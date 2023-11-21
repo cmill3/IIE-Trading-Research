@@ -27,7 +27,7 @@ def build_backtest_data(file_name,strategies,config):
     dfs = []
     for strategy in strategies:
         data = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/{strategy}/{file_name}.csv')
-        dfs.append(data)
+        dfs.append(data[0:5])
 
     backtest_data = pd.concat(dfs,ignore_index=True)
     backtest_data = backtest_data[backtest_data['probabilities'] > config['probability']]
@@ -105,7 +105,7 @@ if __name__ == "__main__":
          '2023-05-22', '2023-05-29', '2023-06-05', '2023-06-12', '2023-06-19']
     
     time_periods = [test_files,test_files2,test_files3,test_files4]
-
+    models_tested = []
     for time in time_periods:
         print(f"Starting {time} at {datetime.now()}")
         start_dt = time[0]
@@ -163,50 +163,50 @@ if __name__ == "__main__":
                 "risk_adjustment": .005,
                 "probability": 0.5
             },
-            {
-                "put_pct": 1, 
-                "spread_adjustment": 0,
-                "aa": 1,
-                "risk_unit": .002,
-                "vc": True,
-                "vc_level":"400$.003",
-                "portfolio_cash": 200000,
-                "risk_adjustment": .005,
-                "probability": 0.5
-            },
-            {
-                "put_pct": 1, 
-                "spread_adjustment": 0,
-                "aa": 1,
-                "risk_unit": .002,
-                "vc": True,
-                "vc_level":"400$.003",
-                "portfolio_cash": 200000,
-                "risk_adjustment": .003,
-                "probability": 0.5
-            },
-            {
-                "put_pct": 1, 
-                "spread_adjustment": 0,
-                "aa": 1,
-                "risk_unit": .002,
-                "vc": True,
-                "vc_level":"250$.003",
-                "portfolio_cash": 200000,
-                "risk_adjustment": .005,
-                "probability": 0.5
-            },
-            {
-                "put_pct": 1, 
-                "spread_adjustment": 0,
-                "aa": 1,
-                "risk_unit": .002,
-                "vc": True,
-                "vc_level":"250$.003",
-                "portfolio_cash": 200000,
-                "risk_adjustment": .003,
-                "probability": 0.5
-            }
+            # {
+            #     "put_pct": 1, 
+            #     "spread_adjustment": 0,
+            #     "aa": 1,
+            #     "risk_unit": .002,
+            #     "vc": True,
+            #     "vc_level":"400$.003",
+            #     "portfolio_cash": 200000,
+            #     "risk_adjustment": .005,
+            #     "probability": 0.5
+            # },
+            # {
+            #     "put_pct": 1, 
+            #     "spread_adjustment": 0,
+            #     "aa": 1,
+            #     "risk_unit": .002,
+            #     "vc": True,
+            #     "vc_level":"400$.003",
+            #     "portfolio_cash": 200000,
+            #     "risk_adjustment": .003,
+            #     "probability": 0.5
+            # },
+            # {
+            #     "put_pct": 1, 
+            #     "spread_adjustment": 0,
+            #     "aa": 1,
+            #     "risk_unit": .002,
+            #     "vc": True,
+            #     "vc_level":"250$.003",
+            #     "portfolio_cash": 200000,
+            #     "risk_adjustment": .005,
+            #     "probability": 0.5
+            # },
+            # {
+            #     "put_pct": 1, 
+            #     "spread_adjustment": 0,
+            #     "aa": 1,
+            #     "risk_unit": .002,
+            #     "vc": True,
+            #     "vc_level":"250$.003",
+            #     "portfolio_cash": 200000,
+            #     "risk_adjustment": .003,
+            #     "probability": 0.5
+            # }
         ]
 
         for config in backtest_configs:
@@ -216,5 +216,9 @@ if __name__ == "__main__":
             s3.put_object(Body=portfolio_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/portfolio_report.csv')
             s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/positions_report.csv')
             print(f"Done with {trading_strat} at {datetime.now()}!")
+            models_tested.append(trading_strat)
+
+    print(f"Completed all models at {datetime.now()}!")
+    print(models_tested)
 
 
