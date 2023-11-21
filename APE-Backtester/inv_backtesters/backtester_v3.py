@@ -49,7 +49,7 @@ def run_trades_simulation(full_positions_list,start_date,end_date,config):
 def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,config):
 
     if not local_data:
-        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=8) as executor:
             # Submit the processing tasks to the ThreadPoolExecutor
             processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies,config) for file_name in file_names]
 
@@ -119,68 +119,24 @@ if __name__ == "__main__":
         strategies = ["BFC","BFC_1D","BFP","BFP_1D"]
 
         backtest_configs = [
-            {
-                "put_pct": 1, 
-                "spread_adjustment": 0,
-                "aa": 1,
-                "risk_unit": .002,
-                "vc": False,
-                "vc_level":"nvc",
-                "portfolio_cash": 200000,
-                "risk_adjustment": .003,
-                "probability": 0.5
-            },
-            {
-                "put_pct": 1, 
-                "spread_adjustment": 1,
-                "aa": 1,
-                "risk_unit": .002,
-                "vc": False,
-                "vc_level":"nvc",
-                "portfolio_cash": 200000,
-                "risk_adjustment": .003,
-                "probability": 0.5
-            },
-            {
-                "put_pct": 1, 
-                "spread_adjustment": 0,
-                "aa": 1,
-                "risk_unit": .002,
-                "vc": False,
-                "vc_level":"nvc",
-                "portfolio_cash": 200000,
-                "risk_adjustment": .005,
-                "probability": 0.5
-            },
-            {
-                "put_pct": 1, 
-                "spread_adjustment": 1,
-                "aa": 1,
-                "risk_unit": .002,
-                "vc": False,
-                "vc_level":"nvc",
-                "portfolio_cash": 200000,
-                "risk_adjustment": .005,
-                "probability": 0.5
-            },
             # {
             #     "put_pct": 1, 
             #     "spread_adjustment": 0,
             #     "aa": 1,
             #     "risk_unit": .002,
-            #     "vc": True,
-            #     "vc_level":"400$.003",
+            #     "vc": False,
+            #     "vc_level":"nvc",
             #     "portfolio_cash": 200000,
-            #     "risk_adjustment": .005,
+            #     "risk_adjustment": .003,
             #     "probability": 0.5
             # },
             # {
             #     "put_pct": 1, 
-            #     "spread_adjustment": 0,
+            #     "spread_adjustment": 1,
             #     "aa": 1,
             #     "risk_unit": .002,
-            #     "vc": True,
-            #     "vc_level":"400$.003",
+            #     "vc": False,
+            #     "vc_level":"nvc",
             #     "portfolio_cash": 200000,
             #     "risk_adjustment": .003,
             #     "probability": 0.5
@@ -190,23 +146,67 @@ if __name__ == "__main__":
             #     "spread_adjustment": 0,
             #     "aa": 1,
             #     "risk_unit": .002,
-            #     "vc": True,
-            #     "vc_level":"250$.003",
+            #     "vc": False,
+            #     "vc_level":"nvc",
             #     "portfolio_cash": 200000,
             #     "risk_adjustment": .005,
             #     "probability": 0.5
             # },
             # {
             #     "put_pct": 1, 
-            #     "spread_adjustment": 0,
+            #     "spread_adjustment": 1,
             #     "aa": 1,
             #     "risk_unit": .002,
-            #     "vc": True,
-            #     "vc_level":"250$.003",
+            #     "vc": False,
+            #     "vc_level":"nvc",
             #     "portfolio_cash": 200000,
-            #     "risk_adjustment": .003,
+            #     "risk_adjustment": .005,
             #     "probability": 0.5
-            # }
+            # },
+            {
+                "put_pct": 1, 
+                "spread_adjustment": 0,
+                "aa": 1,
+                "risk_unit": .002,
+                "vc": True,
+                "vc_level":"400$.003",
+                "portfolio_cash": 200000,
+                "risk_adjustment": .005,
+                "probability": 0.5
+            },
+            {
+                "put_pct": 1, 
+                "spread_adjustment": 0,
+                "aa": 1,
+                "risk_unit": .002,
+                "vc": True,
+                "vc_level":"400$.003",
+                "portfolio_cash": 200000,
+                "risk_adjustment": .003,
+                "probability": 0.5
+            },
+            {
+                "put_pct": 1, 
+                "spread_adjustment": 0,
+                "aa": 1,
+                "risk_unit": .002,
+                "vc": True,
+                "vc_level":"250$.003",
+                "portfolio_cash": 200000,
+                "risk_adjustment": .005,
+                "probability": 0.5
+            },
+            {
+                "put_pct": 1, 
+                "spread_adjustment": 0,
+                "aa": 1,
+                "risk_unit": .002,
+                "vc": True,
+                "vc_level":"250$.003",
+                "portfolio_cash": 200000,
+                "risk_adjustment": .003,
+                "probability": 0.5
+            }
         ]
 
         for config in backtest_configs:
