@@ -68,13 +68,13 @@ def backtest_orchestrator(start_date, end_date, portfolio_cash, risk_unit,file_n
 
 if __name__ == "__main__":
     s3 = boto3.client('s3')
-    start_date = '2023/08/14'
+    start_date = '2023/06/05'
     end_date = '2023/10/09'
     start_str = start_date.split("/")[1] + start_date.split("/")[2]
     end_str = end_date.split("/")[1] + end_date.split("/")[2]
-    trading_strat = "modelsv2_noposlimit_0out_100put_noresize"
+    trading_strat = "modelsv2_noposlimit_0out_85put_noresize_risk+3_AA1"
     portfolio_cash = 200000
-    risk_unit =.004
+    risk_unit =.0025
     cash_risk = f"{portfolio_cash}_{risk_unit}"
     strategies = ["BFC","BFC_1D","BFP","BFP_1D"]
     # portfolio_df, positions_df = run_backtest(start_date, end_date)

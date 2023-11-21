@@ -160,7 +160,7 @@ def time_decay_alpha_BFP_v0_inv(polygon_df, simulation_date, quantity):
         max_value = polygon_df.iloc[:index]['underlying_price'].max()
         Target_pct = -.025
         pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
-        Floor_pct = ((float(max_value) - float(open_price))/float(open_price) + .012)
+        Floor_pct = ((float(max_value) - float(open_price))/float(open_price) + .009)
 
 
         if pct_change < (2*Target_pct):
@@ -207,7 +207,7 @@ def time_decay_alpha_BFC_v0_inv(polygon_df, simulation_date, quantity):
         max_value = polygon_df.iloc[:index]['underlying_price'].max()
         Target_pct = .025
         pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
-        Floor_pct = ((float(max_value) - float(open_price))/float(open_price) - .012)
+        Floor_pct = ((float(max_value) - float(open_price))/float(open_price) - .009)
 
         # if type(Floor_pct) == float:
         #     Floor_pct = -0.02
@@ -255,7 +255,7 @@ def time_decay_alpha_BFP1D_v0_inv(polygon_df, simulation_date, quantity):
         max_value = polygon_df.iloc[:index]['underlying_price'].max()
         Target_pct = -.015
         pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
-        Floor_pct = ((float(max_value) - float(open_price))/float(open_price) + .007)
+        Floor_pct = ((float(max_value) - float(open_price))/float(open_price) + .004)
 
 
         if pct_change < (2*Target_pct):
@@ -301,7 +301,7 @@ def time_decay_alpha_BFC1D_v0_inv(polygon_df, simulation_date, quantity):
         max_value = polygon_df.iloc[:index]['underlying_price'].max()
         Target_pct = .015
         pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
-        Floor_pct = ((float(max_value) - float(open_price))/float(open_price) - .007)
+        Floor_pct = ((float(max_value) - float(open_price))/float(open_price) - .004)
 
         # if type(Floor_pct) == float:
         #     Floor_pct = -0.02

@@ -101,13 +101,17 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length):
     enriched_options_aggregates = []
     expiries = ast.literal_eval(row['expiries'])
 
+        ## ASSIGNMENT ADJUSTMENT
     if row['strategy'] in ['BFC','BFP']:
-        expiry = expiries[1]
-    else:
-        if start_date.weekday() >= 3:
-            expiry = expiries[1]
-        else:
+        if start_date.weekday() > 3:
             expiry = expiries[0]
+        else:
+            expiry = expiries[1]
+    else:
+        if start_date.weekday() > 4:
+            expiry = expiries[0]
+        else:
+            expiry = expiries[1]
     
     strike = row['symbol'] + expiry
     try:
@@ -134,7 +138,7 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length):
     filtered_contracts = [k for k in contracts if strike in k]
     options_df = build_options_df(filtered_contracts, row)
     ## SPREAD ADJUSTMENT
-    # options_df = options_df.iloc[2:]
+    # options_df = options_df.iloc[1:]
     for index,contract in options_df.iterrows():
         try:
             options_agg_data = ph.polygon_optiondata(contract['contract_symbol'], start_date, end_date)
@@ -337,7 +341,7 @@ def extract_results_dict(positions_list):
             "price_change": transaction['price_change'], "pct_gain": transaction['pct_gain'],
             "total_gain": transaction['total_gain'], "open_trade_dt": transaction['open_trade_dt'], 
             "close_trade_dt": transaction['close_trade_dt'],"max_gain_before": sell_dict['max_value_before_pct_change'],
-            "max_gain_after": sell_dict['max_value_after_pct_change'],
+            "max_gain_after": sell_dict['max_value_after_pct_change'],"option_symbol": sell_dict['option_symbol'],
             "max_value_before_date": sell_dict['max_value_before_date'], "max_value_after_date": sell_dict['max_value_after_date'],
             "max_value_before_idx": sell_dict['max_value_before_idx'], "max_value_after_idx": sell_dict['max_value_after_idx']
         })
