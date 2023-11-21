@@ -30,7 +30,7 @@ def pull_data_invalerts(bucket_name, object_key, file_name, prefixes, time_span)
     return data, datetime_list
 
 
-def create_simulation_data_inv(row):
+def create_simulation_data_inv(row,config):
     date_str = row['date'].split(" ")[0]
     start_date = datetime(int(date_str.split("-")[0]),int(date_str.split("-")[1]),int(date_str.split("-")[2]),int(row['hour']),0,0)
     if row['strategy'] in ["BFC","BFP","INDEXC","INDEXP"]:
@@ -39,10 +39,10 @@ def create_simulation_data_inv(row):
         days_back = 2
     end_date = backtrader_helper.create_end_date(start_date, days_back)
     # option_symbol, polygon_dfs = backtrader_helper.data_pull(symbol, start_date, end_date, mkt_price, strategy, contracts)
-    trading_aggregates, option_symbols = backtrader_helper.create_options_aggs_inv(row,start_date,end_date=end_date,spread_length=3)
+    trading_aggregates, option_symbols = backtrader_helper.create_options_aggs_inv(row,start_date,end_date=end_date,spread_length=3,config=config)
     return start_date, end_date, row['symbol'], row['o'], row['strategy'], option_symbols, trading_aggregates
 
-def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, polygon_df, position_id, trading_date, alert_hour,order_id):
+def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, polygon_df, position_id, trading_date, alert_hour,order_id,config):
     open_price = open_prices[0]
     open_datetime = datetime(int(trading_date.split("-")[0]),int(trading_date.split("-")[1]),int(trading_date.split("-")[2]),int(alert_hour),0,0,tzinfo=pytz.timezone('US/Eastern'))
     contract_cost = round(open_price * 100,2)
@@ -53,34 +53,49 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
         
     buy_dict = {"open_price": open_price, "open_datetime": open_datetime, "quantity": 1, "contract_cost": contract_cost, "option_symbol": option_symbol, "position_id": position_id, "contract_type": contract_type}
 
-    try:
-        if strategy == "BFP":
-            sell_dict = trade.time_decay_alpha_BFP_v0_inv(polygon_df.iloc[1:],open_datetime,1)
-        elif strategy == "BFC":
-            sell_dict = trade.time_decay_alpha_BFC_v0_inv(polygon_df.iloc[1:],open_datetime,1)
-        elif strategy == "BFC_1D":
-            sell_dict = trade.time_decay_alpha_BFC1D_v0_inv(polygon_df.iloc[1:],open_datetime,1)
-        elif strategy == "BFP_1D":
-            sell_dict = trade.time_decay_alpha_BFP1D_v0_inv(polygon_df.iloc[1:],open_datetime,1)
-    except Exception as e:
-        print(e)
-        print("Error in sell_dict")
-        print(symbol)
-        return {}
+    if config['vc']:
+        try:
+            if strategy == "BFP":
+                sell_dict = trade.time_decay_alpha_BFP_v0_vc(polygon_df,open_datetime,1,config)
+            elif strategy == "BFC":
+                sell_dict = trade.time_decay_alpha_BFC_v0_vc(polygon_df,open_datetime,1,config)
+            elif strategy == "BFC_1D":
+                sell_dict = trade.time_decay_alpha_BFC1D_v0_vc(polygon_df,open_datetime,1,config)
+            elif strategy == "BFP_1D":
+                sell_dict = trade.time_decay_alpha_BFP1D_v0_vc(polygon_df,open_datetime,1,config)
+        except Exception as e:
+            print(f"Error {e} in sell_dict for {symbol} in {strategy}")
+            print(polygon_df)
+            return {}
+    else:
+        try:
+            if strategy == "BFP":
+                sell_dict = trade.time_decay_alpha_BFP_v0_inv(polygon_df,open_datetime,1,config)
+            elif strategy == "BFC":
+                sell_dict = trade.time_decay_alpha_BFC_v0_inv(polygon_df,open_datetime,1,config)
+            elif strategy == "BFC_1D":
+                sell_dict = trade.time_decay_alpha_BFC1D_v0_inv(polygon_df,open_datetime,1,config)
+            elif strategy == "BFP_1D":
+                sell_dict = trade.time_decay_alpha_BFP1D_v0_inv(polygon_df,open_datetime,1,config)
+        except Exception as e:
+            print(f"Error {e} in sell_dict for {symbol} in {strategy}")
+            print(polygon_df)
+            return {}
     
     # sell_dict['position_id'] = position_id
     try:
         sell_dict['position_id'] = position_id
         results_dict = backtrader_helper.create_results_dict(buy_dict, sell_dict, order_id)
         results_dict['position_id'] = position_id
-        print("RESULTS")
-        print(results_dict)
-        print()
         # transaction_dict = {"buy_dict": buy_dict, "sell_dict":sell_dict, "results_dict": results_dict}
-        if buy_dict['open_datetime'] > sell_dict['close_datetime']:
+        buy_dt = buy_dict['open_datetime']
+        sell_dt = sell_dict['close_datetime']
+        buy_dt = datetime(buy_dt.year,buy_dt.month,buy_dt.day,buy_dt.hour)
+        sell_dt = datetime(sell_dt.year,sell_dt.month,sell_dt.day,sell_dt.hour)
+        if buy_dt > sell_dt:
             print(f"Date Mismatch for {symbol}")
-            print(buy_dict)
-            print(sell_dict)
+            print(f"{buy_dt} vs. {sell_dt}")
+            # print(sell_dict['close_datetime'])
             print()
     except Exception as e:
         print(f"Error {e} in transaction_dict for {symbol}")
@@ -91,7 +106,7 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
     return results_dict
     # return buy_dict, sell_dict, results_dict, transaction_dict, open_datetime
 
-def simulate_trades_invalerts(data):
+def simulate_trades_invalerts(data,config):
     positions_list = []
     order_num = 1
     for i, row in data.iterrows():
@@ -99,7 +114,7 @@ def simulate_trades_invalerts(data):
         alert_hour = row['hour']
         trading_date = row['date']
         trading_date = trading_date.split(" ")[0]
-        start_date, end_date, symbol, mkt_price, strategy, option_symbols, enriched_options_aggregates = create_simulation_data_inv(row)
+        start_date, end_date, symbol, mkt_price, strategy, option_symbols, enriched_options_aggregates = create_simulation_data_inv(row,config)
         order_dt = start_date.strftime("%m+%d")
         pos_dt = start_date.strftime("%Y-%m-%d-%H")
         position_id = f"{row['symbol']}-{(row['strategy'].replace('_',''))}-{pos_dt}"
@@ -114,7 +129,10 @@ def simulate_trades_invalerts(data):
                 #     print(df)
                 #     continue
                 order_id = f"{order_num}_{order_dt}"
-                results_dict = buy_iterate_sellV2_invalerts(symbol, ticker, open_prices, strategy, df, position_id, trading_date, alert_hour, order_id)
+                results_dict = buy_iterate_sellV2_invalerts(symbol, ticker, open_prices, strategy, df, position_id, trading_date, alert_hour, order_id,config)
+                print(f"results_dict for {symbol} and {ticker}")
+                print(results_dict)
+                print()
                 if len(results_dict) == 0:
                     print(f"Error in simulate_trades_invalerts for {symbol} and {ticker}")
                     print(f"{order_id}_{order_dt}")

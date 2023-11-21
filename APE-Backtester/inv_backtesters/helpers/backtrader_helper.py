@@ -35,7 +35,6 @@ def round_down_to_base(x, base=5):
 
 def create_end_date(date, trading_days_to_add):
     #Trading days only
-
     while trading_days_to_add > 0:
         date += timedelta(days=1)
         weekday = date.weekday()
@@ -96,19 +95,20 @@ def create_results_dict(buy_dict, sell_dict,order_id):
                     }
     return results_dict
 
-def create_options_aggs_inv(row,start_date,end_date,spread_length):
+def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
     options = []
     enriched_options_aggregates = []
     expiries = ast.literal_eval(row['expiries'])
 
-        ## ASSIGNMENT ADJUSTMENT
+    ## ASSIGNMENT ADJUSTMENT
+    threeD_cutoff, oneD_cutoff = map_assignment_adjustment(config['aa'])
     if row['strategy'] in ['BFC','BFP']:
-        if start_date.weekday() > 3:
+        if start_date.weekday() > threeD_cutoff:
             expiry = expiries[0]
         else:
             expiry = expiries[1]
     else:
-        if start_date.weekday() > 4:
+        if start_date.weekday() > oneD_cutoff:
             expiry = expiries[0]
         else:
             expiry = expiries[1]
@@ -132,13 +132,19 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length):
     try:
         contracts = ast.literal_eval(row['contracts'])
     except Exception as e:
-        print(f"Error: {e} in contracts for {row['symbol']} of {row['strategy']}")
+        print(f"Error: {e} in evaluating contracts for {row['symbol']} of {row['strategy']}")
         return [], []
     
     filtered_contracts = [k for k in contracts if strike in k]
+    if len(filtered_contracts) == 0:
+        print(f"No contracts for {row['symbol']} of {row['strategy']}")
+        print(contracts)
+        print(strike)
+        print(start_date)
+        return [], []
     options_df = build_options_df(filtered_contracts, row)
     ## SPREAD ADJUSTMENT
-    # options_df = options_df.iloc[1:]
+    options_df = options_df.iloc[config['spread_adjustment']:]
     for index,contract in options_df.iterrows():
         try:
             options_agg_data = ph.polygon_optiondata(contract['contract_symbol'], start_date, end_date)
@@ -333,9 +339,6 @@ def extract_results_dict(positions_list):
     transactions = positions_list['transactions']
     for transaction in transactions:
         sell_dict = transaction['sell_info']
-        print('SELL DICT')
-        print(sell_dict)
-        print()
         results_dicts.append(
         {
             "price_change": transaction['price_change'], "pct_gain": transaction['pct_gain'],
@@ -370,6 +373,10 @@ def create_portfolio_date_list(start_date, end_date):
     end_date = create_end_date(end_time, 4)
     date_list, _, _  = create_datetime_index(start_time, end_date)
     return date_list
+
+def map_assignment_adjustment(aa):
+    if aa == 1:
+        return 3,4
 
 
 def build_put_list(opt_chain, expiry, symbol):
@@ -449,7 +456,7 @@ def build_options_df(contracts, row):
 
 
 def extract_strike(row):
-    str = row['contract_symbol'].split(row['underlying_symbol'])[1]
+    str = row['contract_symbol'].split(f"O:{row['underlying_symbol']}")[1]
     if row['option_type'] == 'P':
         str = str.split('P')[1]
     elif row['option_type'] == 'C':

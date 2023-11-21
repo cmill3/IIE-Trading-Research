@@ -44,6 +44,16 @@ def get_business_days(transaction_date, current_date):
     business_days = days - weekends
     return business_days 
 
+def get_day_diff(transaction_date, current_date):
+    transaction_dt = datetime(transaction_date.year, transaction_date.month, transaction_date.day)
+    current_dt = datetime(current_date.year, current_date.month, current_date.day)
+
+    days_between = 0
+    while transaction_dt < current_dt:
+        transaction_dt += timedelta(days=1)
+        if transaction_dt.weekday() < 5:
+            days_between += 1
+    return days_between
 
 def build_spread(chain_df, spread_length, cp):
     contract_list = []
@@ -77,3 +87,8 @@ def convert_timestamp_est(timestamp):
     dt_est = dt_utc.astimezone(pytz.timezone('US/Eastern'))
     
     return dt_est
+
+
+if __name__ == "__main__":    
+    res = get_day_diff(datetime(2023, 11, 17), datetime(2023, 11, 20))
+    print(res)
