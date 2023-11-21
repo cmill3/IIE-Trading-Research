@@ -915,7 +915,8 @@ def time_decay_alpha_BFP_v0_vc(polygon_df, simulation_date, quantity,config):
 
         if deriv_pct_change > float(vc_amt):
             Floor_pct -= float(risk_pct)
-        elif day_diff < 2:
+        
+        if day_diff < 2:
             if pct_change >= Floor_pct:
                 sell_code = 2
                 reason = "Hit exit target, sell."
@@ -971,7 +972,8 @@ def time_decay_alpha_BFC_v0_vc(polygon_df, simulation_date, quantity,config):
 
         if deriv_pct_change > float(vc_amt):
             Floor_pct += float(risk_pct)
-        elif day_diff < 2:
+        
+        if day_diff < 2:
             if pct_change <= Floor_pct:
                 sell_code = 2
                 reason = "Hit exit target, sell."
@@ -1027,7 +1029,8 @@ def time_decay_alpha_BFP1D_v0_vc(polygon_df, simulation_date, quantity,config):
 
         if deriv_pct_change > float(vc_amt):
             Floor_pct -= float(risk_pct)
-        elif day_diff < 1:
+        
+        if day_diff < 1:
             if pct_change >= Floor_pct:
                 sell_code = 2
                 reason = "Hit exit target, sell."
@@ -1082,7 +1085,8 @@ def time_decay_alpha_BFC1D_v0_vc(polygon_df, simulation_date, quantity,config):
 
         if deriv_pct_change > float(vc_amt):
             Floor_pct += float(risk_pct)
-        elif day_diff < 1:
+        
+        if day_diff < 1:
             if pct_change <= Floor_pct:
                 sell_code = 2
                 reason = "Hit exit target, sell."
@@ -1280,13 +1284,13 @@ def build_trade_analytics(row, polygon_df, derivative_open_price, index, quantit
     after_df = polygon_df.iloc[index:]
     trade_dict['max_value_before'] = before_df['h'].max()
     trade_dict['max_value_before_idx'] = before_df['h'].idxmax()
-    trade_dict['max_value_before_date'] = before_df.loc[trade_dict['max_value_before_idx']]['date']
+    trade_dict['max_value_before_date'] = before_df.loc[trade_dict['max_value_before_idx']]['date'].strftime("%Y-%m-%d %H:%M")
     trade_dict['max_value_before_pct_change'] = ((trade_dict['max_value_before'] - derivative_open_price)/derivative_open_price)
 
     if len(after_df) > 0:
         trade_dict['max_value_after'] = after_df['h'].max()
         trade_dict['max_value_after_idx'] = after_df['h'].idxmax()
-        trade_dict['max_value_after_date'] = after_df.loc[trade_dict['max_value_after_idx']]['date']
+        trade_dict['max_value_after_date'] = after_df.loc[trade_dict['max_value_after_idx']]['date'].strftime("%Y-%m-%d %H:%M")
         trade_dict['max_value_after_pct_change'] = ((trade_dict['max_value_after'] - derivative_open_price)/derivative_open_price)
     else:
         trade_dict['max_value_after'] = None
