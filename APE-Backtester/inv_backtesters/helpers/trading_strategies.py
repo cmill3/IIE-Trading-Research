@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 import logging
-from helpers.helper import get_business_days  
+from helpers.helper import get_day_diff
 import numpy as np  
 import math
 import ast
@@ -170,13 +170,14 @@ def time_decay_alpha_BFP_v0_inv(polygon_df, simulation_date, quantity,config):
             Floor_pct -= 0.075
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
-        day_diff = get_business_days(simulation_date, row['date'])
+        day_diff = get_day_diff(simulation_date, row['date'])
+
         sell_code = 0
         reason = ""
         if day_diff < 2:
             if pct_change >= Floor_pct:
                 sell_code = 2
-                reason = "Hit exit target, sell."
+                reason = f"Breached floor pct, sell. {pct_change} {Floor_pct}"
         elif day_diff > 3:
             sell_code = 3
             reason = "Held through confidence."
@@ -219,13 +220,14 @@ def time_decay_alpha_BFC_v0_inv(polygon_df, simulation_date, quantity,config):
         elif pct_change > Target_pct:
             Floor_pct += 0.0075
 
-        day_diff = get_business_days(simulation_date, row['date'])
+
+        day_diff = get_day_diff(simulation_date, row['date'])
         sell_code = 0
         reason = ""
         if day_diff < 2:
             if pct_change <= Floor_pct:
                 sell_code = 2
-                reason = "Hit exit target, sell."
+                reason = f"Breached floor pct, sell. {pct_change} {Floor_pct}"
         elif day_diff > 3:
             sell_code = 3
             reason = "Held through confidence."
@@ -271,13 +273,13 @@ def time_decay_alpha_BFP1D_v0_inv(polygon_df, simulation_date, quantity,config):
             Floor_pct -= 0.035
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
-        day_diff = get_business_days(simulation_date, row['date'])
+        day_diff = get_day_diff(simulation_date, row['date'])
         sell_code = 0
         reason = ""
         if day_diff < 1:
             if pct_change >= Floor_pct:
                 sell_code = 2
-                reason = "Hit exit target, sell."
+                reason = f"Breached floor pct, sell. {pct_change} {Floor_pct}"
         elif day_diff > 2:
             sell_code = 3
             reason = "Held through confidence."
@@ -323,13 +325,13 @@ def time_decay_alpha_BFC1D_v0_inv(polygon_df, simulation_date, quantity,config):
             Floor_pct += 0.0035
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
-        day_diff = get_business_days(simulation_date, row['date'])
+        day_diff = get_day_diff(simulation_date, row['date'])
         sell_code = 0
         reason = ""
         if day_diff < 1:
             if pct_change <= Floor_pct:
                 sell_code = 2
-                reason = "Hit exit target, sell."
+                reason = f"Breached floor pct, sell. {pct_change} {Floor_pct}"
         elif day_diff > 2:
             sell_code = 3
             reason = "Held through confidence."
@@ -905,7 +907,7 @@ def time_decay_alpha_BFP_v0_vc(polygon_df, simulation_date, quantity,config):
             Floor_pct -= 0.075
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
-        day_diff = get_business_days(simulation_date, row['date'])
+        day_diff = get_day_diff(simulation_date, row['date'])
         sell_code = 0
         reason = ""
 
@@ -962,7 +964,7 @@ def time_decay_alpha_BFC_v0_vc(polygon_df, simulation_date, quantity,config):
             Floor_pct += 0.0075
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
-        day_diff = get_business_days(simulation_date, row['date'])
+        day_diff = get_day_diff(simulation_date, row['date'])
         sell_code = 0
         reason = ""
         vc_amt,risk_pct = config['vc_level'].split("$")
@@ -1017,7 +1019,7 @@ def time_decay_alpha_BFP1D_v0_vc(polygon_df, simulation_date, quantity,config):
             Floor_pct -= 0.075
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
-        day_diff = get_business_days(simulation_date, row['date'])
+        day_diff = get_day_diff(simulation_date, row['date'])
         sell_code = 0
         reason = ""
 
@@ -1073,7 +1075,7 @@ def time_decay_alpha_BFC1D_v0_vc(polygon_df, simulation_date, quantity,config):
             Floor_pct += 0.0075
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
-        day_diff = get_business_days(simulation_date, row['date'])
+        day_diff = get_day_diff(simulation_date, row['date'])
         sell_code = 0
         reason = ""
         vc_amt,risk_pct = config['vc_level'].split("$")

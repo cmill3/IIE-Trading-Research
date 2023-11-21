@@ -49,7 +49,7 @@ def run_trades_simulation(full_positions_list,start_date,end_date,config):
 def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,config):
 
     if not local_data:
-        with concurrent.futures.ThreadPoolExecutor(max_workers=12) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
             # Submit the processing tasks to the ThreadPoolExecutor
             processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies,config) for file_name in file_names]
 
@@ -97,14 +97,17 @@ if __name__ == "__main__":
 
     test_files =  ['2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
     '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02']
-
     test_files2 = ['2023-01-02', '2023-01-09', '2023-01-16', '2023-01-23', 
-         '2023-01-30', '2023-02-06', '2023-02-13', '2023-02-20', '2023-02-27', '2023-03-06', '2023-03-13', '2023-03-20', 
+         '2023-01-30', '2023-02-06', '2023-02-13', '2023-02-20']
+    test_files3 = ['2023-02-27', '2023-03-06', '2023-03-13', '2023-03-20', 
          '2023-03-27', '2023-04-03', '2023-04-10', '2023-04-17', '2023-04-24']
+    test_files4 = ['2023-05-01', '2023-05-08', '2023-05-15', 
+         '2023-05-22', '2023-05-29', '2023-06-05', '2023-06-12', '2023-06-19']
     
-    time_peridods = [test_files,test_files2,file_names]
+    time_periods = [test_files,test_files2,test_files3,test_files4]
 
-    for time in time_peridods:
+    for time in time_periods:
+        print(f"Starting {time} at {datetime.now()}")
         start_dt = time[0]
         end_date = time[-1]
 
@@ -208,9 +211,10 @@ if __name__ == "__main__":
 
         for config in backtest_configs:
             trading_strat = f"modelsv2_noposlimit_{config['spread_adjustment']}out_{config['put_pct']}put_noresize_risk{config['risk_adjustment']}_AA{config['aa']}_{config['vc_level']}_prob{config['probability']}"
-            portfolio_df, positions_df = backtest_orchestrator(start_date, end_date,file_names=test_files,strategies=strategies,local_data=False, config=config) 
+            print(f"Starting {trading_strat} at {datetime.now()}")
+            portfolio_df, positions_df = backtest_orchestrator(start_date, end_date,file_names=time,strategies=strategies,local_data=False, config=config) 
             s3.put_object(Body=portfolio_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/portfolio_report.csv')
             s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/positions_report.csv')
-            print(f"Done with {trading_strat}!")
+            print(f"Done with {trading_strat} at {datetime.now()}!")
 
 
