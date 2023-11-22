@@ -53,7 +53,7 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
         
     buy_dict = {"open_price": open_price, "open_datetime": open_datetime, "quantity": 1, "contract_cost": contract_cost, "option_symbol": option_symbol, "position_id": position_id, "contract_type": contract_type}
 
-    if config['vc']:
+    if config['vc'] == "vc":
         try:
             if strategy == "BFP":
                 sell_dict = trade.time_decay_alpha_BFP_v0_vc(polygon_df,open_datetime,1,config)
@@ -63,6 +63,20 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
                 sell_dict = trade.time_decay_alpha_BFC1D_v0_vc(polygon_df,open_datetime,1,config)
             elif strategy == "BFP_1D":
                 sell_dict = trade.time_decay_alpha_BFP1D_v0_vc(polygon_df,open_datetime,1,config)
+        except Exception as e:
+            print(f"Error {e} in sell_dict for {symbol} in {strategy}")
+            print(polygon_df)
+            return {}
+    elif config['vc'] == "vc2":
+        try:
+            if strategy == "BFP":
+                sell_dict = trade.time_decay_alpha_BFP_v0_vc2(polygon_df,open_datetime,1,config)
+            elif strategy == "BFC":
+                sell_dict = trade.time_decay_alpha_BFC_v0_vc2(polygon_df,open_datetime,1,config)
+            elif strategy == "BFC_1D":
+                sell_dict = trade.time_decay_alpha_BFC1D_v0_vc2(polygon_df,open_datetime,1,config)
+            elif strategy == "BFP_1D":
+                sell_dict = trade.time_decay_alpha_BFP1D_v0_vc2(polygon_df,open_datetime,1,config)
         except Exception as e:
             print(f"Error {e} in sell_dict for {symbol} in {strategy}")
             print(polygon_df)
