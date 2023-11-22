@@ -27,7 +27,7 @@ def build_backtest_data(file_name,strategies,config):
     dfs = []
     for strategy in strategies:
         data = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/{strategy}/{file_name}.csv')
-        dfs.append(data[0:5])
+        dfs.append(data)
 
     backtest_data = pd.concat(dfs,ignore_index=True)
     backtest_data = backtest_data[backtest_data['probabilities'] > config['probability']]
