@@ -109,7 +109,6 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit,
                             current_positions.append((position['position_id'].split("-")[0] + position['position_id'].split("-")[1]))
                             results_dicts = extract_results_dict(position)
                             positions_taken.append({'position_id':position['position_id'],"results":results_dicts,"quantity":quantities})
-                            value['period_net_returns'] = (value['sale_returns'] - value['purchase_costs'])
                 else:
                     if passed_trades_dict.get(key) is not None:
                         passed_trades_dict[key]['trades'].append(position)
@@ -133,7 +132,7 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit,
     print(diff2)
     return portfolio_df, passed_trades_df, positions_taken, positions_dict
 
-def simulate_portfolio_poslimit(positions_list, datetime_list, portfolio_cash, risk_unit):
+def simulate_portfolio_poslimit(positions_list, datetime_list, portfolio_cash, risk_unit,put_adjustment):
     positions_taken = []
     contracts_bought = []
     contracts_sold = []
@@ -216,7 +215,6 @@ def simulate_portfolio_poslimit(positions_list, datetime_list, portfolio_cash, r
                 for position in positions_dict[key]:
                     orders_taken = False
                     if approve_trade_poslimit(value['portfolio_cash'],(.5 * starting_cash),position['position_id'].split("-")[0] + position['position_id'].split("-")[1], current_positions):
-                        print(f"Trade for {position['position_id']} approved")
                         sized_buys, sized_sells = ts.build_trade(position,risk_unit,put_adjustment,portfolio_cash)
                         if sized_buys == None:
                             print(position)

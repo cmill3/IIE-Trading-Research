@@ -895,9 +895,10 @@ def time_decay_alpha_BFP_v0_vc(polygon_df, simulation_date, quantity,config):
         if index == 0:
             continue
         max_value = polygon_df.iloc[:index]['underlying_price'].max()
+        max_deriv_value = polygon_df.iloc[:index]['o'].max()
         Target_pct = -.025
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(row['o']) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
         Floor_pct = ((float(max_value) - float(underlying_open_price))/float(underlying_open_price) + (.012 + (-1*config['risk_adjustment'])))
 
 
@@ -916,10 +917,14 @@ def time_decay_alpha_BFP_v0_vc(polygon_df, simulation_date, quantity,config):
         if deriv_pct_change > float(vc_amt):
             Floor_pct -= float(risk_pct)
         
-        if day_diff < 2:
+        if day_diff < 3:
+            if deriv_pct_change > float(vc_amt):
+                Floor_pct -= float(risk_pct)
+            else:
+                Floor_pct = -1 * Target_pct
             if pct_change >= Floor_pct:
                 sell_code = 2
-                reason = "Hit exit target, sell."
+                reason = "Hit exit target, sell early."
         elif day_diff > 3:
             sell_code = 3
             reason = "Held through confidence."
@@ -952,9 +957,10 @@ def time_decay_alpha_BFC_v0_vc(polygon_df, simulation_date, quantity,config):
         if index == 0:
             continue
         max_value = polygon_df.iloc[:index]['underlying_price'].max()
+        max_deriv_value = polygon_df.iloc[:index]['o'].max()
         Target_pct = .025
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(row['o']) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
         Floor_pct = ((float(max_value) - float(underlying_open_price))/float(underlying_open_price) - (.012 + (-1*config['risk_adjustment'])))
 
 
@@ -973,10 +979,14 @@ def time_decay_alpha_BFC_v0_vc(polygon_df, simulation_date, quantity,config):
         if deriv_pct_change > float(vc_amt):
             Floor_pct += float(risk_pct)
         
-        if day_diff < 2:
-            if pct_change <= Floor_pct:
+        if day_diff < 3:
+            if deriv_pct_change > float(vc_amt):
+                Floor_pct += float(risk_pct)
+            else:
+                Floor_pct = -1 * Target_pct
+            if pct_change >= Floor_pct:
                 sell_code = 2
-                reason = "Hit exit target, sell."
+                reason = "Hit exit target, sell early."
         elif day_diff > 3:
             sell_code = 3
             reason = "Held through confidence."
@@ -1009,9 +1019,10 @@ def time_decay_alpha_BFP1D_v0_vc(polygon_df, simulation_date, quantity,config):
         if index == 0:
             continue
         max_value = polygon_df.iloc[:index]['underlying_price'].max()
+        max_deriv_value = polygon_df.iloc[:index]['o'].max()
         Target_pct = -.015
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(row['o']) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
         Floor_pct = ((float(max_value) - float(underlying_open_price))/float(underlying_open_price) + (.007 + (-1*config['risk_adjustment'])))
 
 
@@ -1031,9 +1042,13 @@ def time_decay_alpha_BFP1D_v0_vc(polygon_df, simulation_date, quantity,config):
             Floor_pct -= float(risk_pct)
         
         if day_diff < 1:
+            if deriv_pct_change > float(vc_amt):
+                Floor_pct -= float(risk_pct)
+            else:
+                Floor_pct = -1 * Target_pct
             if pct_change >= Floor_pct:
                 sell_code = 2
-                reason = "Hit exit target, sell."
+                reason = "Hit exit target, sell early."
         elif day_diff > 2:
             sell_code = 3
             reason = "Held through confidence."
@@ -1065,9 +1080,10 @@ def time_decay_alpha_BFC1D_v0_vc(polygon_df, simulation_date, quantity,config):
         if index == 0:
             continue
         max_value = polygon_df.iloc[:index]['underlying_price'].max()
+        max_deriv_value = polygon_df.iloc[:index]['o'].max()
         Target_pct = .015
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(row['o']) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
         Floor_pct = ((float(max_value) - float(underlying_open_price))/float(underlying_open_price) - (.012 + (-1*config['risk_adjustment'])))
 
         # if type(Floor_pct) == float:
@@ -1085,6 +1101,245 @@ def time_decay_alpha_BFC1D_v0_vc(polygon_df, simulation_date, quantity,config):
 
         if deriv_pct_change > float(vc_amt):
             Floor_pct += float(risk_pct)
+        
+        if day_diff < 1:
+            if deriv_pct_change > float(vc_amt):
+                Floor_pct += float(risk_pct)
+            else:
+                Floor_pct = -1 * Target_pct
+            if pct_change >= Floor_pct:
+                sell_code = 2
+                reason = "Hit exit target, sell early."
+        elif day_diff > 2:
+            sell_code = 3
+            reason = "Held through confidence."
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,reason)  
+            return sell_dict
+        elif day_diff >= 1:
+            if pct_change < Floor_pct:
+                sell_code = 2
+                reason = "Hit point of no confidence, sell."
+            elif pct_change >= Target_pct:
+                sell_code = 2
+                reason = "Hit exit target, sell."
+            elif pct_change < (.5*(Target_pct)):
+                sell_code = 2
+                reason = "Failed momentum gate, sell."
+            else:
+                sell_code = 0
+                reason = "Hold."
+
+        if sell_code != 0:
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)
+            return sell_dict
+        
+
+### VC SELL MODELS
+
+def time_decay_alpha_BFP_v0_vc2(polygon_df, simulation_date, quantity,config):
+    underlying_open_price = polygon_df.iloc[0]['underlying_price']
+    derivative_open_price = polygon_df.iloc[0]['o']
+    for index, row in polygon_df.iterrows():
+        if index == 0:
+            continue
+        max_value = polygon_df.iloc[:index]['underlying_price'].max()
+        max_deriv_value = polygon_df.iloc[:index]['o'].max()
+        Target_pct = -.025
+        pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        Floor_pct = ((float(max_value) - float(underlying_open_price))/float(underlying_open_price) + (.012 + (-1*config['risk_adjustment'])))
+
+
+        if pct_change < (2*Target_pct):
+            Floor_pct -= 0.01
+        elif pct_change < Target_pct:
+            Floor_pct -= 0.075
+
+        # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
+        day_diff = get_day_diff(simulation_date, row['date'])
+        sell_code = 0
+        reason = ""
+
+        vc_amt,risk_pct = config['vc_level'].split("$")
+
+        if deriv_pct_change > float(vc_amt):
+            sell_code = 1
+            reason = "Derivative Value Capture."
+        
+        if day_diff < 2:
+            if pct_change >= Floor_pct:
+                sell_code = 2
+                reason = "Hit exit target, sell."
+        elif day_diff > 3:
+            sell_code = 3
+            reason = "Held through confidence."
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,reason)  
+            return sell_dict
+        elif day_diff >= 2:
+            if pct_change > Floor_pct:
+                sell_code = 2
+                reason = "Hit point of no confidence, sell."
+            elif pct_change <= Target_pct:
+                sell_code = 2
+                reason = "Hit exit target, sell."
+            elif pct_change > (.5*(Target_pct)):
+                sell_code = 2
+                reason = "Failed momentum gate, sell."
+            else:
+                sell_code = 0
+                reason = "Hold."
+
+        if sell_code != 0:
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)
+            return sell_dict
+        
+
+
+def time_decay_alpha_BFC_v0_vc2(polygon_df, simulation_date, quantity,config):
+    underlying_open_price = polygon_df.iloc[0]['underlying_price']
+    derivative_open_price = polygon_df.iloc[0]['o']
+    for index, row in polygon_df.iterrows():
+        if index == 0:
+            continue
+        max_value = polygon_df.iloc[:index]['underlying_price'].max()
+        max_deriv_value = polygon_df.iloc[:index]['o'].max()
+        Target_pct = .025
+        pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        Floor_pct = ((float(max_value) - float(underlying_open_price))/float(underlying_open_price) - (.012 + (-1*config['risk_adjustment'])))
+
+
+
+        if pct_change > (2*Target_pct):
+            Floor_pct += 0.01
+        elif pct_change > Target_pct:
+            Floor_pct += 0.0075
+
+        # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
+        day_diff = get_day_diff(simulation_date, row['date'])
+        sell_code = 0
+        reason = ""
+        vc_amt,risk_pct = config['vc_level'].split("$")
+
+        if deriv_pct_change > float(vc_amt):
+            sell_code = 1
+            reason = "Derivative Value Capture."
+        
+        if day_diff < 2:
+            if pct_change <= Floor_pct:
+                sell_code = 2
+                reason = "Hit exit target, sell."
+        elif day_diff > 3:
+            sell_code = 3
+            reason = "Held through confidence."
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,reason)  
+            return sell_dict
+        elif day_diff >= 2:
+            if pct_change < Floor_pct:
+                sell_code = 2
+                reason = "Hit point of no confidence, sell."
+            elif pct_change >= Target_pct:
+                sell_code = 2
+                reason = "Hit exit target, sell."
+            elif pct_change < (.5*(Target_pct)):
+                sell_code = 2
+                reason = "Failed momentum gate, sell."
+            else:
+                sell_code = 0
+                reason = "Hold."
+
+        if sell_code != 0:
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)
+            return sell_dict
+        
+
+
+def time_decay_alpha_BFP1D_v0_vc2(polygon_df, simulation_date, quantity,config):
+    underlying_open_price = polygon_df.iloc[0]['underlying_price']
+    derivative_open_price = polygon_df.iloc[0]['o']
+    for index, row in polygon_df.iterrows():
+        if index == 0:
+            continue
+        max_value = polygon_df.iloc[:index]['underlying_price'].max()
+        max_deriv_value = polygon_df.iloc[:index]['o'].max()
+        Target_pct = -.015
+        pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        Floor_pct = ((float(max_value) - float(underlying_open_price))/float(underlying_open_price) + (.007 + (-1*config['risk_adjustment'])))
+
+
+        if pct_change < (2*Target_pct):
+            Floor_pct -= 0.01
+        elif pct_change < Target_pct:
+            Floor_pct -= 0.075
+
+        # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
+        day_diff = get_day_diff(simulation_date, row['date'])
+        sell_code = 0
+        reason = ""
+
+        vc_amt,risk_pct = config['vc_level'].split("$")
+
+        if deriv_pct_change > float(vc_amt):
+            sell_code = 1
+            reason = "Derivative Value Capture."
+        
+        if day_diff < 1:
+            if pct_change >= Floor_pct:
+                sell_code = 2
+                reason = "Hit exit target, sell."
+        elif day_diff > 2:
+            sell_code = 3
+            reason = "Held through confidence."
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,reason)  
+            return sell_dict
+        elif day_diff >= 1:
+            if pct_change > Floor_pct:
+                sell_code = 2
+                reason = "Hit point of no confidence, sell."
+            elif pct_change <= Target_pct:
+                sell_code = 2
+                reason = "Hit exit target, sell."
+            elif pct_change > (.5*(Target_pct)):
+                sell_code = 2
+                reason = "Failed momentum gate, sell."
+            else:
+                sell_code = 0
+                reason = "Hold."
+
+        if sell_code != 0:
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)
+            return sell_dict
+
+def time_decay_alpha_BFC1D_v0_vc2(polygon_df, simulation_date, quantity,config):
+    underlying_open_price = polygon_df.iloc[0]['underlying_price']
+    derivative_open_price = polygon_df.iloc[0]['o']
+    for index, row in polygon_df.iterrows():
+        if index == 0:
+            continue
+        max_value = polygon_df.iloc[:index]['underlying_price'].max()
+        max_deriv_value = polygon_df.iloc[:index]['o'].max()
+        Target_pct = .015
+        pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        Floor_pct = ((float(max_value) - float(underlying_open_price))/float(underlying_open_price) - (.012 + (-1*config['risk_adjustment'])))
+
+        # if type(Floor_pct) == float:
+        #     Floor_pct = -0.02
+        if pct_change > (2*Target_pct):
+            Floor_pct += 0.01
+        elif pct_change > Target_pct:
+            Floor_pct += 0.0075
+
+        # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
+        day_diff = get_day_diff(simulation_date, row['date'])
+        sell_code = 0
+        reason = ""
+        vc_amt,risk_pct = config['vc_level'].split("$")
+
+        if deriv_pct_change > float(vc_amt):
+            sell_code = 1
+            reason = "Derivative Value Capture."
         
         if day_diff < 1:
             if pct_change <= Floor_pct:
