@@ -40,11 +40,11 @@ def build_backtest_data(file_name,strategies,config):
 
 def run_trades_simulation(full_positions_list,start_date,end_date,config):
     full_date_list = helper.create_portfolio_date_list(start_date, end_date)
-    if config['pos_limit']:
+    if config['pos_limit'] == "poslimit":
         portfolio_df, passed_trades_df, positions_taken, positions_dict = portfolio_sim.simulate_portfolio_poslimit(
             full_positions_list, full_date_list,portfolio_cash=config['portfolio_cash'], risk_unit=config['risk_unit'],put_adjustment=config['put_pct']
             )
-    else:
+    elif config['pos_limit'] == "noposlimit":
         portfolio_df, passed_trades_df, positions_taken, positions_dict = portfolio_sim.simulate_portfolio(
             full_positions_list, full_date_list,portfolio_cash=config['portfolio_cash'], risk_unit=config['risk_unit'],put_adjustment=config['put_pct']
             )
@@ -54,7 +54,7 @@ def run_trades_simulation(full_positions_list,start_date,end_date,config):
 def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,config):
 
     if not local_data:
-        with concurrent.futures.ProcessPoolExecutor(max_workers=8) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=12) as executor:
             # Submit the processing tasks to the ThreadPoolExecutor
             processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies,config) for file_name in file_names]
 
@@ -108,202 +108,211 @@ if __name__ == "__main__":
          '2023-03-27', '2023-04-03', '2023-04-10', '2023-04-17', '2023-04-24']
     test_files4 = ['2023-05-01', '2023-05-08', '2023-05-15', 
          '2023-05-22', '2023-05-29', '2023-06-05', '2023-06-12', '2023-06-19']
-    
+
+    backtest_configs = [
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .01,
+            "vc": "nvc",
+            "vc_level":"nvc",
+            "portfolio_cash": 200000,
+            "risk_adjustment": .003,
+            "probability": 0.5,
+            "pos_limit": "poslimit"
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 1,
+            "aa": 1,
+            "risk_unit": .01,
+            "vc": "nvc",
+            "vc_level":"nvc",
+            "portfolio_cash": 200000,
+            "risk_adjustment": .005,
+            "probability": 0.5,
+            "pos_limit": "poslimit"
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .002,
+            "vc": "vc",
+            "vc_level":"250$.005",
+            "portfolio_cash": 200000,
+            "risk_adjustment": .003,
+            "probability": 0.5,
+            "pos_limit": "poslimit"
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .01,
+            "vc": "vc",
+            "vc_level":"150$.005",
+            "portfolio_cash": 200000,
+            "risk_adjustment": .003,
+            "probability": 0.5,
+            "pos_limit": "poslimit"
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .01,
+            "vc": "vc",
+            "vc_level":"250$.003",
+            "portfolio_cash": 200000,
+            "risk_adjustment": .005,
+            "probability": 0.5,
+            "pos_limit": "poslimit"
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .01,
+            "vc": "vc",
+            "vc_level":"150$.003",
+            "portfolio_cash": 200000,
+            "risk_adjustment": .005,
+            "probability": 0.5,
+            "pos_limit": "poslimit"
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .002,
+            "vc": "vc",
+            "vc_level":"250$.005",
+            "portfolio_cash": 200000,
+            "risk_adjustment": .003,
+            "probability": 0.5,
+            "pos_limit": "noposlimit"
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .002,
+            "vc": "vc",
+            "vc_level":"150$.005",
+            "portfolio_cash": 200000,
+            "risk_adjustment": .003,
+            "probability": 0.5,
+            "pos_limit": "noposlimit"
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .002,
+            "vc": "vc",
+            "vc_level":"250$.003",
+            "portfolio_cash": 200000,
+            "risk_adjustment": .005,
+            "probability": 0.5,
+            "pos_limit": "noposlimit"
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .002,
+            "vc": "vc",
+            "vc_level":"150$.003",
+            "portfolio_cash": 200000,
+            "risk_adjustment": .005,
+            "probability": 0.5,
+            "pos_limit": "noposlimit"
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .01,
+            "vc": "vc2",
+            "vc_level":"400$.005",
+            "portfolio_cash": 200000,
+            "risk_adjustment": .003,
+            "probability": 0.5,
+            "pos_limit": "poslimit"
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .01,
+            "vc": "vc2",
+            "vc_level":"300$.005",
+            "portfolio_cash": 200000,
+            "risk_adjustment": .003,
+            "probability": 0.5,
+            "pos_limit": "poslimit"
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .002,
+            "vc": "vc2",
+            "vc_level":"400$.003",
+            "portfolio_cash": 200000,
+            "risk_adjustment": .003,
+            "probability": 0.5,
+            "pos_limit": "noposlimit"
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .002,
+            "vc": "vc2",
+            "vc_level":"300$.003",
+            "portfolio_cash": 200000,
+            "risk_adjustment": .003,
+            "probability": 0.5,
+            "pos_limit": "noposlimit"
+        }
+    ]
+    # time_periods = [test_files,test_files2,test_files3,test_files4]
+    strategies = ["BFC","BFC_1D","BFP","BFP_1D"]
     time_periods = [test_files,test_files2,test_files3,test_files4]
     models_tested = []
-    for time in time_periods:
-        print(f"Starting {time} at {datetime.now()}")
-        start_dt = time[0]
-        end_date = time[-1]
+    error_models = []
 
-        start_date = start_dt.replace("-","/")
-        end_dt = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=7)
-        end_date = end_dt.strftime("%Y/%m/%d")
-        start_str = start_date.split("/")[1] + start_date.split("/")[2]
-        end_str = end_date.split("/")[1] + end_date.split("/")[2]
-        strategies = ["BFC","BFC_1D","BFP","BFP_1D"]
+    for config in backtest_configs:
+        trading_strat = f"modelsv2_{config['pos_limit']}_{config['spread_adjustment']}out_{config['put_pct']}put_noresize_risk{config['risk_adjustment']}_AA{config['aa']}_{config['vc']}_{config['vc_level']}_prob{config['probability']}"
+        # for time in time_periods:
+            # try:
+            #     start_dt = time[0]
+            #     end_date = time[-1]
 
-        backtest_configs = [
-            {
-                "put_pct": 1, 
-                "spread_adjustment": 0,
-                "aa": 1,
-                "risk_unit": .01,
-                "vc": False,
-                "vc_level":"nvc",
-                "portfolio_cash": 200000,
-                "risk_adjustment": .003,
-                "probability": 0.5,
-                "pos_limit": True
-            },
-            {
-                "put_pct": 1, 
-                "spread_adjustment": 1,
-                "aa": 1,
-                "risk_unit": .01,
-                "vc": False,
-                "vc_level":"nvc",
-                "portfolio_cash": 200000,
-                "risk_adjustment": .005,
-                "probability": 0.5,
-                "pos_limit": True
-            },
-            {
-                "put_pct": 1, 
-                "spread_adjustment": 0,
-                "aa": 1,
-                "risk_unit": .002,
-                "vc": "vc",
-                "vc_level":"250$.005",
-                "portfolio_cash": 200000,
-                "risk_adjustment": .003,
-                "probability": 0.5,
-                "pos_limit": True
-            },
-            {
-                "put_pct": 1, 
-                "spread_adjustment": 0,
-                "aa": 1,
-                "risk_unit": .01,
-                "vc": "vc",
-                "vc_level":"150$.005",
-                "portfolio_cash": 200000,
-                "risk_adjustment": .003,
-                "probability": 0.5,
-                "pos_limit": True
-            },
-            {
-                "put_pct": 1, 
-                "spread_adjustment": 0,
-                "aa": 1,
-                "risk_unit": .01,
-                "vc": "vc",
-                "vc_level":"250$.003",
-                "portfolio_cash": 200000,
-                "risk_adjustment": .005,
-                "probability": 0.5,
-                "pos_limit": True
-            },
-            {
-                "put_pct": 1, 
-                "spread_adjustment": 0,
-                "aa": 1,
-                "risk_unit": .01,
-                "vc": "vc",
-                "vc_level":"150$.003",
-                "portfolio_cash": 200000,
-                "risk_adjustment": .005,
-                "probability": 0.5,
-                "pos_limit": True
-            },
-            {
-                "put_pct": 1, 
-                "spread_adjustment": 0,
-                "aa": 1,
-                "risk_unit": .002,
-                "vc": "vc",
-                "vc_level":"250$.005",
-                "portfolio_cash": 200000,
-                "risk_adjustment": .003,
-                "probability": 0.5,
-                "pos_limit": False
-            },
-            {
-                "put_pct": 1, 
-                "spread_adjustment": 0,
-                "aa": 1,
-                "risk_unit": .002,
-                "vc": "vc",
-                "vc_level":"150$.005",
-                "portfolio_cash": 200000,
-                "risk_adjustment": .003,
-                "probability": 0.5,
-                "pos_limit": False
-            },
-            {
-                "put_pct": 1, 
-                "spread_adjustment": 0,
-                "aa": 1,
-                "risk_unit": .002,
-                "vc": "vc",
-                "vc_level":"250$.003",
-                "portfolio_cash": 200000,
-                "risk_adjustment": .005,
-                "probability": 0.5,
-                "pos_limit": False
-            },
-            {
-                "put_pct": 1, 
-                "spread_adjustment": 0,
-                "aa": 1,
-                "risk_unit": .002,
-                "vc": "vc",
-                "vc_level":"150$.003",
-                "portfolio_cash": 200000,
-                "risk_adjustment": .005,
-                "probability": 0.5,
-                "pos_limit": False
-            },
-            {
-                "put_pct": 1, 
-                "spread_adjustment": 0,
-                "aa": 1,
-                "risk_unit": .01,
-                "vc": "vc2",
-                "vc_level":"400$.005",
-                "portfolio_cash": 200000,
-                "risk_adjustment": .003,
-                "probability": 0.5,
-                "pos_limit": True
-            },
-            {
-                "put_pct": 1, 
-                "spread_adjustment": 0,
-                "aa": 1,
-                "risk_unit": .01,
-                "vc": "vc2",
-                "vc_level":"300$.005",
-                "portfolio_cash": 200000,
-                "risk_adjustment": .003,
-                "probability": 0.5,
-                "pos_limit": True
-            },
-            {
-                "put_pct": 1, 
-                "spread_adjustment": 0,
-                "aa": 1,
-                "risk_unit": .002,
-                "vc": "vc2",
-                "vc_level":"400$.003",
-                "portfolio_cash": 200000,
-                "risk_adjustment": .003,
-                "probability": 0.5,
-                "pos_limit": False
-            },
-            {
-                "put_pct": 1, 
-                "spread_adjustment": 0,
-                "aa": 1,
-                "risk_unit": .002,
-                "vc": "vc2",
-                "vc_level":"300$.003",
-                "portfolio_cash": 200000,
-                "risk_adjustment": .003,
-                "probability": 0.5,
-                "pos_limit": False
-            }
-        ]
+            #     start_date = start_dt.replace("-","/")
+            #     end_dt = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=7)
+            #     end_date = end_dt.strftime("%Y/%m/%d")
+            #     start_str = start_date.split("/")[1] + start_date.split("/")[2]
+            #     end_str = end_date.split("/")[1] + end_date.split("/")[2]
 
-        for config in backtest_configs:
-            trading_strat = f"modelsv2_noposlimit_{config['spread_adjustment']}out_{config['put_pct']}put_noresize_risk{config['risk_adjustment']}_AA{config['aa']}_{config['vc_level']}_prob{config['probability']}"
-            print(f"Starting {trading_strat} at {datetime.now()}")
-            portfolio_df, positions_df = backtest_orchestrator(start_date, end_date,file_names=time,strategies=strategies,local_data=False, config=config) 
-            s3.put_object(Body=portfolio_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/portfolio_report.csv')
-            s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/positions_report.csv')
-            print(f"Done with {trading_strat} at {datetime.now()}!")
-            models_tested.append(trading_strat)
+            #     trading_strat = f"modelsv2_{config['pos_limit']}_{config['spread_adjustment']}out_{config['put_pct']}put_noresize_risk{config['risk_adjustment']}_AA{config['aa']}_{config['vc']}_{config['vc_level']}_prob{config['probability']}"
+            #     print(f"Starting {trading_strat} at {datetime.now()}")
+            #     portfolio_df, positions_df = backtest_orchestrator(start_date, end_date,file_names=time,strategies=strategies,local_data=False, config=config) 
+            #     s3.put_object(Body=portfolio_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/portfolio_report.csv')
+            #     s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/positions_report.csv')
+            #     print(f"Done with {trading_strat} at {datetime.now()}!")
+            # except Exception as e:
+            #     print(f"Error: {e} for {trading_strat}")
+            #     error_models.append(f"Error: {e} for {trading_strat}")
+            #     continue
+        models_tested.append(trading_strat)
 
     print(f"Completed all models at {datetime.now()}!")
     print(models_tested)
+    print("Errors:")
+    print(error_models)
 
 
