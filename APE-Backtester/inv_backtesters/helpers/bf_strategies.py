@@ -228,7 +228,7 @@ def time_decay_alpha_BFP_v0_vc(polygon_df, simulation_date, quantity,config):
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         Target_pct = -.025
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100
         Floor_pct = ((float(min_value) - float(underlying_open_price))/float(underlying_open_price) + (.012 + (-1*config['risk_adjustment'])))
 
 
@@ -290,7 +290,7 @@ def time_decay_alpha_BFC_v0_vc(polygon_df, simulation_date, quantity,config):
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         Target_pct = .025
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100
         Floor_pct = ((float(max_value) - float(underlying_open_price))/float(underlying_open_price) - (.012 + (-1*config['risk_adjustment'])))
 
 
@@ -352,7 +352,7 @@ def time_decay_alpha_BFP1D_v0_vc(polygon_df, simulation_date, quantity,config):
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         Target_pct = -.015
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100
         Floor_pct = ((float(min_value) - float(underlying_open_price))/float(underlying_open_price) + (.007 + (-1*config['risk_adjustment'])))
 
 
@@ -413,7 +413,7 @@ def time_decay_alpha_BFC1D_v0_vc(polygon_df, simulation_date, quantity,config):
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         Target_pct = .015
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100
         Floor_pct = ((float(max_value) - float(underlying_open_price))/float(underlying_open_price) - (.012 + (-1*config['risk_adjustment'])))
 
         # if type(Floor_pct) == float:
@@ -476,7 +476,7 @@ def time_decay_alpha_BFP_v0_vc2(polygon_df, simulation_date, quantity,config):
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         Target_pct = -.025
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100 
         Floor_pct = ((float(min_value) - float(underlying_open_price))/float(underlying_open_price) + (.012 + (-1*config['risk_adjustment'])))
 
 
@@ -535,7 +535,7 @@ def time_decay_alpha_BFC_v0_vc2(polygon_df, simulation_date, quantity,config):
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         Target_pct = .025
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100
         Floor_pct = ((float(max_value) - float(underlying_open_price))/float(underlying_open_price) - (.012 + (-1*config['risk_adjustment'])))
 
 
@@ -594,7 +594,7 @@ def time_decay_alpha_BFP1D_v0_vc2(polygon_df, simulation_date, quantity,config):
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         Target_pct = -.015
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100
         Floor_pct = ((float(min_value) - float(underlying_open_price))/float(underlying_open_price) + (.007 + (-1*config['risk_adjustment'])))
 
 
@@ -651,7 +651,7 @@ def time_decay_alpha_BFC1D_v0_vc2(polygon_df, simulation_date, quantity,config):
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         Target_pct = .015
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100
         Floor_pct = ((float(max_value) - float(underlying_open_price))/float(underlying_open_price) - (.012 + (-1*config['risk_adjustment'])))
 
         # if type(Floor_pct) == float:
@@ -712,7 +712,7 @@ def time_decay_alpha_BFP_v0_regVCSell(polygon_df, simulation_date, quantity, reg
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
         min_pct_change = ((float(min_value) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100
 
         risk_adj1, risk_adj2 = config['risk_adjustment'].split("$")
         vc_amt,risk_pct = config['vc_level'].split("$")
@@ -778,7 +778,7 @@ def time_decay_alpha_BFC_v0_regVCSell(polygon_df, simulation_date, quantity, reg
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
         max_pct_change = ((float(max_value) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100 
 
         risk_adj1, risk_adj2 = config['risk_adjustment'].split("$")
         vc_amt,risk_pct = config['vc_level'].split("$")
@@ -846,7 +846,7 @@ def time_decay_alpha_BFP1D_v0_regVCSell(polygon_df, simulation_date, quantity, r
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
         min_pct_change = ((float(min_value) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100
 
         risk_adj1, risk_adj2 = config['risk_adjustment'].split("$")
         vc_amt,risk_pct = config['vc_level'].split("$")
@@ -910,7 +910,7 @@ def time_decay_alpha_BFC1D_v0_regVCSell(polygon_df, simulation_date, quantity, r
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
         max_pct_change = ((float(max_value) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100
 
         risk_adj1, risk_adj2 = config['risk_adjustment'].split("$")
         vc_amt,risk_pct = config['vc_level'].split("$")
@@ -977,7 +977,7 @@ def time_decay_alpha_BFP_v0_regVC(polygon_df, simulation_date, quantity, regress
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
         min_pct_change = ((float(min_value) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100
 
         risk_adj1, risk_adj2 = config['risk_adjustment'].split("$")
         vc_amt,risk_pct = config['vc_level'].split("$")
@@ -1040,7 +1040,7 @@ def time_decay_alpha_BFC_v0_regVC(polygon_df, simulation_date, quantity, regress
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
         max_pct_change = ((float(max_value) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100
 
         risk_adj1, risk_adj2 = config['risk_adjustment'].split("$")        
         vc_amt,risk_pct = config['vc_level'].split("$")
@@ -1105,7 +1105,7 @@ def time_decay_alpha_BFP1D_v0_regVC(polygon_df, simulation_date, quantity, regre
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
         min_pct_change = ((float(min_value) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100
 
         risk_adj1, risk_adj2 = config['risk_adjustment'].split("$")
         vc_amt,risk_pct = config['vc_level'].split("$")
@@ -1166,7 +1166,7 @@ def time_decay_alpha_BFC1D_v0_regVC(polygon_df, simulation_date, quantity, regre
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
         max_pct_change = ((float(max_value) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100
 
         risk_adj1, risk_adj2 = config['risk_adjustment'].split("$")
         vc_amt,risk_pct = config['vc_level'].split("$")
@@ -1229,7 +1229,7 @@ def time_decay_alpha_BFP_v0_reg(polygon_df, simulation_date, quantity, regressio
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
         min_pct_change = ((float(min_value) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100
 
         risk_adj1, risk_adj2 = config['risk_adjustment'].split("$")        
         # vc_amt,risk_pct = config['vc_level'].split("$")
@@ -1291,7 +1291,7 @@ def time_decay_alpha_BFC_v0_reg(polygon_df, simulation_date, quantity, regressio
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
         max_pct_change = ((float(max_value) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100
 
         risk_adj1, risk_adj2 = config['risk_adjustment'].split("$")
 
@@ -1353,7 +1353,7 @@ def time_decay_alpha_BFP1D_v0_reg(polygon_df, simulation_date, quantity, regress
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
         min_pct_change = ((float(min_value) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100
 
         risk_adj1, risk_adj2 = config['risk_adjustment'].split("$")
 
@@ -1412,7 +1412,7 @@ def time_decay_alpha_BFC1D_v0_reg(polygon_df, simulation_date, quantity, regress
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
         max_pct_change = ((float(max_value) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100
 
         risk_adj1, risk_adj2 = config['risk_adjustment'].split("$")
 
@@ -1476,7 +1476,7 @@ def time_decay_alpha_BFP_v0_regAgg(polygon_df, simulation_date, quantity, regres
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
         min_pct_change = ((float(min_value) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100
 
         risk_adj1, risk_adj2 = config['risk_adjustment'].split("$")        
         # vc_amt,risk_pct = config['vc_level'].split("$")
@@ -1538,7 +1538,7 @@ def time_decay_alpha_BFC_v0_regAgg(polygon_df, simulation_date, quantity, regres
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
         max_pct_change = ((float(max_value) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100
 
         risk_adj1, risk_adj2 = config['risk_adjustment'].split("$")
 
@@ -1600,7 +1600,7 @@ def time_decay_alpha_BFP1D_v0_regAgg(polygon_df, simulation_date, quantity, regr
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
         min_pct_change = ((float(min_value) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100
 
         risk_adj1, risk_adj2 = config['risk_adjustment'].split("$")
 
@@ -1659,7 +1659,7 @@ def time_decay_alpha_BFC1D_v0_regAgg(polygon_df, simulation_date, quantity, regr
         max_deriv_value = polygon_df.iloc[:index]['o'].max()
         pct_change = ((float(row['underlying_price']) - float(underlying_open_price))/float(underlying_open_price))
         max_pct_change = ((float(max_value) - float(underlying_open_price))/float(underlying_open_price))
-        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price))
+        deriv_pct_change = ((float(max_deriv_value) - float(derivative_open_price))/float(derivative_open_price)) * 100
 
         risk_adj1, risk_adj2 = config['risk_adjustment'].split("$")
 

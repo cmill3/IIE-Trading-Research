@@ -10,7 +10,7 @@ import holidays
 
 results = pd.read_csv('/Users/ogdiz/Projects/APE-Research/APE-Backtester/v1/BT_Results/IGNORE.csv')
 
-{
+full = [{
             "put_pct": 1, 
             "spread_adjustment": 0,
             "aa": 1,
@@ -476,5 +476,85 @@ results = pd.read_csv('/Users/ogdiz/Projects/APE-Research/APE-Backtester/v1/BT_R
             "risk_adjustment": "0.25$0.5",
             "pos_limit": "noposlimit",
             "standard_risk": "0.8",
+            "volatility_threshold": 1.5
+        }]
+
+high_vol = [{
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .01,
+            "model": "reg",
+            "vc_level":"nvc",
+            "portfolio_cash": 200000,
+            "risk_adjustment": "0.25$0.5",
+            "pos_limit": "noposlimit",
+            "standard_risk": "0.8",
+            "volatility_threshold": 1.5
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .01,
+            "model": "regVC",
+            "vc_level":"200$",
+            "portfolio_cash": 200000,
+            "risk_adjustment": "0.25$0.5",
+            "pos_limit": "noposlimit",
+            "standard_risk": "0.8",
+            "volatility_threshold": 1.5
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .01,
+            "model": "regVCSell",
+            "vc_level":"200$",
+            "portfolio_cash": 200000,
+            "risk_adjustment": "0.25$0.5",
+            "pos_limit": "noposlimit",
+            "standard_risk": "0.8",
+            "volatility_threshold": 1.5
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .01,
+            "model": "reg",
+            "vc_level":"nvc",
+            "portfolio_cash": 200000,
+            "risk_adjustment": "0.1$0.3",
+            "pos_limit": "noposlimit",
+            "standard_risk": "0.6",
+            "volatility_threshold": 1.5
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .01,
+            "model": "regVC",
+            "vc_level":"200$",
+            "portfolio_cash": 200000,
+            "risk_adjustment": "0.1$0.3",
+            "pos_limit": "noposlimit",
+            "standard_risk": "0.6",
+            "volatility_threshold": 1.5
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .01,
+            "model": "regVCSell",
+            "vc_level":"200$",
+            "portfolio_cash": 200000,
+            "risk_adjustment": "0.1$0.3",
+            "pos_limit": "noposlimit",
+            "standard_risk": "0.6",
             "volatility_threshold": 1.5
         }
+]
