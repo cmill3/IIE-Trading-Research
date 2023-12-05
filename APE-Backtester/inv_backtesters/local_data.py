@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import concurrent.futures
 s3 = boto3.client('s3')
 
-def add_contract_data_to_local(weeks,strategy_info):
+def add_contract_data_to_local(weeks,strategy_info,strategy):
     print(strategy_info)
     # dfs = []
     for week in weeks:
@@ -133,27 +133,28 @@ if __name__ == "__main__":
 
 
     strategy_info = {
-         "BFP_1D": {
-              "file_path": "1D_TSSIM1_BFPSIDX_custHyp_2018",
-              "time_span": 2,
-              "side": "P"
-         },
-        # "BFC_1D": {
-        #       "file_path": "1d_TSSIM1_BFPSIDX_custHyp_2018",
+        #  "BFP_1D": {
+        #       "file_path": "1D_TSSIM1_BFPSIDX_custHyp_2018",
         #       "time_span": 2,
-        #       "side": "C"
-        #  },
-        #  "BFP": {
-        #       "file_path": "TSSIM1_BFPSIDX_MSE_custHyp_2018",
-        #       "time_span": 4,
         #       "side": "P"
         #  },
-        # "BFC": {
-        #       "file_path": "TSSIM1_BFPSIDX_MSE_custHyp_2018",
-        #       "time_span": 4,
-        #       "side": "C"
-        #  }
+        "BFC_1D": {
+              "file_path": "1d_TSSIM1_BFPSIDX_custHyp_2018",
+              "time_span": 2,
+              "side": "C"
+         },
+         "BFP": {
+              "file_path": "TSSIM1_BFPSIDX_MSE_custHyp_2018",
+              "time_span": 4,
+              "side": "P"
+         },
+        "BFC": {
+              "file_path": "TSSIM1_BFPSIDX_MSE_custHyp_2018",
+              "time_span": 4,
+              "side": "C"
+         }
     }
+
     file_names = ['2022-10-03', '2022-10-10', '2022-10-17', '2022-10-24', '2022-10-31', '2022-11-07', '2022-11-14', '2022-11-21', '2022-11-28', 
          '2022-12-05', '2022-12-12', '2022-12-19', '2022-12-26', '2023-01-02', '2023-01-09', '2023-01-16', '2023-01-23', 
          '2023-01-30', '2023-02-06', '2023-02-13', '2023-02-20', '2023-02-27', '2023-03-06', '2023-03-13', '2023-03-20', 
@@ -162,8 +163,11 @@ if __name__ == "__main__":
          '2023-07-17', '2023-07-24', '2023-07-31', '2023-08-07', '2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
          '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02', '2023-10-09']
     
-    for strategy in strategy_info:
-        add_contract_data_to_local(file_names,strategy_info[strategy])
+    # for strategy in strategy_info:
+    with concurrent.futures.ProcessPoolExecutor(max_workers=3) as executor:
+        # Submit the processing tasks to the ThreadPoolExecutor
+        processed_weeks_futures = [executor.submit(add_contract_data_to_local,file_names,strategy_info[strategy],strategy) for strategy in strategy_info]
+        # add_contract_data_to_local(file_names,strategy_info[strategy])strategy_info
 
     # for week in file_names:
     #     for strategy in ['BFC','BFP','BFC_1D','BFP_1D']:
