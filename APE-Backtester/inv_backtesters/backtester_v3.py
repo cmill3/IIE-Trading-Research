@@ -114,44 +114,17 @@ if __name__ == "__main__":
     test_files4 = ['2023-05-01', '2023-05-08', '2023-05-15', 
          '2023-05-22', '2023-05-29', '2023-06-05', '2023-06-12', '2023-06-19']
 
-    backtest_configs = [
-        {
+    backtest_configs = high_vol = [{
             "put_pct": 1, 
             "spread_adjustment": 0,
             "aa": 1,
             "risk_unit": .01,
-            "model": "regAgg",
+            "model": "reg",
             "vc_level":"nvc",
             "portfolio_cash": 200000,
-            "risk_adjustment": "0.1$0.3",
-            "pos_limit": "poslimit",
-            "standard_risk": "0.6",
-            "volatility_threshold": 1
-        },
-        {
-            "put_pct": 1, 
-            "spread_adjustment": 0,
-            "aa": 1,
-            "risk_unit": .01,
-            "model": "regAgg",
-            "vc_level":"nvc",
-            "portfolio_cash": 200000,
-            "risk_adjustment": "0.1$0.3",
-            "pos_limit": "poslimit",
-            "standard_risk": "0.6",
-            "volatility_threshold": 1.25
-        },
-        {
-            "put_pct": 1, 
-            "spread_adjustment": 0,
-            "aa": 1,
-            "risk_unit": .01,
-            "model": "regAgg",
-            "vc_level":"nvc",
-            "portfolio_cash": 200000,
-            "risk_adjustment": "0.1$0.3",
-            "pos_limit": "poslimit",
-            "standard_risk": "0.6",
+            "risk_adjustment": "0.25$0.5",
+            "pos_limit": "noposlimit",
+            "standard_risk": "0.8",
             "volatility_threshold": 1.5
         },
         {
@@ -159,33 +132,33 @@ if __name__ == "__main__":
             "spread_adjustment": 0,
             "aa": 1,
             "risk_unit": .01,
-            "model": "regAgg",
-            "vc_level":"nvc",
+            "model": "regVC",
+            "vc_level":"200$",
             "portfolio_cash": 200000,
-            "risk_adjustment": "0.1$0.3",
+            "risk_adjustment": "0.25$0.5",
             "pos_limit": "noposlimit",
-            "standard_risk": "0.6",
-            "volatility_threshold": 1
+            "standard_risk": "0.8",
+            "volatility_threshold": 1.5
         },
         {
             "put_pct": 1, 
             "spread_adjustment": 0,
             "aa": 1,
             "risk_unit": .01,
-            "model": "regAgg",
-            "vc_level":"nvc",
+            "model": "regVCSell",
+            "vc_level":"200$",
             "portfolio_cash": 200000,
-            "risk_adjustment": "0.1$0.3",
+            "risk_adjustment": "0.25$0.5",
             "pos_limit": "noposlimit",
-            "standard_risk": "0.6",
-            "volatility_threshold": 1.25
+            "standard_risk": "0.8",
+            "volatility_threshold": 1.5
         },
         {
             "put_pct": 1, 
             "spread_adjustment": 0,
             "aa": 1,
             "risk_unit": .01,
-            "model": "regAgg",
+            "model": "reg",
             "vc_level":"nvc",
             "portfolio_cash": 200000,
             "risk_adjustment": "0.1$0.3",
@@ -198,38 +171,12 @@ if __name__ == "__main__":
             "spread_adjustment": 0,
             "aa": 1,
             "risk_unit": .01,
-            "model": "regAgg",
-            "vc_level":"nvc",
+            "model": "regVC",
+            "vc_level":"200$",
             "portfolio_cash": 200000,
-            "risk_adjustment": "0.25$0.5",
-            "pos_limit": "poslimit",
-            "standard_risk": "0.8",
-            "volatility_threshold": 1
-        },
-        {
-            "put_pct": 1, 
-            "spread_adjustment": 0,
-            "aa": 1,
-            "risk_unit": .01,
-            "model": "regAgg",
-            "vc_level":"nvc",
-            "portfolio_cash": 200000,
-            "risk_adjustment": "0.25$0.5",
-            "pos_limit": "poslimit",
-            "standard_risk": "0.8",
-            "volatility_threshold": 1.25
-        },
-        {
-            "put_pct": 1, 
-            "spread_adjustment": 0,
-            "aa": 1,
-            "risk_unit": .01,
-            "model": "regAgg",
-            "vc_level":"nvc",
-            "portfolio_cash": 200000,
-            "risk_adjustment": "0.25$0.5",
-            "pos_limit": "poslimit",
-            "standard_risk": "0.8",
+            "risk_adjustment": "0.1$0.3",
+            "pos_limit": "noposlimit",
+            "standard_risk": "0.6",
             "volatility_threshold": 1.5
         },
         {
@@ -237,41 +184,15 @@ if __name__ == "__main__":
             "spread_adjustment": 0,
             "aa": 1,
             "risk_unit": .01,
-            "model": "regAgg",
-            "vc_level":"nvc",
+            "model": "regVCSell",
+            "vc_level":"200$",
             "portfolio_cash": 200000,
-            "risk_adjustment": "0.25$0.5",
+            "risk_adjustment": "0.1$0.3",
             "pos_limit": "noposlimit",
-            "standard_risk": "0.8",
-            "volatility_threshold": 1
-        },
-        {
-            "put_pct": 1, 
-            "spread_adjustment": 0,
-            "aa": 1,
-            "risk_unit": .01,
-            "model": "regAgg",
-            "vc_level":"nvc",
-            "portfolio_cash": 200000,
-            "risk_adjustment": "0.25$0.5",
-            "pos_limit": "noposlimit",
-            "standard_risk": "0.8",
-            "volatility_threshold": 1.25
-        },
-        {
-            "put_pct": 1, 
-            "spread_adjustment": 0,
-            "aa": 1,
-            "risk_unit": .01,
-            "model": "regAgg",
-            "vc_level":"nvc",
-            "portfolio_cash": 200000,
-            "risk_adjustment": "0.25$0.5",
-            "pos_limit": "noposlimit",
-            "standard_risk": "0.8",
+            "standard_risk": "0.6",
             "volatility_threshold": 1.5
-        }
-    ]
+        },
+]
     # time_periods = [test_files,test_files2,test_files3,test_files4]
     strategies = ["BFC","BFC_1D","BFP","BFP_1D"]
     time_periods = [test_files,test_files2,test_files3,test_files4]

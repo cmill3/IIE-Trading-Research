@@ -556,5 +556,6 @@ high_vol = [{
             "pos_limit": "noposlimit",
             "standard_risk": "0.6",
             "volatility_threshold": 1.5
-        }
+        },
+
 ]
