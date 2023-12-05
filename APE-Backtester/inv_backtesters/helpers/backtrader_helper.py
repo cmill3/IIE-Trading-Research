@@ -8,8 +8,8 @@ import json
 import ast
 # import holidays
 import warnings
-import helpers.trading_strategies as ts
-import helpers.helper as helper
+# import helpers.bf_strategies as ts
+# import helpers.helper as helper
 import helpers.polygon_helper as ph
 import pytz
 
@@ -469,3 +469,16 @@ def extract_strike(row):
             return int(strike[i:])
         
     return 0
+
+def configure_regression_predictions(backtest_data, config):
+    backtest_data = backtest_data[backtest_data['threeD_stddev50'] > 0]
+    forecast_vols = []
+    for index, row in backtest_data.iterrows():
+        if row['strategy'] in ['BFC','BFP']:
+            forecast_vols.append(row['forecast']/row['threeD_stddev50'])
+        else:
+            forecast_vols.append(row['forecast']/row['oneD_stddev50'])
+    backtest_data['forecast_vol'] = forecast_vols
+    # backtest_data['forecast_vol'] = backtest_data.apply(lambda x: x['forecast']/x['threeD_stddev50'] if x['strategy'in ['BFC','BFP']] else x['forecast']/x['oneD_stddev50'],axis=1)
+    data = backtest_data.loc[backtest_data['forecast_vol'] > config['volatility_threshold']].reset_index(drop=True)
+    return data

@@ -3,7 +3,7 @@ import datetime as dt
 import pandas as pd
 from helpers import backtrader_helper
 import warnings
-import helpers.trading_strategies as trade
+import helpers.bf_strategies as trade
 import boto3
 import pytz
 
@@ -22,8 +22,8 @@ def pull_data_invalerts(bucket_name, object_key, file_name, prefixes, time_span)
         except:
             print(f"no file for {prefix}")
             continue
-    full_data = pd.concat(dfs)
-    data = full_data[full_data.predictions == 1]
+    data = pd.concat(dfs)
+    # data = full_data[full_data.predictions == 1]
     start_time = datetime.strptime(data['date'].values[0], '%Y-%m-%d %H:%M:%S%z')
     end_date = backtrader_helper.create_end_date_local_data(data['date'].values[-1], time_span)
     datetime_list, datetime_index, results = backtrader_helper.create_datetime_index(start_time, end_date)
@@ -42,7 +42,7 @@ def create_simulation_data_inv(row,config):
     trading_aggregates, option_symbols = backtrader_helper.create_options_aggs_inv(row,start_date,end_date=end_date,spread_length=3,config=config)
     return start_date, end_date, row['symbol'], row['o'], row['strategy'], option_symbols, trading_aggregates
 
-def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, polygon_df, position_id, trading_date, alert_hour,order_id,config):
+def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, polygon_df, position_id, trading_date, alert_hour,order_id,config,row):
     open_price = open_prices[0]
     open_datetime = datetime(int(trading_date.split("-")[0]),int(trading_date.split("-")[1]),int(trading_date.split("-")[2]),int(alert_hour),0,0,tzinfo=pytz.timezone('US/Eastern'))
     contract_cost = round(open_price * 100,2)
@@ -53,7 +53,7 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
         
     buy_dict = {"open_price": open_price, "open_datetime": open_datetime, "quantity": 1, "contract_cost": contract_cost, "option_symbol": option_symbol, "position_id": position_id, "contract_type": contract_type}
 
-    if config['vc'] == "vc":
+    if config['model'] == "vc":
         try:
             if strategy == "BFP":
                 sell_dict = trade.time_decay_alpha_BFP_v0_vc(polygon_df,open_datetime,1,config)
@@ -67,7 +67,7 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
             print(f"Error {e} in sell_dict for {symbol} in {strategy}")
             print(polygon_df)
             return {}
-    elif config['vc'] == "vc2":
+    elif config['model'] == "vc2":
         try:
             if strategy == "BFP":
                 sell_dict = trade.time_decay_alpha_BFP_v0_vc2(polygon_df,open_datetime,1,config)
@@ -81,22 +81,64 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
             print(f"Error {e} in sell_dict for {symbol} in {strategy}")
             print(polygon_df)
             return {}
-    else:
+    elif config['model'] == "cls":
         try:
             if strategy == "BFP":
-                sell_dict = trade.time_decay_alpha_BFP_v0_inv(polygon_df,open_datetime,1,config)
+                sell_dict = trade.time_decay_alpha_BFP_v0_cls(polygon_df,open_datetime,1,config)
             elif strategy == "BFC":
-                sell_dict = trade.time_decay_alpha_BFC_v0_inv(polygon_df,open_datetime,1,config)
+                sell_dict = trade.time_decay_alpha_BFC_v0_cls(polygon_df,open_datetime,1,config)
             elif strategy == "BFC_1D":
-                sell_dict = trade.time_decay_alpha_BFC1D_v0_inv(polygon_df,open_datetime,1,config)
+                sell_dict = trade.time_decay_alpha_BFC1D_v0_cls(polygon_df,open_datetime,1,config)
             elif strategy == "BFP_1D":
-                sell_dict = trade.time_decay_alpha_BFP1D_v0_inv(polygon_df,open_datetime,1,config)
+                sell_dict = trade.time_decay_alpha_BFP1D_v0_cls(polygon_df,open_datetime,1,config)
+        except Exception as e:
+            print(f"Error {e} in sell_dict for {symbol} in {strategy}")
+            print(polygon_df)
+            return {}
+    elif config['model'] == "regVCSell":
+        try:
+            if strategy == "BFP":
+                sell_dict = trade.time_decay_alpha_BFP_v0_regVCSell(polygon_df,open_datetime,1,row['forecast'],row['threeD_stddev50'],config)
+            elif strategy == "BFC":
+                sell_dict = trade.time_decay_alpha_BFC_v0_regVCSell(polygon_df,open_datetime,1,row['forecast'],row['threeD_stddev50'],config)
+            elif strategy == "BFC_1D":
+                sell_dict = trade.time_decay_alpha_BFC1D_v0_regVCSell(polygon_df,open_datetime,1,row['forecast'],row['oneD_stddev50'],config)
+            elif strategy == "BFP_1D":
+                sell_dict = trade.time_decay_alpha_BFP1D_v0_regVCSell(polygon_df,open_datetime,1,row['forecast'],row['oneD_stddev50'],config)
+        except Exception as e:
+            print(f"Error {e} in sell_dict for {symbol} in {strategy}")
+            print(polygon_df)
+            return {}
+    elif config['model'] == "regVC":
+        try:
+            if strategy == "BFP":
+                sell_dict = trade.time_decay_alpha_BFP_v0_regVC(polygon_df,open_datetime,1,row['forecast'],row['threeD_stddev50'],config)
+            elif strategy == "BFC":
+                sell_dict = trade.time_decay_alpha_BFC_v0_regVC(polygon_df,open_datetime,1,row['forecast'],row['threeD_stddev50'],config)
+            elif strategy == "BFC_1D":
+                sell_dict = trade.time_decay_alpha_BFC1D_v0_regVC(polygon_df,open_datetime,1,row['forecast'],row['oneD_stddev50'],config)
+            elif strategy == "BFP_1D":
+                sell_dict = trade.time_decay_alpha_BFP1D_v0_regVC(polygon_df,open_datetime,1,row['forecast'],row['oneD_stddev50'],config)
+        except Exception as e:
+            print(f"Error {e} in sell_dict for {symbol} in {strategy}")
+            print(polygon_df)
+            return {}
+    elif config['model'] == "reg":
+        try:
+            if strategy == "BFP":
+                sell_dict = trade.time_decay_alpha_BFP_v0_reg(polygon_df,open_datetime,1,row['forecast'],row['threeD_stddev50'],config)
+            elif strategy == "BFC":
+                sell_dict = trade.time_decay_alpha_BFC_v0_reg(polygon_df,open_datetime,1,row['forecast'],row['threeD_stddev50'],config)
+            elif strategy == "BFC_1D":
+                sell_dict = trade.time_decay_alpha_BFC1D_v0_reg(polygon_df,open_datetime,1,row['forecast'],row['oneD_stddev50'],config)
+            elif strategy == "BFP_1D":
+                sell_dict = trade.time_decay_alpha_BFP1D_v0_reg(polygon_df,open_datetime,1,row['forecast'],row['oneD_stddev50'],config)
         except Exception as e:
             print(f"Error {e} in sell_dict for {symbol} in {strategy}")
             print(polygon_df)
             return {}
     
-    # sell_dict['position_id'] = position_id
+    sell_dict['position_id'] = position_id
     try:
         sell_dict['position_id'] = position_id
         results_dict = backtrader_helper.create_results_dict(buy_dict, sell_dict, order_id)
@@ -143,7 +185,7 @@ def simulate_trades_invalerts(data,config):
                 #     print(df)
                 #     continue
                 order_id = f"{order_num}_{order_dt}"
-                results_dict = buy_iterate_sellV2_invalerts(symbol, ticker, open_prices, strategy, df, position_id, trading_date, alert_hour, order_id,config)
+                results_dict = buy_iterate_sellV2_invalerts(symbol, ticker, open_prices, strategy, df, position_id, trading_date, alert_hour, order_id,config,row)
                 print(f"results_dict for {symbol} and {ticker}")
                 print(results_dict)
                 print()

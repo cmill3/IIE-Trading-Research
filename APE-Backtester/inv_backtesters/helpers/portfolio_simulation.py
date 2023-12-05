@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from helpers.backtrader_helper import *
-import helpers.trading_strategies as ts
+from helpers.strategy_helper import *
+import helpers.bf_strategies as ts
 
 
 def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit,put_adjustment):
@@ -26,7 +27,7 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit,
             if positions_dict.get(key) is not None:
                 for position in positions_dict[key]:
                     if value['portfolio_cash'] > (0.5 * starting_cash):
-                        sized_buys, sized_sells = ts.build_trade(position,risk_unit,put_adjustment,portfolio_cash)
+                        sized_buys, sized_sells = build_trade(position,risk_unit,put_adjustment,portfolio_cash)
                         orders_taken = False
                         for index, order in enumerate(sized_buys):
                             if order != None:
@@ -85,7 +86,7 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit,
         if positions_dict.get(key) is not None:
                 for position in positions_dict[key]:
                     if value['portfolio_cash'] > (0.5 * starting_cash):
-                        sized_buys, sized_sells = ts.build_trade(position,risk_unit,put_adjustment,portfolio_cash)
+                        sized_buys, sized_sells = build_trade(position,risk_unit,put_adjustment,portfolio_cash)
                         orders_taken = False
                         for index, order in enumerate(sized_buys):
                             if order != None:
@@ -156,7 +157,7 @@ def simulate_portfolio_poslimit(positions_list, datetime_list, portfolio_cash, r
                 for position in positions_dict[key]:
                     orders_taken = False
                     if value['portfolio_cash'] > (0.5 * starting_cash):
-                        sized_buys, sized_sells = ts.build_trade(position,risk_unit,put_adjustment,portfolio_cash)
+                        sized_buys, sized_sells = build_trade(position,risk_unit,put_adjustment,portfolio_cash)
                         if sized_buys == None:
                             print(f"no buys for {position['position_id']}")
                             continue
@@ -218,7 +219,7 @@ def simulate_portfolio_poslimit(positions_list, datetime_list, portfolio_cash, r
                 for position in positions_dict[key]:
                     orders_taken = False
                     if approve_trade_poslimit(value['portfolio_cash'],(.5 * starting_cash),position['position_id'].split("-")[0] + position['position_id'].split("-")[1], current_positions):
-                        sized_buys, sized_sells = ts.build_trade(position,risk_unit,put_adjustment,portfolio_cash)
+                        sized_buys, sized_sells = build_trade(position,risk_unit,put_adjustment,portfolio_cash)
                         if sized_buys == None:
                             print(position)
                             continue
