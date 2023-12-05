@@ -154,6 +154,7 @@ def simulate_portfolio_poslimit(positions_list, datetime_list, portfolio_cash, r
 
             if positions_dict.get(key) is not None:
                 for position in positions_dict[key]:
+                    orders_taken = False
                     if value['portfolio_cash'] > (0.5 * starting_cash):
                         sized_buys, sized_sells = ts.build_trade(position,risk_unit,put_adjustment,portfolio_cash)
                         if sized_buys == None:
@@ -161,6 +162,7 @@ def simulate_portfolio_poslimit(positions_list, datetime_list, portfolio_cash, r
                             continue
                         for index, order in enumerate(sized_buys):
                             if order != None:
+                                orders_taken = True
                                 value['contracts_purchased'].append(f"{order['option_symbol']}_{order['order_id']}")
                                 value['purchase_costs'] += (order['contract_cost'] * order['quantity'])
                                 value['portfolio_cash'] -= (order['contract_cost'] * order['quantity'])
@@ -176,10 +178,11 @@ def simulate_portfolio_poslimit(positions_list, datetime_list, portfolio_cash, r
                                     sales_dict[sale_dt] = [sale_info]
                                 else:
                                     sales_dict[sale_dt].append(sale_info)
-                        current_positions.append((position['position_id'].split("-")[0] + position['position_id'].split("-")[1]))
-                        results_dicts = extract_results_dict(position)
-                        positions_taken.append({'position_id':position['position_id'],"results":results_dicts,"quantity":quantities})
-                        value['period_net_returns'] = (value['sale_returns'] - value['purchase_costs'])
+                        if orders_taken:
+                            current_positions.append((position['position_id'].split("-")[0] + position['position_id'].split("-")[1]))
+                            results_dicts = extract_results_dict(position)
+                            positions_taken.append({'position_id':position['position_id'],"results":results_dicts,"quantity":quantities})
+                            value['period_net_returns'] = (value['sale_returns'] - value['purchase_costs'])
                     else:
                         if passed_trades_dict.get(key) is not None:
                             passed_trades_dict[key]['trades'].append(position)
