@@ -482,7 +482,6 @@ def configure_regression_predictions(backtest_data, config):
     backtest_data['forecast_vol'] = forecast_vols
     # backtest_data['forecast_vol'] = backtest_data.apply(lambda x: x['forecast']/x['threeD_stddev50'] if x['strategy'in ['BFC','BFP']] else x['forecast']/x['oneD_stddev50'],axis=1)
     data = backtest_data.loc[backtest_data['forecast_vol'] > config['volatility_threshold']].reset_index(drop=True)
-    print(data['strategy'].value_counts())
     return data
 
 def configure_trade_data(df,config):

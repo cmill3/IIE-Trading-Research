@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
-import holidays
+# import holidays
 import boto3
 import helpers.backtest_functions as back_tester
 import helpers.backtrader_helper as helper

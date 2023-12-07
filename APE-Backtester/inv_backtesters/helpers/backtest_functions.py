@@ -239,7 +239,7 @@ def simulate_trades_invalerts(data,config):
                 results.append(results_dict)
                 order_num += 1
             except Exception as e:
-                print("error in buy_iterate_sellV2_invalerts")
+                print(f"error: {e} in buy_iterate_sellV2_invalerts")
                 print(df)
                 continue
         
