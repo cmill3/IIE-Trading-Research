@@ -485,14 +485,14 @@ def configure_regression_predictions(backtest_data, config):
     return data
 
 def configure_trade_data(df,config):
-    index = df.loc[df['symbol'] in ['QQQ','SPY','IWM']]
-    stocks = df.loc[df['symbol'] not in ['QQQ','SPY','IWM']]
+    index = df.loc[df['symbol'].isin(['QQQ','SPY','IWM'])]
+    stocks = df.loc[df['symbol'].isin(['QQQ','SPY','IWM']) == False]
 
-    one = stocks.loc[stocks['strategy']in ['BFC_1D','BFP_1D']]
-    three = stocks.loc[stocks['strategy']in ['BFC','BFP']]
+    one = stocks.loc[stocks['strategy'].isin(['BFC_1D','BFP_1D'])]
+    three = stocks.loc[stocks['strategy'].isin(['BFC','BFP'])]
 
-    one = one.loc[one['day_of_week'] in [2,3]]
-    three = three.loc[three['day_of_week'] in [0,1]]
+    one = one.loc[one['day_of_week'].isin([2,3])]
+    three = three.loc[three['day_of_week'].isin([0,1])]
 
     trade_df = pd.concat([index,one,three])
     return trade_df
