@@ -41,17 +41,14 @@ def time_decay_alpha_BFP_v0_cls(polygon_df, simulation_date, quantity,config):
             return sell_dict
         elif day_diff >= 2:
             if pct_change > Floor_pct:
-                sell_code = 2
+                sell_code = 4
                 reason = "Hit point of no confidence, sell."
             elif pct_change <= Target_pct:
-                sell_code = 2
+                sell_code = 6
                 reason = "Hit exit target, sell."
             elif pct_change > (.5*(Target_pct)):
-                sell_code = 2
+                sell_code = 5
                 reason = "Failed momentum gate, sell."
-            else:
-                sell_code = 0
-                reason = "Hold."
 
         if sell_code != 0:
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,sell_code)
@@ -91,17 +88,15 @@ def time_decay_alpha_BFC_v0_cls(polygon_df, simulation_date, quantity,config):
             return sell_dict
         elif day_diff >= 2:
             if pct_change < Floor_pct:
-                sell_code = 2
+                sell_code = 4
                 reason = "Hit point of no confidence, sell."
             elif pct_change >= Target_pct:
-                sell_code = 2
+                sell_code = 6
                 reason = "Hit exit target, sell."
             elif pct_change < (.5*(Target_pct)):
-                sell_code = 2
+                sell_code = 5
                 reason = "Failed momentum gate, sell."
-            else:
-                sell_code = 0
-                reason = "Hold."
+
 
         if sell_code != 0:
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,sell_code)
@@ -305,7 +300,7 @@ def time_decay_alpha_BFC_v0_vc(polygon_df, simulation_date, quantity,config):
         
         if day_diff < 3:
             if deriv_pct_change > float(vc_amt):
-                Floor_pct = float(risk_pct)
+                Floor_pct = Floor_pct
             else:
                 Floor_pct = -1 * Target_pct
             if pct_change >= Floor_pct:
@@ -365,7 +360,7 @@ def time_decay_alpha_BFP1D_v0_vc(polygon_df, simulation_date, quantity,config):
         
         if day_diff < 1:
             if deriv_pct_change > float(vc_amt):
-                Floor_pct -= float(risk_pct)
+                Floor_pct = Floor_pct
             else:
                 Floor_pct = -1 * Target_pct
             if pct_change >= Floor_pct:
@@ -378,17 +373,14 @@ def time_decay_alpha_BFP1D_v0_vc(polygon_df, simulation_date, quantity,config):
             return sell_dict
         elif day_diff >= 1:
             if pct_change > Floor_pct:
-                sell_code = 2
+                sell_code = 4
                 reason = "Hit point of no confidence, sell."
             elif pct_change <= Target_pct:
-                sell_code = 2
+                sell_code = 6
                 reason = "Hit exit target, sell."
             elif pct_change > (.5*(Target_pct)):
-                sell_code = 2
+                sell_code = 5
                 reason = "Failed momentum gate, sell."
-            else:
-                sell_code = 0
-                reason = "Hold."
 
         if sell_code != 0:
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,sell_code)
@@ -426,7 +418,7 @@ def time_decay_alpha_BFC1D_v0_vc(polygon_df, simulation_date, quantity,config):
         
         if day_diff < 1:
             if deriv_pct_change > float(vc_amt):
-                Floor_pct += float(risk_pct)
+                Floor_pct = Floor_pct
             else:
                 Floor_pct = -1 * Target_pct
             if pct_change >= Floor_pct:
@@ -439,17 +431,14 @@ def time_decay_alpha_BFC1D_v0_vc(polygon_df, simulation_date, quantity,config):
             return sell_dict
         elif day_diff >= 1:
             if pct_change < Floor_pct:
-                sell_code = 2
+                sell_code = 4
                 reason = "Hit point of no confidence, sell."
             elif pct_change >= Target_pct:
-                sell_code = 2
+                sell_code = 6
                 reason = "Hit exit target, sell."
             elif pct_change < (.5*(Target_pct)):
-                sell_code = 2
+                sell_code = 5
                 reason = "Failed momentum gate, sell."
-            else:
-                sell_code = 0
-                reason = "Hold."
 
         if sell_code != 0:
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,sell_code)
@@ -487,6 +476,8 @@ def time_decay_alpha_BFP_v0_vc2(polygon_df, simulation_date, quantity,config):
         if deriv_pct_change > float(vc_amt):
             sell_code = 1
             reason = "Derivative Value Capture."
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,sell_code)
+            return sell_dict
         
         if day_diff < 2:
             if pct_change >= Floor_pct:
@@ -499,17 +490,14 @@ def time_decay_alpha_BFP_v0_vc2(polygon_df, simulation_date, quantity,config):
             return sell_dict
         elif day_diff >= 2:
             if pct_change > Floor_pct:
-                sell_code = 2
+                sell_code = 4
                 reason = "Hit point of no confidence, sell."
             elif pct_change <= Target_pct:
-                sell_code = 2
+                sell_code = 6
                 reason = "Hit exit target, sell."
             elif pct_change > (.5*(Target_pct)):
-                sell_code = 2
+                sell_code = 5
                 reason = "Failed momentum gate, sell."
-            else:
-                sell_code = 0
-                reason = "Hold."
 
         if sell_code != 0:
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,sell_code)
@@ -546,6 +534,8 @@ def time_decay_alpha_BFC_v0_vc2(polygon_df, simulation_date, quantity,config):
         if deriv_pct_change > float(vc_amt):
             sell_code = 1
             reason = "Derivative Value Capture."
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,sell_code)
+            return sell_dict
         
         if day_diff < 2:
             if pct_change <= Floor_pct:
@@ -558,17 +548,14 @@ def time_decay_alpha_BFC_v0_vc2(polygon_df, simulation_date, quantity,config):
             return sell_dict
         elif day_diff >= 2:
             if pct_change < Floor_pct:
-                sell_code = 2
+                sell_code = 4
                 reason = "Hit point of no confidence, sell."
             elif pct_change >= Target_pct:
-                sell_code = 2
+                sell_code = 6
                 reason = "Hit exit target, sell."
             elif pct_change < (.5*(Target_pct)):
-                sell_code = 2
+                sell_code = 5
                 reason = "Failed momentum gate, sell."
-            else:
-                sell_code = 0
-                reason = "Hold."
 
         if sell_code != 0:
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,sell_code)
@@ -605,6 +592,8 @@ def time_decay_alpha_BFP1D_v0_vc2(polygon_df, simulation_date, quantity,config):
         if deriv_pct_change > float(vc_amt):
             sell_code = 1
             reason = "Derivative Value Capture."
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,sell_code)
+            return sell_dict
         
         if day_diff < 1:
             if pct_change >= Floor_pct:
@@ -617,17 +606,14 @@ def time_decay_alpha_BFP1D_v0_vc2(polygon_df, simulation_date, quantity,config):
             return sell_dict
         elif day_diff >= 1:
             if pct_change > Floor_pct:
-                sell_code = 2
+                sell_code = 4
                 reason = "Hit point of no confidence, sell."
             elif pct_change <= Target_pct:
-                sell_code = 2
+                sell_code = 6
                 reason = "Hit exit target, sell."
             elif pct_change > (.5*(Target_pct)):
-                sell_code = 2
+                sell_code = 5
                 reason = "Failed momentum gate, sell."
-            else:
-                sell_code = 0
-                reason = "Hold."
 
         if sell_code != 0:
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,sell_code)
@@ -662,6 +648,8 @@ def time_decay_alpha_BFC1D_v0_vc2(polygon_df, simulation_date, quantity,config):
         if deriv_pct_change > float(vc_amt):
             sell_code = 1
             reason = "Derivative Value Capture."
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,sell_code)
+            return sell_dict
         
         if day_diff < 1:
             if pct_change <= Floor_pct:

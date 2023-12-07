@@ -3,7 +3,13 @@ import helpers.backtest_functions as back_tester
 import pandas as pd
 from datetime import datetime, timedelta
 import concurrent.futures
+import pandas_market_calendars as mcal
+import numpy as np
+
 s3 = boto3.client('s3')
+nyse = mcal.get_calendar('NYSE')
+holidays = nyse.holidays()
+holidays_multiyear = holidays.holidays
 
 def add_contract_data_to_local(weeks,strategy_info,strategy):
     print(strategy_info)
@@ -101,7 +107,12 @@ def create_index_date(date):
     str = date.split(" ")[0]
     dt = datetime.strptime(str, '%Y-%m-%d')
     wk_day = dt.weekday()
-    return dt - timedelta(days=wk_day)
+    monday = dt - timedelta(days=wk_day)
+    monday_np = np.datetime64(monday)
+    
+    if monday_np in holidays_multiyear:
+        monday = monday + timedelta(days=1)
+    return monday
 
 def generate_expiry_dates_row(row):
     date_str = row['date'].split(" ")[0]
@@ -189,8 +200,7 @@ if __name__ == "__main__":
          }
     }
 
-    file_names = ['2022-10-03', '2022-10-10', '2022-10-17', '2022-10-24', '2022-10-31', '2022-11-07', '2022-11-14', '2022-11-21', '2022-11-28', 
-         '2022-12-05', '2022-12-12', '2022-12-19', '2022-12-26', '2023-01-02', '2023-01-09', '2023-01-16', '2023-01-23', 
+    file_names = ['2023-01-02', '2023-01-09', '2023-01-16', '2023-01-23', 
          '2023-01-30', '2023-02-06', '2023-02-13', '2023-02-20', '2023-02-27', '2023-03-06', '2023-03-13', '2023-03-20', 
          '2023-03-27', '2023-04-03', '2023-04-10', '2023-04-17', '2023-04-24', '2023-05-01', '2023-05-08', '2023-05-15', 
          '2023-05-22', '2023-05-29', '2023-06-05', '2023-06-12', '2023-06-19', '2023-06-26', '2023-07-03', '2023-07-10', 
