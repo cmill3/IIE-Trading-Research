@@ -137,6 +137,48 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
             print(f"Error {e} in sell_dict for {symbol} in {strategy}")
             print(polygon_df)
             return {}
+    elif config['model'] == "regAgg":
+        try:
+            if strategy == "BFP":
+                sell_dict = trade.time_decay_alpha_BFP_v0_regAgg(polygon_df,open_datetime,1,row['forecast'],row['threeD_stddev50'],config)
+            elif strategy == "BFC":
+                sell_dict = trade.time_decay_alpha_BFC_v0_regAgg(polygon_df,open_datetime,1,row['forecast'],row['threeD_stddev50'],config)
+            elif strategy == "BFC_1D":
+                sell_dict = trade.time_decay_alpha_BFC1D_v0_regAgg(polygon_df,open_datetime,1,row['forecast'],row['oneD_stddev50'],config)
+            elif strategy == "BFP_1D":
+                sell_dict = trade.time_decay_alpha_BFP1D_v0_regAgg(polygon_df,open_datetime,1,row['forecast'],row['oneD_stddev50'],config)
+        except Exception as e:
+            print(f"Error {e} in sell_dict for {symbol} in {strategy}")
+            print(polygon_df)
+            return {}
+    elif config['model'] == "regAggVCSell":
+        try:
+            if strategy == "BFP":
+                sell_dict = trade.time_decay_alpha_BFP_v0_regAggVCSell(polygon_df,open_datetime,1,row['forecast'],row['threeD_stddev50'],config)
+            elif strategy == "BFC":
+                sell_dict = trade.time_decay_alpha_BFC_v0_regAggVCSell(polygon_df,open_datetime,1,row['forecast'],row['threeD_stddev50'],config)
+            elif strategy == "BFC_1D":
+                sell_dict = trade.time_decay_alpha_BFC1D_v0_regAggVCSell(polygon_df,open_datetime,1,row['forecast'],row['oneD_stddev50'],config)
+            elif strategy == "BFP_1D":
+                sell_dict = trade.time_decay_alpha_BFP1D_v0_regAggVCSell(polygon_df,open_datetime,1,row['forecast'],row['oneD_stddev50'],config)
+        except Exception as e:
+            print(f"Error {e} in sell_dict for {symbol} in {strategy}")
+            print(polygon_df)
+            return {}
+    elif config['model'] == "regAggVC":
+        try:
+            if strategy == "BFP":
+                sell_dict = trade.time_decay_alpha_BFP_v0_regAggVC(polygon_df,open_datetime,1,row['forecast'],row['threeD_stddev50'],config)
+            elif strategy == "BFC":
+                sell_dict = trade.time_decay_alpha_BFC_v0_regAggVC(polygon_df,open_datetime,1,row['forecast'],row['threeD_stddev50'],config)
+            elif strategy == "BFC_1D":
+                sell_dict = trade.time_decay_alpha_BFC1D_v0_regAggVC(polygon_df,open_datetime,1,row['forecast'],row['oneD_stddev50'],config)
+            elif strategy == "BFP_1D":
+                sell_dict = trade.time_decay_alpha_BFP1D_v0_regAggVC(polygon_df,open_datetime,1,row['forecast'],row['oneD_stddev50'],config)
+        except Exception as e:
+            print(f"Error {e} in sell_dict for {symbol} in {strategy}")
+            print(polygon_df)
+            return {}
     
     sell_dict['position_id'] = position_id
     try:

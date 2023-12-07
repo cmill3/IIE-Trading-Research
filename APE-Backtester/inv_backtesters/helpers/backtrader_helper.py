@@ -346,7 +346,8 @@ def extract_results_dict(positions_list):
             "close_trade_dt": transaction['close_trade_dt'],"max_gain_before": sell_dict['max_value_before_pct_change'],
             "max_gain_after": sell_dict['max_value_after_pct_change'],"option_symbol": sell_dict['option_symbol'],
             "max_value_before_date": sell_dict['max_value_before_date'], "max_value_after_date": sell_dict['max_value_after_date'],
-            "max_value_before_idx": sell_dict['max_value_before_idx'], "max_value_after_idx": sell_dict['max_value_after_idx']
+            "max_value_before_idx": sell_dict['max_value_before_idx'], "max_value_after_idx": sell_dict['max_value_after_idx'],
+            "sell_code": sell_dict['sell_code']
         })
     return results_dicts
 
@@ -483,3 +484,17 @@ def configure_regression_predictions(backtest_data, config):
     data = backtest_data.loc[backtest_data['forecast_vol'] > config['volatility_threshold']].reset_index(drop=True)
     print(data['strategy'].value_counts())
     return data
+
+def configure_trade_data(df,config):
+    index = df.loc[df['symbol'] in ['QQQ','SPY','IWM']]
+    stocks = df.loc[df['symbol'] not in ['QQQ','SPY','IWM']]
+
+    one = stocks.loc[stocks['strategy']in ['BFC_1D','BFP_1D']]
+    three = stocks.loc[stocks['strategy']in ['BFC','BFP']]
+
+    one = one.loc[one['day_of_week'] in [2,3]]
+    three = three.loc[three['day_of_week'] in [0,1]]
+
+    trade_df = pd.concat([index,one,three])
+    return trade_df
+

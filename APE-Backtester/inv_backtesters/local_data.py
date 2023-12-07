@@ -16,8 +16,9 @@ def add_contract_data_to_local(weeks,strategy_info,strategy):
                 data.drop(columns=['Unnamed: 0.2','Unnamed: 0.1','Unnamed: 0'],inplace=True)
                 data['side'] = strategy_info['side']
                 data['contracts']= data.apply(lambda x: pull_contract_data(x),axis=1)
-                data['expiries'] = data['date'].apply(lambda x: generate_expiry_dates_row(x))
+                data['expiries'] = data.apply(lambda x: generate_expiry_dates_row(x),axis=1)
                 data.to_csv(f'/Users/charlesmiller/Documents/backtesting_data/{strategy}/{week}.csv', index=False)
+                print(f"Finished {strategy} for {week}")
             except Exception as e:
                 print(f"Error: {e} for {strategy}")
                 continue
@@ -27,13 +28,18 @@ def add_contract_data_to_local(weeks,strategy_info,strategy):
 
         
 def pull_contract_data(row):
-    date = row['date'].split(" ")[0]
-    year, month, day = date.split("-")
+    if row['symbol'] in ['SPY','QQQ','IWM']:
+        date = row['date'].split(" ")[0]
+        file_date = create_index_date(row['date'])
+        year, month, day = file_date.strftime('%Y-%m-%d').split("-")
+    else:
+        date = row['date'].split(" ")[0]
+        year, month, day = date.split("-")
     key = f"options_snapshot/{year}/{month}/{day}/{row['symbol']}.csv"
     try:
         contracts = s3.get_object(Bucket="icarus-research-data", Key=key)
     except Exception as e:
-        print(f"Error: {e} for {row['symbol']}")
+        print(f"Error pulling data: {e} for {row['symbol']}")
         return []
     contracts = pd.read_csv(contracts['Body'])
     try:
@@ -43,7 +49,7 @@ def pull_contract_data(row):
         contracts['month'] = contracts['date'].apply(lambda x: x[2:4])
         contracts['day'] = contracts['date'].apply(lambda x: x[4:])
         contracts['date'] = contracts['year'] + "-" + contracts['month'] + "-" + contracts['day']
-        expiry_dates = generate_expiry_dates(date)
+        expiry_dates = generate_expiry_dates(date,row['symbol'],row['strategy'])
         filtered_contracts = contracts[contracts['date'].isin(expiry_dates)]
         filtered_contracts = filtered_contracts[filtered_contracts['side'] == row['side']]
         contracts_list = filtered_contracts['symbol'].tolist()
@@ -62,18 +68,26 @@ def s3_to_local(file_name):
     data = pd.concat([data1,data2,data3,data4],ignore_index=True)
     data.to_csv(f'/Users/charlesmiller/Documents/backtesting_data/{file_name}.csv', index=False)
 
-def generate_expiry_dates(date_str):
-    input_date = datetime.strptime(date_str, '%Y-%m-%d')
+def generate_expiry_dates(date_str,symbol,strategy):
+    if symbol in ['SPY','QQQ','IWM']:
+        if strategy in ['BFP_1D','BFC_1D']:
+            day_of = add_weekdays(date_str,1,symbol)
+            next_day = add_weekdays(date_str,2,symbol)
+            return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
+        elif strategy in ['BFP','BFC']:
+            day_of = add_weekdays(date_str,3,symbol)
+            next_day = add_weekdays(date_str,4,symbol)
+            return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
+    else: 
+        input_date = datetime.strptime(date_str, '%Y-%m-%d')
+        # Find the weekday of the input date (Monday is 0 and Sunday is 6)
+        weekday = input_date.weekday()
 
-    # Find the weekday of the input date (Monday is 0 and Sunday is 6)
-    weekday = input_date.weekday()
 
     if weekday == 4:
         closest_friday = input_date + timedelta(days=7)
         following_friday = input_date + timedelta(days=14)
-        closest_friday_str = closest_friday.strftime('%Y-%m-%d')
-        following_friday_str = following_friday.strftime('%Y-%m-%d')
-        return [closest_friday_str, following_friday_str]
+        return [closest_friday.strftime('%Y-%m-%d'), following_friday.strftime('%Y-%m-%d')]
 
     # Calculate days until the next Friday
     days_until_closest_friday = (4 - weekday) % 7
@@ -81,26 +95,35 @@ def generate_expiry_dates(date_str):
     closest_friday = input_date + timedelta(days=days_until_closest_friday)
     following_friday = input_date + timedelta(days=days_until_following_friday)
 
-    # Format the dates back to strings
-    closest_friday_str = closest_friday.strftime('%Y-%m-%d')
-    following_friday_str = following_friday.strftime('%Y-%m-%d')
+    return [closest_friday.strftime('%Y-%m-%d'), following_friday.strftime('%Y-%m-%d')]
 
-    return [closest_friday_str, following_friday_str]
+def create_index_date(date):
+    str = date.split(" ")[0]
+    dt = datetime.strptime(str, '%Y-%m-%d')
+    wk_day = dt.weekday()
+    return dt - timedelta(days=wk_day)
 
-def generate_expiry_dates_row(date):
-    date_str = date.split(" ")[0]
-    input_date = datetime.strptime(date_str, '%Y-%m-%d')
-
-    # Find the weekday of the input date (Monday is 0 and Sunday is 6)
-    weekday = input_date.weekday()
+def generate_expiry_dates_row(row):
+    date_str = row['date'].split(" ")[0]
+    if row['symbol'] in ['SPY','QQQ','IWM']:
+        if row['strategy'] in ['BFP_1D','BFC_1D']:
+            day_of = add_weekdays(date_str,1,row['symbol'])
+            next_day = add_weekdays(date_str,2,row['symbol'])
+            return [day_of.strftime('%y%m%d'),next_day.strftime('%y%m%d')]
+        elif row['strategy'] in ['BFP','BFC']:
+            day_of = add_weekdays(date_str,3,row['symbol'])
+            next_day = add_weekdays(date_str,4,row['symbol'])
+            return [day_of.strftime('%y%m%d'),next_day.strftime('%y%m%d')]
+    else: 
+        input_date = datetime.strptime(date_str, '%Y-%m-%d')
+        # Find the weekday of the input date (Monday is 0 and Sunday is 6)
+        weekday = input_date.weekday()
 
     if weekday == 4:
         closest_friday = input_date + timedelta(days=7)
         following_friday = input_date + timedelta(days=14)
-        closest_friday_str = closest_friday.strftime('%y%m%d')
-        following_friday_str = following_friday.strftime('%y%m%d')
 
-        return [closest_friday_str, following_friday_str]
+        return [closest_friday.strftime('%y%m%d'), following_friday.strftime('%y%m%d')]
 
     # Calculate days until the next Friday
     days_until_closest_friday = (4 - weekday) % 7
@@ -108,11 +131,22 @@ def generate_expiry_dates_row(date):
     closest_friday = input_date + timedelta(days=days_until_closest_friday)
     following_friday = input_date + timedelta(days=days_until_following_friday)
 
-    # Format the dates back to strings
-    closest_friday_str = closest_friday.strftime('%y%m%d')
-    following_friday_str = following_friday.strftime('%y%m%d')
 
-    return [closest_friday_str, following_friday_str]
+    return [closest_friday.strftime('%y%m%d'), following_friday.strftime('%y%m%d')]
+
+def add_weekdays(date,days,symbol):
+    if type(date) == str:
+        date = datetime.strptime(date, '%Y-%m-%d')
+    # date = datetime.strptime(date, '%Y-%m-%d')
+    while days > 0:
+        date += timedelta(days=1)
+        if date.weekday() < 5:
+            days -= 1
+
+    if symbol == "IWM":
+        if date.weekday() in [1,3]:
+            date += timedelta(days=1)
+    return date
 
 if __name__ == "__main__":
     # all_dates = [
@@ -133,11 +167,11 @@ if __name__ == "__main__":
 
 
     strategy_info = {
-        #  "BFP_1D": {
-        #       "file_path": "1D_TSSIM1_BFPSIDX_custHyp_2018",
-        #       "time_span": 2,
-        #       "side": "P"
-        #  },
+         "BFP_1D": {
+              "file_path": "1D_TSSIM1_BFPSIDX_custHyp_2018",
+              "time_span": 2,
+              "side": "P"
+         },
         "BFC_1D": {
               "file_path": "1d_TSSIM1_BFPSIDX_custHyp_2018",
               "time_span": 2,
@@ -163,8 +197,10 @@ if __name__ == "__main__":
          '2023-07-17', '2023-07-24', '2023-07-31', '2023-08-07', '2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
          '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02', '2023-10-09']
     
+    # add_contract_data_to_local([file_names[14]],strategy_info['BFP_1D'],"BFP_1D")
+    
     # for strategy in strategy_info:
-    with concurrent.futures.ProcessPoolExecutor(max_workers=3) as executor:
+    with concurrent.futures.ProcessPoolExecutor(max_workers=4) as executor:
         # Submit the processing tasks to the ThreadPoolExecutor
         processed_weeks_futures = [executor.submit(add_contract_data_to_local,file_names,strategy_info[strategy],strategy) for strategy in strategy_info]
         # add_contract_data_to_local(file_names,strategy_info[strategy])strategy_info

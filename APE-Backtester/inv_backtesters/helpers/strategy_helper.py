@@ -164,7 +164,7 @@ def add_spread_cost(spread_cost, target_cost, contracts_details):
     return spread_multiplier, add_one
         
 
-def build_trade_analytics(row, polygon_df, derivative_open_price, index, quantity, reason):
+def build_trade_analytics(row, polygon_df, derivative_open_price, index, quantity, sell_code):
     trade_dict = {}
     before_df = polygon_df.iloc[:index]
     after_df = polygon_df.iloc[index:]
@@ -189,5 +189,5 @@ def build_trade_analytics(row, polygon_df, derivative_open_price, index, quantit
     trade_dict["quantity"] = quantity
     trade_dict["contract_cost"] = (row['o']*100)
     trade_dict["option_symbol"] = row['ticker']
-    trade_dict["reason"] = reason
+    trade_dict["sell_code"] = sell_code
     return trade_dict
