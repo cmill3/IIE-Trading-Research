@@ -9,6 +9,7 @@ pandas = "*"
 requests = "*"
 yahooquery = "*"
 holidays = "*"
+pandas-market-calendars = "*"
 
 [dev-packages]
 

@@ -32,9 +32,12 @@ def build_backtest_data(file_name,strategies,config):
 
     backtest_data = pd.concat(dfs,ignore_index=True)
     # backtest_data = backtest_data[backtest_data['probabilities'] > config['probability']]
-    backtest_data = helper.configure_regression_predictions(backtest_data,config)
-    backtest_data = helper.configure_trade_data(backtest_data,config)
-
+    if config['model_type'] == "reg":
+        backtest_data = helper.configure_regression_predictions(backtest_data,config)
+        backtest_data = helper.configure_trade_data(backtest_data,config)
+    elif config['model_type'] == "cls":
+        backtest_data = backtest_data.loc[backtest_data['predictions'] == 1]
+    
     ## What we will do is instead of simulating one trade at a time we will do one time period at a time and then combine and create results then.
     positions_list = back_tester.simulate_trades_invalerts(backtest_data,config)
     full_positions_list.extend(positions_list)
@@ -128,6 +131,37 @@ if __name__ == "__main__":
             "pos_limit": "noposlimit",
             "standard_risk": "0.8",
             "volatility_threshold": 1.5,
+            "model_type": "reg",
+            "floor_value": 0.9
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .01,
+            "model": "regAggVC",
+            "vc_level":"200$",
+            "portfolio_cash": 200000,
+            "risk_adjustment": "0.25$0.5",
+            "pos_limit": "noposlimit",
+            "standard_risk": "0.8",
+            "volatility_threshold": 1.5,
+            "model_type": "reg",
+            "floor_value": 0.9
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .01,
+            "model": "regAggVCSell",
+            "vc_level":"200$",
+            "portfolio_cash": 200000,
+            "risk_adjustment": "0.25$0.5",
+            "pos_limit": "noposlimit",
+            "standard_risk": "0.8",
+            "volatility_threshold": 1.5,
+            "model_type": "reg",
             "floor_value": 0.9
         },
         {
@@ -136,66 +170,135 @@ if __name__ == "__main__":
             "aa": 1,
             "risk_unit": .01,
             "model": "regAgg",
+            "vc_level":"nvc",
+            "portfolio_cash": 200000,
+            "risk_adjustment": "0.1$0.3",
+            "pos_limit": "noposlimit",
+            "standard_risk": "0.6",
+            "volatility_threshold": 1.25,
+            "model_type": "reg",
+            "floor_value": 0.9
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .01,
+            "model": "regAggVC",
+            "vc_level":"200$",
+            "portfolio_cash": 200000,
+            "risk_adjustment": "0.1$0.3",
+            "pos_limit": "noposlimit",
+            "standard_risk": "0.6",
+            "volatility_threshold": 1.25,
+            "model_type": "reg",
+            "floor_value": 0.9
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .01,
+            "model": "regAggVCSell",
+            "vc_level":"200$",
+            "portfolio_cash": 200000,
+            "risk_adjustment": "0.1$0.3",
+            "pos_limit": "noposlimit",
+            "standard_risk": "0.6",
+            "volatility_threshold": 1.25,
+            "model_type": "reg",
+            "floor_value": 0.9
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .01,
+            "model": "regAgg",
+            "vc_level":"nvc",
+            "portfolio_cash": 200000,
+            "risk_adjustment": "0.25$0.5",
+            "pos_limit": "noposlimit",
+            "standard_risk": "0.8",
+            "volatility_threshold": 1.25,
+            "model_type": "reg",
+            "floor_value": 0.9
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .01,
+            "model": "regAggVC",
             "vc_level":"200$",
             "portfolio_cash": 200000,
             "risk_adjustment": "0.25$0.5",
             "pos_limit": "noposlimit",
             "standard_risk": "0.8",
-            "volatility_threshold": 1.5,
-            "floor_value": 0.75
+            "volatility_threshold": 1.25,
+            "model_type": "reg",
+            "floor_value": 0.9
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .01,
+            "model": "regAggVCSell",
+            "vc_level":"200$",
+            "portfolio_cash": 200000,
+            "risk_adjustment": "0.25$0.5",
+            "pos_limit": "noposlimit",
+            "standard_risk": "0.8",
+            "volatility_threshold": 1.25,
+            "model_type": "reg",
+            "floor_value": 0.9
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .01,
+            "model": "regAgg",
+            "vc_level":"nvc",
+            "portfolio_cash": 200000,
+            "risk_adjustment": "0.1$0.3",
+            "pos_limit": "noposlimit",
+            "standard_risk": "0.6",
+            "volatility_threshold": 1.25,
+            "model_type": "reg",
+            "floor_value": 0.9
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .01,
+            "model": "regAggVC",
+            "vc_level":"200$",
+            "portfolio_cash": 200000,
+            "risk_adjustment": "0.1$0.3",
+            "pos_limit": "noposlimit",
+            "standard_risk": "0.6",
+            "volatility_threshold": 1.25,
+            "model_type": "reg",
+            "floor_value": 0.9
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .01,
+            "model": "regAggVCSell",
+            "vc_level":"200$",
+            "portfolio_cash": 200000,
+            "risk_adjustment": "0.1$0.3",
+            "pos_limit": "noposlimit",
+            "standard_risk": "0.6",
+            "volatility_threshold": 1.25,
+            "model_type": "reg",
+            "floor_value": 0.9
         }
-        # {
-        #     "put_pct": 1, 
-        #     "spread_adjustment": 0,
-        #     "aa": 1,
-        #     "risk_unit": .01,
-        #     "model": "regAggVCSell",
-        #     "vc_level":"200$",
-        #     "portfolio_cash": 200000,
-        #     "risk_adjustment": "0.25$0.5",
-        #     "pos_limit": "noposlimit",
-        #     "standard_risk": "0.8",
-        #     "volatility_threshold": 1.5
-        # },
-        # {
-        #     "put_pct": 1, 
-        #     "spread_adjustment": 0,
-        #     "aa": 1,
-        #     "risk_unit": .01,
-        #     "model": "regAgg",
-        #     "vc_level":"nvc",
-        #     "portfolio_cash": 200000,
-        #     "risk_adjustment": "0.1$0.3",
-        #     "pos_limit": "noposlimit",
-        #     "standard_risk": "0.6",
-        #     "volatility_threshold": 1.5
-        # },
-        # {
-        #     "put_pct": 1, 
-        #     "spread_adjustment": 0,
-        #     "aa": 1,
-        #     "risk_unit": .01,
-        #     "model": "regAggVC",
-        #     "vc_level":"200$",
-        #     "portfolio_cash": 200000,
-        #     "risk_adjustment": "0.1$0.3",
-        #     "pos_limit": "noposlimit",
-        #     "standard_risk": "0.6",
-        #     "volatility_threshold": 1.5
-        # },
-        # {
-        #     "put_pct": 1, 
-        #     "spread_adjustment": 0,
-        #     "aa": 1,
-        #     "risk_unit": .01,
-        #     "model": "regAggVCSell",
-        #     "vc_level":"200$",
-        #     "portfolio_cash": 200000,
-        #     "risk_adjustment": "0.1$0.3",
-        #     "pos_limit": "noposlimit",
-        #     "standard_risk": "0.6",
-        #     "volatility_threshold": 1.5
-        # },
 ]
     # time_periods = [test_files,test_files2,test_files3,test_files4]
     strategies = ["BFC","BFC_1D","BFP","BFP_1D"]
@@ -204,9 +307,9 @@ if __name__ == "__main__":
     error_models = []
 
     for config in backtest_configs:
-        trading_strat = f"modelVOL:{config['model']}_{config['pos_limit']}_{config['spread_adjustment']}out_{config['put_pct']}put_stdRisk{config['standard_risk']}_riskAdj{config['risk_adjustment']}_AA{config['aa']}_{config['vc_level']}_vol{config['volatility_threshold']}_fv2{config['floor_value']}"
+        trading_strat = f"modelVOL:{config['model']}_{config['pos_limit']}_{config['spread_adjustment']}out_{config['put_pct']}put_stdRisk{config['standard_risk']}_riskAdj{config['risk_adjustment']}_AA{config['aa']}_{config['vc_level']}_vol{config['volatility_threshold']}_fv{config['floor_value']}"
         for time in time_periods:
-            try:
+            # try:
                 start_dt = time[0]
                 end_date = time[-1]
 
@@ -222,10 +325,10 @@ if __name__ == "__main__":
                 s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/positions_report.csv')
                 s3.put_object(Body=full_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/all_positions.csv')
                 print(f"Done with {trading_strat} at {datetime.now()}!")
-            except Exception as e:
-                print(f"Error: {e} for {trading_strat}")
-                error_models.append(f"Error: {e} for {trading_strat}")
-                continue
+            # except Exception as e:
+            #     print(f"Error: {e} for {trading_strat}")
+            #     error_models.append(f"Error: {e} for {trading_strat}")
+            #     continue
         models_tested.append(trading_strat)
 
     print(f"Completed all models at {datetime.now()}!")
