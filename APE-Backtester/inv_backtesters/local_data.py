@@ -133,11 +133,11 @@ if __name__ == "__main__":
 
 
     strategy_info = {
-        #  "BFP_1D": {
-        #       "file_path": "1D_TSSIM1_BFPSIDX_custHyp_2018",
-        #       "time_span": 2,
-        #       "side": "P"
-        #  },
+         "BFP_1D": {
+              "file_path": "1D_TSSIM1_BFPSIDX_custHyp_2018",
+              "time_span": 2,
+              "side": "P"
+         },
         "BFC_1D": {
               "file_path": "1d_TSSIM1_BFPSIDX_custHyp_2018",
               "time_span": 2,
@@ -164,7 +164,7 @@ if __name__ == "__main__":
          '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02', '2023-10-09']
     
     # for strategy in strategy_info:
-    with concurrent.futures.ProcessPoolExecutor(max_workers=3) as executor:
+    with concurrent.futures.ProcessPoolExecutor(max_workers=4) as executor:
         # Submit the processing tasks to the ThreadPoolExecutor
         processed_weeks_futures = [executor.submit(add_contract_data_to_local,file_names,strategy_info[strategy],strategy) for strategy in strategy_info]
         # add_contract_data_to_local(file_names,strategy_info[strategy])strategy_info

@@ -1495,7 +1495,7 @@ def time_decay_alpha_BFP_v0_regAgg(polygon_df, simulation_date, quantity, regres
         reason = ""
         
         if day_diff < 2:
-            if pct_change >= regression_tgt:
+            if pct_change <= regression_tgt:
                 sell_code = 2
                 reason = "Hit exit target, sell."
         elif day_diff > 3:
@@ -1557,7 +1557,7 @@ def time_decay_alpha_BFC_v0_regAgg(polygon_df, simulation_date, quantity, regres
         reason = ""
         
         if day_diff < 2:
-            if pct_change <= regression_tgt:
+            if pct_change >= regression_tgt:
                 sell_code = 2
                 reason = "Hit exit target, sell."
         elif day_diff > 3:
@@ -1619,7 +1619,7 @@ def time_decay_alpha_BFP1D_v0_regAgg(polygon_df, simulation_date, quantity, regr
         reason = ""
         
         if day_diff < 1:
-            if pct_change >= regression_tgt:
+            if pct_change <= regression_tgt:
                 sell_code = 2
                 reason = "Hit exit target, sell."
         elif day_diff > 2:
@@ -1679,7 +1679,7 @@ def time_decay_alpha_BFC1D_v0_regAgg(polygon_df, simulation_date, quantity, regr
         reason = ""
         
         if day_diff < 1:
-            if pct_change <= regression_tgt:
+            if pct_change >= regression_tgt:
                 sell_code = 2
                 reason = "Hit exit target, sell."
         elif day_diff > 2:
