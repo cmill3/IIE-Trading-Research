@@ -61,7 +61,7 @@ def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,c
     #  build_backtest_data(file_names[0],strategies,config)
 
     if not local_data:
-        with concurrent.futures.ProcessPoolExecutor(max_workers=8) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=12) as executor:
             # Submit the processing tasks to the ThreadPoolExecutor
             processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies,config) for file_name in file_names]
 
@@ -109,14 +109,15 @@ if __name__ == "__main__":
          '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02', '2023-10-09'
          ]
 
-    test_files =  ['2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
+    test_files =  ['2023-07-31','2023-08-07','2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
     '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02']
     test_files2 = ['2023-01-02', '2023-01-09', '2023-01-16', '2023-01-23', 
          '2023-01-30', '2023-02-06', '2023-02-13', '2023-02-20']
     test_files3 = ['2023-02-27', '2023-03-06', '2023-03-13', '2023-03-20', 
          '2023-03-27', '2023-04-03', '2023-04-10', '2023-04-17', '2023-04-24']
     test_files4 = ['2023-05-01', '2023-05-08', '2023-05-15', 
-         '2023-05-22', '2023-05-29', '2023-06-05', '2023-06-12', '2023-06-19']
+         '2023-05-22', '2023-05-29', '2023-06-05', '2023-06-12', '2023-06-19','2023-07-10', 
+         '2023-07-17', '2023-07-24']
 
     backtest_configs = [
     # {
