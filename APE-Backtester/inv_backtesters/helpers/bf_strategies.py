@@ -447,7 +447,7 @@ def time_decay_alpha_BFC1D_v0_vc(polygon_df, simulation_date, quantity,config):
 
 ### VC SELL MODELS
 
-def time_decay_alpha_BFP_v0_vc2(polygon_df, simulation_date, quantity,config):
+def time_decay_alpha_BFP_v0_vcSell(polygon_df, simulation_date, quantity,config):
     underlying_open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
     for index, row in polygon_df.iterrows():
@@ -505,7 +505,7 @@ def time_decay_alpha_BFP_v0_vc2(polygon_df, simulation_date, quantity,config):
         
 
 
-def time_decay_alpha_BFC_v0_vc2(polygon_df, simulation_date, quantity,config):
+def time_decay_alpha_BFC_v0_vcSell(polygon_df, simulation_date, quantity,config):
     underlying_open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
     for index, row in polygon_df.iterrows():
@@ -563,7 +563,7 @@ def time_decay_alpha_BFC_v0_vc2(polygon_df, simulation_date, quantity,config):
         
 
 
-def time_decay_alpha_BFP1D_v0_vc2(polygon_df, simulation_date, quantity,config):
+def time_decay_alpha_BFP1D_v0_vcSell(polygon_df, simulation_date, quantity,config):
     underlying_open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
     for index, row in polygon_df.iterrows():
@@ -619,7 +619,7 @@ def time_decay_alpha_BFP1D_v0_vc2(polygon_df, simulation_date, quantity,config):
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,sell_code)
             return sell_dict
 
-def time_decay_alpha_BFC1D_v0_vc2(polygon_df, simulation_date, quantity,config):
+def time_decay_alpha_BFC1D_v0_vcSell(polygon_df, simulation_date, quantity,config):
     underlying_open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
     for index, row in polygon_df.iterrows():

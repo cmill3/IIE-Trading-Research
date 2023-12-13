@@ -26,7 +26,7 @@ def build_backtest_data(file_name,strategies,config):
 
     dfs = []
     for strategy in strategies:
-        data = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/{strategy}/{file_name}.csv')
+        data = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/cls/{strategy}/{file_name}.csv')
         dfs.append(data)
 
 
@@ -61,7 +61,7 @@ def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,c
     #  build_backtest_data(file_names[0],strategies,config)
 
     if not local_data:
-        with concurrent.futures.ProcessPoolExecutor(max_workers=6) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=8) as executor:
             # Submit the processing tasks to the ThreadPoolExecutor
             processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies,config) for file_name in file_names]
 
@@ -118,20 +118,125 @@ if __name__ == "__main__":
     test_files4 = ['2023-05-01', '2023-05-08', '2023-05-15', 
          '2023-05-22', '2023-05-29', '2023-06-05', '2023-06-12', '2023-06-19']
 
-    backtest_configs = high_vol = [
+    backtest_configs = [
+    # {
+    #         "put_pct": 1, 
+    #         "spread_adjustment": 0,
+    #         "aa": 1,
+    #         "risk_unit": .01,
+    #         "model": "cls",
+    #         "vc_level":"nvc",
+    #         "portfolio_cash": 200000,
+    #         "risk_adjustment": 0.03,
+    #         "pos_limit": "noposlimit",
+    #         "standard_risk": "0.6",
+    #         "volatility_threshold": 1.5,
+    #         "model_type": "cls",
+    #         "floor_value": 0.9
+    #     },
+    #     {
+    #         "put_pct": 1, 
+    #         "spread_adjustment": 0,
+    #         "aa": 1,
+    #         "risk_unit": .01,
+    #         "model": "vc",
+    #         "vc_level":"200$.03",
+    #         "portfolio_cash": 200000,
+    #         "risk_adjustment": 0.03,
+    #         "pos_limit": "noposlimit",
+    #         "standard_risk": "0.6",
+    #         "volatility_threshold": 1.5,
+    #         "model_type": "cls",
+    #         "floor_value": 0.9
+    #     },
+    #     {
+    #         "put_pct": 1, 
+    #         "spread_adjustment": 0,
+    #         "aa": 1,
+    #         "risk_unit": .01,
+    #         "model": "vcSell",
+    #         "vc_level":"200$",
+    #         "portfolio_cash": 200000,
+    #         "risk_adjustment": 0.03,
+    #         "pos_limit": "noposlimit",
+    #         "standard_risk": "0.6",
+    #         "volatility_threshold": 1.5,
+    #         "model_type": "cls",
+    #         "floor_value": 0.9
+    #     },
+    #     {
+    #         "put_pct": 1, 
+    #         "spread_adjustment": 0,
+    #         "aa": 1,
+    #         "risk_unit": .01,
+    #         "model": "vc",
+    #         "vc_level":"300$.03",
+    #         "portfolio_cash": 200000,
+    #         "risk_adjustment": 0.03,
+    #         "pos_limit": "noposlimit",
+    #         "standard_risk": "0.6",
+    #         "volatility_threshold": 1.5,
+    #         "model_type": "cls",
+    #         "floor_value": 0.9
+    #     },
+    #     {
+    #         "put_pct": 1, 
+    #         "spread_adjustment": 0,
+    #         "aa": 1,
+    #         "risk_unit": .01,
+    #         "model": "vcSell",
+    #         "vc_level":"300$",
+    #         "portfolio_cash": 200000,
+    #         "risk_adjustment": 0.03,
+    #         "pos_limit": "noposlimit",
+    #         "standard_risk": "0.6",
+    #         "volatility_threshold": 1.5,
+    #         "model_type": "cls",
+    #         "floor_value": 0.9
+    #     },
+    #     {
+    #         "put_pct": 1, 
+    #         "spread_adjustment": 0,
+    #         "aa": 1,
+    #         "risk_unit": .01,
+    #         "model": "cls",
+    #         "vc_level":"nvc",
+    #         "portfolio_cash": 200000,
+    #         "risk_adjustment": 0.05,
+    #         "pos_limit": "noposlimit",
+    #         "standard_risk": "0.6",
+    #         "volatility_threshold": 1.5,
+    #         "model_type": "cls",
+    #         "floor_value": 0.9
+    #     },
+    #     {
+    #         "put_pct": 1, 
+    #         "spread_adjustment": 0,
+    #         "aa": 1,
+    #         "risk_unit": .01,
+    #         "model": "vc",
+    #         "vc_level":"200$.03",
+    #         "portfolio_cash": 200000,
+    #         "risk_adjustment": 0.05,
+    #         "pos_limit": "noposlimit",
+    #         "standard_risk": "0.6",
+    #         "volatility_threshold": 1.5,
+    #         "model_type": "cls",
+    #         "floor_value": 0.9
+    #     },
         {
             "put_pct": 1, 
             "spread_adjustment": 0,
             "aa": 1,
             "risk_unit": .01,
-            "model": "regAgg",
-            "vc_level":"nvc",
+            "model": "vcSell",
+            "vc_level":"200$",
             "portfolio_cash": 200000,
-            "risk_adjustment": "0.25$0.5",
+            "risk_adjustment": 0.05,
             "pos_limit": "noposlimit",
-            "standard_risk": "0.8",
+            "standard_risk": "0.6",
             "volatility_threshold": 1.5,
-            "model_type": "reg",
+            "model_type": "cls",
             "floor_value": 0.9
         },
         {
@@ -139,14 +244,14 @@ if __name__ == "__main__":
             "spread_adjustment": 0,
             "aa": 1,
             "risk_unit": .01,
-            "model": "regAggVC",
-            "vc_level":"200$",
+            "model": "vc",
+            "vc_level":"300$.03",
             "portfolio_cash": 200000,
-            "risk_adjustment": "0.25$0.5",
+            "risk_adjustment": 0.05,
             "pos_limit": "noposlimit",
-            "standard_risk": "0.8",
+            "standard_risk": "0.6",
             "volatility_threshold": 1.5,
-            "model_type": "reg",
+            "model_type": "cls",
             "floor_value": 0.9
         },
         {
@@ -154,151 +259,16 @@ if __name__ == "__main__":
             "spread_adjustment": 0,
             "aa": 1,
             "risk_unit": .01,
-            "model": "regAggVCSell",
-            "vc_level":"200$",
+            "model": "vcSell",
+            "vc_level":"300$",
             "portfolio_cash": 200000,
-            "risk_adjustment": "0.25$0.5",
+            "risk_adjustment": 0.05,
             "pos_limit": "noposlimit",
-            "standard_risk": "0.8",
+            "standard_risk": "0.6",
             "volatility_threshold": 1.5,
-            "model_type": "reg",
+            "model_type": "cls",
             "floor_value": 0.9
         },
-        {
-            "put_pct": 1, 
-            "spread_adjustment": 0,
-            "aa": 1,
-            "risk_unit": .01,
-            "model": "regAgg",
-            "vc_level":"nvc",
-            "portfolio_cash": 200000,
-            "risk_adjustment": "0.1$0.3",
-            "pos_limit": "noposlimit",
-            "standard_risk": "0.6",
-            "volatility_threshold": 1.25,
-            "model_type": "reg",
-            "floor_value": 0.9
-        },
-        {
-            "put_pct": 1, 
-            "spread_adjustment": 0,
-            "aa": 1,
-            "risk_unit": .01,
-            "model": "regAggVC",
-            "vc_level":"200$",
-            "portfolio_cash": 200000,
-            "risk_adjustment": "0.1$0.3",
-            "pos_limit": "noposlimit",
-            "standard_risk": "0.6",
-            "volatility_threshold": 1.25,
-            "model_type": "reg",
-            "floor_value": 0.9
-        },
-        {
-            "put_pct": 1, 
-            "spread_adjustment": 0,
-            "aa": 1,
-            "risk_unit": .01,
-            "model": "regAggVCSell",
-            "vc_level":"200$",
-            "portfolio_cash": 200000,
-            "risk_adjustment": "0.1$0.3",
-            "pos_limit": "noposlimit",
-            "standard_risk": "0.6",
-            "volatility_threshold": 1.25,
-            "model_type": "reg",
-            "floor_value": 0.9
-        },
-        {
-            "put_pct": 1, 
-            "spread_adjustment": 0,
-            "aa": 1,
-            "risk_unit": .01,
-            "model": "regAgg",
-            "vc_level":"nvc",
-            "portfolio_cash": 200000,
-            "risk_adjustment": "0.25$0.5",
-            "pos_limit": "noposlimit",
-            "standard_risk": "0.8",
-            "volatility_threshold": 1.25,
-            "model_type": "reg",
-            "floor_value": 0.9
-        },
-        {
-            "put_pct": 1, 
-            "spread_adjustment": 0,
-            "aa": 1,
-            "risk_unit": .01,
-            "model": "regAggVC",
-            "vc_level":"200$",
-            "portfolio_cash": 200000,
-            "risk_adjustment": "0.25$0.5",
-            "pos_limit": "noposlimit",
-            "standard_risk": "0.8",
-            "volatility_threshold": 1.25,
-            "model_type": "reg",
-            "floor_value": 0.9
-        },
-        {
-            "put_pct": 1, 
-            "spread_adjustment": 0,
-            "aa": 1,
-            "risk_unit": .01,
-            "model": "regAggVCSell",
-            "vc_level":"200$",
-            "portfolio_cash": 200000,
-            "risk_adjustment": "0.25$0.5",
-            "pos_limit": "noposlimit",
-            "standard_risk": "0.8",
-            "volatility_threshold": 1.25,
-            "model_type": "reg",
-            "floor_value": 0.9
-        },
-        {
-            "put_pct": 1, 
-            "spread_adjustment": 0,
-            "aa": 1,
-            "risk_unit": .01,
-            "model": "regAgg",
-            "vc_level":"nvc",
-            "portfolio_cash": 200000,
-            "risk_adjustment": "0.1$0.3",
-            "pos_limit": "noposlimit",
-            "standard_risk": "0.6",
-            "volatility_threshold": 1.25,
-            "model_type": "reg",
-            "floor_value": 0.9
-        },
-        {
-            "put_pct": 1, 
-            "spread_adjustment": 0,
-            "aa": 1,
-            "risk_unit": .01,
-            "model": "regAggVC",
-            "vc_level":"200$",
-            "portfolio_cash": 200000,
-            "risk_adjustment": "0.1$0.3",
-            "pos_limit": "noposlimit",
-            "standard_risk": "0.6",
-            "volatility_threshold": 1.25,
-            "model_type": "reg",
-            "floor_value": 0.9
-        },
-        {
-            "put_pct": 1, 
-            "spread_adjustment": 0,
-            "aa": 1,
-            "risk_unit": .01,
-            "model": "regAggVCSell",
-            "vc_level":"200$",
-            "portfolio_cash": 200000,
-            "risk_adjustment": "0.1$0.3",
-            "pos_limit": "noposlimit",
-            "standard_risk": "0.6",
-            "volatility_threshold": 1.25,
-            "model_type": "reg",
-            "floor_value": 0.9
-        }
 ]
     # time_periods = [test_files,test_files2,test_files3,test_files4]
     strategies = ["BFC","BFC_1D","BFP","BFP_1D"]
