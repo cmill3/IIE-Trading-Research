@@ -201,22 +201,22 @@ if __name__ == "__main__":
               "side": "C"
          },
          "VDIFFC_1d": {
-              "file_path": 'DEFAULT-idx_custHypP2_2018',
+              "file_path": 'DEFAULT_noOUT_custHypP18_2018',
               "time_span": 2,
               "side": "C"
          },
         "VDIFFP_1d": {
-              "file_path": 'DEFAULT-idx_custHypP2_2018',
+              "file_path": 'DEFAULT_noOUT_custHypP18_2018',
               "time_span": 2,
               "side": "P"
          },
          "VDIFFC": {
-              "file_path": 'DEFAULT-idx_custHypP4_2018',
+              "file_path": 'DEFAULT_noOUT_custHypP33_2018',
               "time_span": 4,
               "side": "C"
          },
         "VDIFFP": {
-              "file_path": 'DEFAULT-idx_custHypP4_2018',
+              "file_path": 'DEFAULT_noOUT_custHypP33_2018',
               "time_span": 4,
               "side": "P"
          },
@@ -261,22 +261,22 @@ if __name__ == "__main__":
               "side": "C"
          },
          "MAP_1d": {
-              "file_path": 'DEFAULT_noIDX+_custHypP21_2018',
+              "file_path": 'DEFAULT_noOUT_custHypP19_20188',
               "time_span": 2,
               "side": "P"
          },
         "MA_1d": {
-              "file_path": 'TSSIM1_noIDX+_custHypP21_2018',
+              "file_path": 'DEFAULT_noOUT_custHypP19_2018',
               "time_span": 2,
               "side": "C"
          },
          "MAP": {
-              "file_path": 'DEFAULT_noIDX+_custHypP325_2018',
+              "file_path": 'DEFAULT_noOUT_custHypP31_2018',
               "time_span": 4,
               "side": "P"
          },
         "MA": {
-              "file_path": 'DEFAULT_noIDX+_custHypP325_2018',
+              "file_path": 'DEFAULT_noOUT_custHypP31_2018',
               "time_span": 4,
               "side": "C"
          }
