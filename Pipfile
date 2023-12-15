@@ -8,8 +8,9 @@ boto3 = "*"
 requests = "*"
 pandas = "*"
 holidays = "*"
+pandas-market-calendars = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"

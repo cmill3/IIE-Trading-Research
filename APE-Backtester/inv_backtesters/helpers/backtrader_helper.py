@@ -46,7 +46,7 @@ def create_end_date(date, trading_days_to_add):
 
 def create_end_date_local_data(date, trading_days_to_add):
     #Trading days only
-    date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S%z')
+    date = datetime.strptime(date, '%Y-%m-%d')
     # trading_days_to_add = add_days
     while trading_days_to_add > 0:
         date += timedelta(days=1)
@@ -102,7 +102,7 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
 
     ## ASSIGNMENT ADJUSTMENT
     threeD_cutoff, oneD_cutoff = map_assignment_adjustment(config['aa'])
-    if row['strategy'] in ['BFC','BFP']:
+    if row['strategy'] in ["BFP","IDXP","LOSERS",'VDIFFP',"MAP","GAINP","BFC","IDXC","GAIN",'VDIFFC',"MA","LOSERSC"]:
         if start_date.weekday() > threeD_cutoff:
             expiry = expiries[0]
         else:
@@ -471,25 +471,26 @@ def extract_strike(row):
         
     return 0
 
-def configure_regression_predictions(backtest_data, config):
-    backtest_data = backtest_data[backtest_data['threeD_stddev50'] > 0]
-    forecast_vols = []
-    for index, row in backtest_data.iterrows():
-        if row['strategy'] in ['BFC','BFP']:
-            forecast_vols.append(abs(row['forecast']/row['threeD_stddev50']))
-        else:
-            forecast_vols.append(abs(row['forecast']/row['oneD_stddev50']))
-    backtest_data['forecast_vol'] = forecast_vols
-    # backtest_data['forecast_vol'] = backtest_data.apply(lambda x: x['forecast']/x['threeD_stddev50'] if x['strategy'in ['BFC','BFP']] else x['forecast']/x['oneD_stddev50'],axis=1)
-    data = backtest_data.loc[backtest_data['forecast_vol'] > config['volatility_threshold']].reset_index(drop=True)
-    return data
+# def configure_regression_predictions(backtest_data, config):
+#     backtest_data = backtest_data[backtest_data['threeD_stddev50'] > 0]
+#     forecast_vols = []
+#     for index, row in backtest_data.iterrows():
+#         if row['strategy'] in ['BFC','BFP']:
+#             forecast_vols.append(abs(row['forecast']/row['threeD_stddev50']))
+#         else:
+#             forecast_vols.append(abs(row['forecast']/row['oneD_stddev50']))
+#     backtest_data['forecast_vol'] = forecast_vols
+#     # backtest_data['forecast_vol'] = backtest_data.apply(lambda x: x['forecast']/x['threeD_stddev50'] if x['strategy'in ['BFC','BFP']] else x['forecast']/x['oneD_stddev50'],axis=1)
+#     data = backtest_data.loc[backtest_data['forecast_vol'] > config['volatility_threshold']].reset_index(drop=True)
+#     return data
 
 def configure_trade_data(df,config):
-    index = df.loc[df['symbol'].isin(['QQQ','SPY','IWM'])]
-    stocks = df.loc[df['symbol'].isin(['QQQ','SPY','IWM']) == False]
+    index = df.loc[df['symbol'].isin(["IWM","SPY","QQQ"])]
+    stocks = df.loc[df['symbol'].isin(["IWM","SPY","QQQ"]) == False]
 
-    one = stocks.loc[stocks['strategy'].isin(['BFC_1D','BFP_1D'])]
-    three = stocks.loc[stocks['strategy'].isin(['BFC','BFP'])]
+
+    one = stocks.loc[stocks['prediction_horizon'] == "1"]
+    three = stocks.loc[stocks['prediction_horizon'] == "3"]
 
     one = one.loc[one['day_of_week'].isin([2,3])]
     three = three.loc[three['day_of_week'].isin([0,1])]
