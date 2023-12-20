@@ -11,23 +11,21 @@ nyse = mcal.get_calendar('NYSE')
 holidays = nyse.holidays()
 holidays_multiyear = holidays.holidays
 
-def add_contract_data_to_local(time_periods,strategy_info,strategy,modeling_type):
+def add_contract_data_to_local(week,strategy_info,strategy,modeling_type):
     # dfs = []
-    for weeks in time_periods:
-        for week in weeks:
-                try:
-                    data, _ = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key=f"backtesting_data/inv_alerts/{strategy_info['file_path']}", 
-                                                            file_name = f"{week}.csv",prefixes=[strategy],time_span=strategy_info['time_span'])
-                    # data.drop(columns=['Unnamed: 0.6','Unnamed: 0.3','Unnamed: 0.2','Unnamed: 0.1','Unnamed: 0'],inplace=True)
-                    data.drop(columns=['Unnamed: 0.2','Unnamed: 0.1','Unnamed: 0'],inplace=True)
-                    data['side'] = strategy_info['side']
-                    data['contracts']= data.apply(lambda x: pull_contract_data(x),axis=1)
-                    data['expiries'] = data.apply(lambda x: generate_expiry_dates_row(x),axis=1)
-                    data.to_csv(f'/Users/charlesmiller/Documents/backtesting_data/{modeling_type}/{strategy}/{week}.csv', index=False)
-                    print(f"Finished {strategy} for {week}")
-                except Exception as e:
-                    print(f"Error: {e} for {strategy}")
-                    continue
+    # for week in weeks:
+        try:
+            data, _ = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key=f"backtesting_data/inv_alerts/{strategy_info['file_path']}", 
+                                                    file_name = f"{week}.csv",prefixes=[strategy],time_span=strategy_info['time_span'])
+            # data.drop(columns=['Unnamed: 0.6','Unnamed: 0.3','Unnamed: 0.2','Unnamed: 0.1','Unnamed: 0'],inplace=True)
+            data.drop(columns=['Unnamed: 0.2','Unnamed: 0.1','Unnamed: 0'],inplace=True)
+            data['side'] = strategy_info['side']
+            data['contracts']= data.apply(lambda x: pull_contract_data(x),axis=1)
+            data['expiries'] = data.apply(lambda x: generate_expiry_dates_row(x),axis=1)
+            data.to_csv(f'/Users/charlesmiller/Documents/backtesting_data/{modeling_type}/{strategy}/{week}.csv', index=False)
+            print(f"Finished {strategy} for {week}")
+        except Exception as e:
+            print(f"Error: {e} for {strategy}")
     #         dfs.append(data)
     # data = pd.concat(dfs,ignore_index=True)
     
@@ -78,11 +76,11 @@ def s3_to_local(file_name):
 
 def generate_expiry_dates(date_str,symbol,strategy):
     if symbol in ['SPY','QQQ','IWM']:
-        if strategy in ["BFP_1d","LOSERS_1d",'VDIFFP_1d',"MAP_1d","GAINP_1D","BFC_1d","IDXC_1d","GAIN_1d",'VDIFFC_1d',"MA_1d","LOSERSC_1D"]:
+        if strategy in ["BFP_1d","LOSERS_1d",'VDIFFP_1d',"MAP_1d","GAINP_1D","BFC_1d","IDXC_1d","IDXP_1d","GAIN_1d",'VDIFFC_1d',"MA_1d","LOSERSC_1D"]:
             day_of = add_weekdays(date_str,1,symbol)
             next_day = add_weekdays(date_str,2,symbol)
             return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
-        elif strategy in ["BFP","LOSERS",'VDIFFP',"MAP","GAINP","BFC","IDXC","GAIN",'VDIFFC',"MA","LOSERSC"]:
+        elif strategy in ["BFP","LOSERS",'VDIFFP',"MAP","GAINP","BFC","IDXC","IDXP","GAIN",'VDIFFC',"MA","LOSERSC"]:
             day_of = add_weekdays(date_str,3,symbol)
             next_day = add_weekdays(date_str,4,symbol)
             return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
@@ -119,12 +117,12 @@ def create_index_date(date):
 def generate_expiry_dates_row(row):
     date_str = row['date'].split(" ")[0]
     if row['symbol'] in ['SPY','QQQ','IWM']:
-        if row['strategy'] in ["BFP_1d","LOSERS_1d",'VDIFFP_1d',"MAP_1d","GAINP_1D","BFC_1d","IDXC_1d","GAIN_1d",'VDIFFC_1d',"MA_1d","LOSERSC_1D"]:
+        if row['strategy'] in ["BFP_1d","LOSERS_1d",'VDIFFP_1d',"MAP_1d","GAINP_1D","BFC_1d","IDXC_1d","IDXP_1d","GAIN_1d",'VDIFFC_1d',"MA_1d","LOSERSC_1D"]:
             day_of = add_weekdays(date_str,1,row['symbol'])
             next_day = add_weekdays(date_str,2,row['symbol'])
             return [day_of.strftime('%y%m%d'),next_day.strftime('%y%m%d')]
-        elif row['strategy'] in ["BFP","LOSERS",'VDIFFP',"MAP","GAINP","BFC","IDXC","GAIN",'VDIFFC',"MA","LOSERSC"]:
-            day_of = add_weekdays(date_str,3,row['symbol'])
+        elif row['strategy'] in ["BFP","LOSERS",'VDIFFP',"MAP","GAINP","BFC","IDXC","IDXP","GAIN",'VDIFFC',"MA","LOSERSC"]:
+            day_of = add_weekdays(date_str,3,row['symbol'])  
             next_day = add_weekdays(date_str,4,row['symbol'])
             return [day_of.strftime('%y%m%d'),next_day.strftime('%y%m%d')]
     else: 
@@ -180,106 +178,106 @@ if __name__ == "__main__":
 
 
     strategy_info = {
-         "IDXC_1d": {
-              "file_path": 'TSSIM1_IDX_custHypP09_2018',
-              "time_span": 2,
-              "side": "C"
-         },
-        "IDXP_1d": {
-              "file_path": 'TSSIM1h_IDX_custHypP08_2018',
-              "time_span": 2,
-              "side": "P"
-         },
-         "IDXP": {
-              "file_path": 'DEFAULT_custHypP15_2018',
-              "time_span": 4,
-              "side": "P"
-         },
-        "IDXC": {
-              "file_path": 'DEFAULT_custHypP15_2018',
-              "time_span": 4,
-              "side": "C"
-         },
-         "VDIFFC_1d": {
-              "file_path": 'DEFAULT_noOUT_custHypP18_2018',
-              "time_span": 2,
-              "side": "C"
-         },
-        "VDIFFP_1d": {
-              "file_path": 'DEFAULT_noOUT_custHypP18_2018',
-              "time_span": 2,
-              "side": "P"
-         },
-         "VDIFFC": {
-              "file_path": 'DEFAULT_noOUT_custHypP33_2018',
-              "time_span": 4,
-              "side": "C"
-         },
-        "VDIFFP": {
-              "file_path": 'DEFAULT_noOUT_custHypP33_2018',
-              "time_span": 4,
-              "side": "P"
-         },
+        #  "IDXC_1d": {
+        #       "file_path": 'TSSIM1_IDX_custHypP09_2018',
+        #       "time_span": 2,
+        #       "side": "C"
+        #  },
+        # "IDXP_1d": {
+        #       "file_path": 'TSSIM1h_IDX_custHypP08_2018',
+        #       "time_span": 2,
+        #       "side": "P"
+        #  },
+        #  "IDXP": {
+        #       "file_path": 'DEFAULT_custHypP15_2018',
+        #       "time_span": 4,
+        #       "side": "P"
+        #  },
+        # "IDXC": {
+        #       "file_path": 'DEFAULT_custHypP15_2018',
+        #       "time_span": 4,
+        #       "side": "C"
+        #  },
+        #  "VDIFFC_1d": {
+        #       "file_path": 'DEFAULT_noOUT_custHypP18_2018',
+        #       "time_span": 2,
+        #       "side": "C"
+        #  },
+        # "VDIFFP_1d": {
+        #       "file_path": 'DEFAULT_noOUT_custHypP18_2018',
+        #       "time_span": 2,
+        #       "side": "P"
+        #  },
+        #  "VDIFFC": {
+        #       "file_path": 'DEFAULT_noOUT_custHypP33_2018',
+        #       "time_span": 4,
+        #       "side": "C"
+        #  },
+        # "VDIFFP": {
+        #       "file_path": 'DEFAULT_noOUT_custHypP33_2018',
+        #       "time_span": 4,
+        #       "side": "P"
+        #  },
          "GAIN_1d": {
-              "file_path": 'DEFAULT_custHypP2_2018',
+              "file_path": 'DEFAULT_noOUT_custHypP2_2018',
               "time_span": 2,
               "side": "C"
          },
         "LOSERS_1d": {
-              "file_path": 'DEFAULT_custHypP2_2018',
+              "file_path": 'DEFAULT_noOUT_custHypP2_2018',
               "time_span": 2,
               "side": "P"
          },
          "GAIN": {
-              "file_path": 'DEFAULT_custHypP4_2018',
+              "file_path": 'DEFAULT_noOUT_custHypP35_2018',
               "time_span": 4,
               "side": "C"
          },
         "LOSERS": {
-              "file_path": 'DEFAULT_custHypP4_2018',
+              "file_path": 'DEFAULT_noOUT_custHypP35_2018',
               "time_span": 4,
               "side": "P"
          },
-         "GAINP_1D": {
-              "file_path": 'DEFAULT_noOUT_custHypP225_2018',
-              "time_span": 2,
-              "side": "P"
-         },
-        "LOSERSC_1D": {
-              "file_path": 'DEFAULT_noOUT_custHypP225_2018',
-              "time_span": 2,
-              "side": "C"
-         },
-         "GAINP": {
-              "file_path": 'DEFAULT_noOUT_custHypP3_2018',
-              "time_span": 4,
-              "side": "P"
-         },
-        "LOSERSC": {
-              "file_path": 'DEFAULT_noOUT_custHypP3_2018',
-              "time_span": 4,
-              "side": "C"
-         },
+        #  "GAINP_1D": {
+        #       "file_path": 'DEFAULT_noOUT_custHypP225_2018',
+        #       "time_span": 2,
+        #       "side": "P"
+        #  },
+        # "LOSERSC_1D": {
+        #       "file_path": 'DEFAULT_noOUT_custHypP225_2018',
+        #       "time_span": 2,
+        #       "side": "C"
+        #  },
+        #  "GAINP": {
+        #       "file_path": 'DEFAULT_noOUT_custHypP3_2018',
+        #       "time_span": 4,
+        #       "side": "P"
+        #  },
+        # "LOSERSC": {
+        #       "file_path": 'DEFAULT_noOUT_custHypP3_2018',
+        #       "time_span": 4,
+        #       "side": "C"
+        #  },
          "MAP_1d": {
-              "file_path": 'DEFAULT_noOUT_custHypP19_20188',
+              "file_path": 'DEFAULT_noOUT_custHypP19_2018',
               "time_span": 2,
               "side": "P"
          },
         "MA_1d": {
-              "file_path": 'DEFAULT_noOUT_custHypP19_2018',
+              "file_path": 'TSSIM1_noOUT_custHypP19_2018',
               "time_span": 2,
               "side": "C"
          },
          "MAP": {
-              "file_path": 'DEFAULT_noOUT_custHypP31_2018',
+              "file_path": 'DEFAULT_noOUT_custHypP3_2018',
               "time_span": 4,
               "side": "P"
          },
-        "MA": {
-              "file_path": 'DEFAULT_noOUT_custHypP31_2018',
-              "time_span": 4,
-              "side": "C"
-         }
+        # "MA": {
+        #       "file_path": 'DEFAULT_noOUT_custHypP31_2018',
+        #       "time_span": 4,
+        #       "side": "C"
+        #  }
     }
 
     file_names = ['2023-01-02','2023-01-09', '2023-01-16', '2023-01-23', 
@@ -295,7 +293,7 @@ if __name__ == "__main__":
     for strategy in strategy_info:
         with concurrent.futures.ProcessPoolExecutor(max_workers=6) as executor:
             # Submit the processing tasks to the ThreadPoolExecutor
-            processed_weeks_futures = [executor.submit(add_contract_data_to_local,file_names,strategy_info[strategy],strategy,modeling_type) for strategy in strategy_info]
+            processed_weeks_futures = [executor.submit(add_contract_data_to_local,week,strategy_info[strategy],strategy,modeling_type) for week in file_names]
     # add_contract_data_to_local(file_names,strategy_info[strategy])
 
     # for week in file_names:

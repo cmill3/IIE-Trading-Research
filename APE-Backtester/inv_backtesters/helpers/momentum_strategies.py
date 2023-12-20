@@ -24,7 +24,7 @@ def tda_PUT_3D_stdcls(polygon_df, simulation_date, quantity, config, target_pct,
         if pct_change < (2*target_pct):
             Floor_pct = (.9*underlying_gain)
         elif pct_change < target_pct:
-            Floor_pct = (.5*underlying_gain)
+            Floor_pct = (.75*underlying_gain)
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         day_diff = get_day_diff(simulation_date, row['date'])
@@ -75,7 +75,7 @@ def tda_CALL_3D_stdcls(polygon_df, simulation_date, quantity, config, target_pct
         if pct_change > (2*target_pct):
             Floor_pct = (.9*underlying_gain)
         elif pct_change > target_pct:
-            Floor_pct = (.5*underlying_gain)
+            Floor_pct = (.75*underlying_gain)
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         day_diff = get_day_diff(simulation_date, row['date'])
@@ -126,7 +126,7 @@ def tda_PUT_1D_stdcls(polygon_df, simulation_date, quantity, config, target_pct,
         if pct_change < (2*target_pct):
             Floor_pct = (.9*underlying_gain)
         elif pct_change < target_pct:
-            Floor_pct = (.5*underlying_gain)
+            Floor_pct = (.75*underlying_gain)
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         day_diff = get_day_diff(simulation_date, row['date'])
@@ -177,7 +177,7 @@ def tda_CALL_1D_stdcls(polygon_df, simulation_date, quantity, config, target_pct
         if pct_change > (2*target_pct):
             Floor_pct = (.9*underlying_gain)
         elif pct_change > target_pct:
-            Floor_pct = (.5*underlying_gain)
+            Floor_pct = (.75*underlying_gain)
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         day_diff = get_day_diff(simulation_date, row['date'])
@@ -230,7 +230,7 @@ def tda_PUT_3D_VCcls(polygon_df, simulation_date, quantity, config, target_pct, 
 
         vc_amt,risk_pct = config['vc_level'].split("$")
         if deriv_pct_change > 300:
-            sell_code = "VC"
+            sell_code = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,sell_code)  
             return sell_dict
         elif deriv_pct_change > float(vc_amt):
@@ -239,7 +239,7 @@ def tda_PUT_3D_VCcls(polygon_df, simulation_date, quantity, config, target_pct, 
         elif pct_change < (2*target_pct):
             Floor_pct = (.9*underlying_gain)
         elif pct_change < target_pct:
-            Floor_pct = (.5*underlying_gain)
+            Floor_pct = (.75*underlying_gain)
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         day_diff = get_day_diff(simulation_date, row['date'])
@@ -301,7 +301,7 @@ def tda_CALL_3D_VCcls(polygon_df, simulation_date, quantity, config, target_pct,
         vc_amt,risk_pct = config['vc_level'].split("$")
 
         if deriv_pct_change > 300:
-            sell_code = "VC"
+            sell_code = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,sell_code)  
             return sell_dict
         elif deriv_pct_change > float(vc_amt):
@@ -310,7 +310,7 @@ def tda_CALL_3D_VCcls(polygon_df, simulation_date, quantity, config, target_pct,
         elif pct_change < (2*target_pct):
             Floor_pct = (.9*underlying_gain)
         elif pct_change < target_pct:
-            Floor_pct = (.5*underlying_gain)
+            Floor_pct = (.75*underlying_gain)
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         day_diff = get_day_diff(simulation_date, row['date'])
@@ -372,7 +372,7 @@ def tda_PUT_1D_VCcls(polygon_df, simulation_date, quantity, config, target_pct, 
         vc_amt,risk_pct = config['vc_level'].split("$")
 
         if deriv_pct_change > 300:
-            sell_code = "VC"
+            sell_code = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,sell_code)  
             return sell_dict
         elif deriv_pct_change > float(vc_amt):
@@ -381,7 +381,7 @@ def tda_PUT_1D_VCcls(polygon_df, simulation_date, quantity, config, target_pct, 
         elif pct_change < (2*target_pct):
             Floor_pct = (.9*underlying_gain)
         elif pct_change < target_pct:
-            Floor_pct = (.5*underlying_gain)
+            Floor_pct = (.75*underlying_gain)
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         day_diff = get_day_diff(simulation_date, row['date'])
@@ -443,7 +443,7 @@ def tda_CALL_1D_VCcls(polygon_df, simulation_date, quantity, config, target_pct,
 
         vc_amt,risk_pct = config['vc_level'].split("$")
         if deriv_pct_change > 300:
-            sell_code = "VC"
+            sell_code = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,sell_code)  
             return sell_dict
         elif deriv_pct_change > float(vc_amt):
@@ -452,7 +452,7 @@ def tda_CALL_1D_VCcls(polygon_df, simulation_date, quantity, config, target_pct,
         elif pct_change < (2*target_pct):
             Floor_pct = (.9*underlying_gain)
         elif pct_change < target_pct:
-            Floor_pct = (.5*underlying_gain)
+            Floor_pct = (.75*underlying_gain)
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         day_diff = get_day_diff(simulation_date, row['date'])

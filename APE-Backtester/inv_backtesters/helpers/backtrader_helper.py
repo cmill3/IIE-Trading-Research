@@ -491,10 +491,14 @@ def configure_trade_data(df,config):
 
     one = stocks.loc[stocks['prediction_horizon'] == "1"]
     three = stocks.loc[stocks['prediction_horizon'] == "3"]
+    one_idx = stocks.loc[stocks['prediction_horizon'] == "1"]
+    three_idx = stocks.loc[stocks['prediction_horizon'] == "3"]
 
     one = one.loc[one['day_of_week'].isin([2,3])]
-    three = three.loc[three['day_of_week'].isin([0,1])]
+    three = three.loc[three['day_of_week'].isin([0,1,2])]
 
-    trade_df = pd.concat([index,one,three])
+    # one_idx = one_idx.loc[one_idx['day_of_week'].isin([1,2,3,4])]
+    # three_idx = three_idx.loc[three_idx['day_of_week'].isin([0,1,2,3])]
+    trade_df = pd.concat([one_idx,three_idx,one,three])
     return trade_df
 
