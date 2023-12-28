@@ -144,58 +144,13 @@ if __name__ == "__main__":
             "spread_adjustment": 0,
             "aa": 1,
             "risk_unit": .002,
-            "model": "VCcls",
-            "vc_level":"150$.9",
-            "portfolio_cash": 500000,
-            "risk_adjustment": 0.05,
-            "pos_limit": "noposlimit",
-            "standard_risk": "0.6",
-            "volatility_threshold": 1,
-            "model_type": "cls",
-            "floor_value": 0.9
-        },
-        {
-            "put_pct": 1, 
-            "spread_adjustment": 0,
-            "aa": 1,
-            "risk_unit": .002,
-            "model": "VCcls",
-            "vc_level":"200$.9",
-            "portfolio_cash": 500000,
-            "risk_adjustment": 0.05,
-            "pos_limit": "noposlimit",
-            "standard_risk": "0.6",
-            "volatility_threshold": 1,
-            "model_type": "cls",
-            "floor_value": 0.9
-        },
-        {
-            "put_pct": 1, 
-            "spread_adjustment": 0,
-            "aa": 1,
-            "risk_unit": .002,
-            "model": "stdcls",
+            "model": "stdclsAGG",
             "vc_level":"nvc",
             "portfolio_cash": 500000,
             "risk_adjustment": 0.05,
             "pos_limit": "noposlimit",
             "standard_risk": "0.6",
-            "volatility_threshold": .75,
-            "model_type": "cls",
-            "floor_value": 0.9
-        },
-        {
-            "put_pct": 1, 
-            "spread_adjustment": 0,
-            "aa": 1,
-            "risk_unit": .002,
-            "model": "VCcls",
-            "vc_level":"150$.9",
-            "portfolio_cash": 500000,
-            "risk_adjustment": 0.05,
-            "pos_limit": "noposlimit",
-            "standard_risk": "0.6",
-            "volatility_threshold": .75,
+            "volatility_threshold": 1,
             "model_type": "cls",
             "floor_value": 0.9
         },
@@ -210,42 +165,12 @@ if __name__ == "__main__":
             "risk_adjustment": 0.05,
             "pos_limit": "noposlimit",
             "standard_risk": "0.6",
-            "volatility_threshold": .75,
+            "volatility_threshold": 1,
             "model_type": "cls",
             "floor_value": 0.9
-        },
-        # {
-        #     "put_pct": 1, 
-        #     "spread_adjustment": 0,
-        #     "aa": 1,
-        #     "risk_unit": .002,
-        #     "model": "stdcls",
-        #     "vc_level":"nvc",
-        #     "portfolio_cash": 500000,
-        #     "risk_adjustment": 0.05,
-        #     "pos_limit": "noposlimit",
-        #     "standard_risk": "0.6",
-        #     "volatility_threshold": .6,
-        #     "model_type": "cls",
-        #     "floor_value": 0.9
-        # },
-        # {
-        #     "put_pct": 1, 
-        #     "spread_adjustment": 0,
-        #     "aa": 1,
-        #     "risk_unit": .002,
-        #     "model": "VCcls",
-        #     "vc_level":"300$.9",
-        #     "portfolio_cash": 500000,
-        #     "risk_adjustment": 0.05,
-        #     "pos_limit": "noposlimit",
-        #     "standard_risk": "0.6",
-        #     "volatility_threshold": .6,
-        #     "model_type": "cls",
-        #     "floor_value": 0.9
-        # },
+        }
 ]
-    # time_periods = [test_files,test_files2,test_files3,test_files4]
+    time_periods = [test_files,test_files2,test_files3,test_files4]
     strategies = ["IDXC:3","IDXP:3","IDXC_1D:1","IDXP_1D:1","MA:3","MAP:3","MA_1D:1","MAP_1D:1","GAIN_1D:1","GAINP_1D:1","GAIN:3","GAINP:3","LOSERS:3","LOSERS_1D:1","LOSERSC:3","LOSERSC_1D:1","VDIFFC:3","VDIFFC_1D:1","VDIFFP_1D:1","VDIFFP:3"]
     time_periods = [test_files,test_files2,test_files3,test_files4]
     models_tested = []
@@ -281,9 +206,9 @@ if __name__ == "__main__":
     print("Errors:")
     print(error_models)
 
-    ### TREND STRATEGIES ONLY
+    # ## TREND STRATEGIES ONLY
     # strategies = ["GAIN_1D:1","GAINP_1D:1","GAIN:3","GAINP:3","LOSERS:3","LOSERS_1D:1","LOSERSC:3","LOSERSC_1D:1"]
-    # time_periods = [test_files,test_files2,test_files3,test_files4]
+    # time_periods = [test_files,test_files2]
     # models_tested = []
     # error_models = []
 
