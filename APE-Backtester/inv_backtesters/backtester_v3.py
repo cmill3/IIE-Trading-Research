@@ -132,12 +132,10 @@ if __name__ == "__main__":
             "model": "stdcls",
             "vc_level":"nvc",
             "portfolio_cash": 500000,
-            "risk_adjustment": 0.05,
             "pos_limit": "noposlimit",
-            "standard_risk": "0.6",
             "volatility_threshold": 1,
             "model_type": "cls",
-            "floor_value": 0.9
+            "user": "cm3"
         },
         {
             "put_pct": 1, 
@@ -147,12 +145,10 @@ if __name__ == "__main__":
             "model": "stdclsAGG",
             "vc_level":"nvc",
             "portfolio_cash": 500000,
-            "risk_adjustment": 0.05,
             "pos_limit": "noposlimit",
-            "standard_risk": "0.6",
             "volatility_threshold": 1,
             "model_type": "cls",
-            "floor_value": 0.9
+            "user": "cm3"
         },
         {
             "put_pct": 1, 
@@ -162,12 +158,10 @@ if __name__ == "__main__":
             "model": "VCcls",
             "vc_level":"200$.9",
             "portfolio_cash": 500000,
-            "risk_adjustment": 0.05,
             "pos_limit": "noposlimit",
-            "standard_risk": "0.6",
             "volatility_threshold": 1,
             "model_type": "cls",
-            "floor_value": 0.9
+            "user": "cm3"
         }
 ]
     time_periods = [test_files,test_files2,test_files3,test_files4]
@@ -175,9 +169,10 @@ if __name__ == "__main__":
     time_periods = [test_files,test_files2,test_files3,test_files4]
     models_tested = []
     error_models = []
+    nowstr = datetime.now().strftime("%Y%m%d")
 
     for config in backtest_configs:
-        trading_strat = f"modelVOL_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['vc_level']}_vol{config['volatility_threshold']}"
+        trading_strat = f"{config['user']}-{nowstr}-modelVOL_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['vc_level']}_vol{config['volatility_threshold']}"
         for time in time_periods:
             try:
                 start_dt = time[0]
@@ -213,7 +208,7 @@ if __name__ == "__main__":
     # error_models = []
 
     # for config in backtest_configs:
-    #     trading_strat = f"modelVOLTREND_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['vc_level']}_vol{config['volatility_threshold']}"
+        # trading_strat = f"{config['user']}-{nowstr}-modelVOLTREND_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['vc_level']}_vol{config['volatility_threshold']}"
     #     for time in time_periods:
     #         try:
     #             start_dt = time[0]
