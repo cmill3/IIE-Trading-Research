@@ -102,16 +102,17 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
 
     ## ASSIGNMENT ADJUSTMENT
     threeD_cutoff, oneD_cutoff = map_assignment_adjustment(config['aa'])
-    if row['strategy'] in ["BFP","IDXP","LOSERS",'VDIFFP',"MAP","GAINP","BFC","IDXC","GAIN",'VDIFFC',"MA","LOSERSC"]:
-        if start_date.weekday() > threeD_cutoff:
-            expiry = expiries[0]
-        else:
-            expiry = expiries[1]
-    else:
-        if start_date.weekday() > oneD_cutoff:
-            expiry = expiries[0]
-        else:
-            expiry = expiries[1]
+    # if row['strategy'] in ["BFP","IDXP","LOSERS",'VDIFFP',"MAP","GAINP","BFC","IDXC","GAIN",'VDIFFC',"MA","LOSERSC"]:
+    #     if start_date.weekday() > threeD_cutoff:
+    #         expiry = expiries[0]
+    #     else:
+    #         expiry = expiries[1]
+    # else:
+    #     if start_date.weekday() > oneD_cutoff:
+    #         expiry = expiries[0]
+    #     else:
+    #         expiry = expiries[1]
+    expiry = expiries[0]
     
     strike = row['symbol'] + expiry
     try:
@@ -491,14 +492,15 @@ def configure_trade_data(df,config):
 
     one = stocks.loc[stocks['prediction_horizon'] == "1"]
     three = stocks.loc[stocks['prediction_horizon'] == "3"]
-    one_idx = stocks.loc[stocks['prediction_horizon'] == "1"]
-    three_idx = stocks.loc[stocks['prediction_horizon'] == "3"]
+    one_idx = index.loc[index['prediction_horizon'] == "1"]
+    three_idx = index.loc[index['prediction_horizon'] == "3"]
 
-    one = one.loc[one['day_of_week'].isin([2,3])]
-    three = three.loc[three['day_of_week'].isin([0,1,2])]
+    filt_one = one.loc[one['day_of_week'].isin([1,2,3])]
+    filt_three = three.loc[three['day_of_week'].isin([0,1,2])]
 
-    # one_idx = one_idx.loc[one_idx['day_of_week'].isin([1,2,3,4])]
-    # three_idx = three_idx.loc[three_idx['day_of_week'].isin([0,1,2,3])]
-    trade_df = pd.concat([one_idx,three_idx,one,three])
+    one_idxF = one_idx.loc[one_idx['day_of_week'].isin([0,1,2,3,4])]
+    three_idxF = three_idx.loc[three_idx['day_of_week'].isin([0,1,2,3])]
+
+    trade_df = pd.concat([one_idxF,three_idxF,filt_one,filt_three])
     return trade_df
 

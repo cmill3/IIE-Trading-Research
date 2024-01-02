@@ -53,7 +53,7 @@ def get_day_diff(transaction_date, current_date):
         transaction_dt += timedelta(days=1)
         if transaction_dt.weekday() < 5:
             days_between += 1
-    return days_between
+    return days_between, current_dt.weekday()
 
 def build_spread(chain_df, spread_length, cp):
     contract_list = []

@@ -35,14 +35,14 @@ def build_backtest_data(file_name,strategies,config):
     backtest_data = pd.concat(dfs,ignore_index=True)
     # backtest_data = backtest_data[backtest_data['probabilities'] > config['probability']]
     if config['model_type'] == "reg":
-        backtest_data = helper.configure_regression_predictions(backtest_data,config)
-        backtest_data = helper.configure_trade_data(backtest_data,config)
+        predictions = helper.configure_regression_predictions(backtest_data,config)
+        filtered_by_date = helper.configure_trade_data(predictions,config)
     elif config['model_type'] == "cls":
-        backtest_data = backtest_data.loc[backtest_data['predictions'] == 1]
-        backtest_data = helper.configure_trade_data(backtest_data,config)
+        predictions = backtest_data.loc[backtest_data['predictions'] == 1]
+        filtered_by_date = helper.configure_trade_data(predictions,config)
     
     ## What we will do is instead of simulating one trade at a time we will do one time period at a time and then combine and create results then.
-    positions_list = back_tester.simulate_trades_invalerts(backtest_data,config)
+    positions_list = back_tester.simulate_trades_invalerts(filtered_by_date,config)
     full_positions_list.extend(positions_list)
 
     return positions_list
@@ -65,7 +65,7 @@ def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,c
 
     if not local_data:
         cpu_count = os.cpu_count()
-        with concurrent.futures.ProcessPoolExecutor(max_workers=12) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=cpu_count) as executor:
             # Submit the processing tasks to the ThreadPoolExecutor
             processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies,config) for file_name in file_names]
 
@@ -113,37 +113,67 @@ if __name__ == "__main__":
          '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02', '2023-10-09'
          ]
 
-    test_files =  ['2023-07-31','2023-08-07','2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
+    q1 =  ['2023-07-31','2023-08-07','2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
     '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02']
-    test_files2 = ['2023-01-02', '2023-01-09', '2023-01-16', '2023-01-23', 
+    q2 = ['2023-01-02', '2023-01-09', '2023-01-16', '2023-01-23', 
          '2023-01-30', '2023-02-06', '2023-02-13', '2023-02-20']
-    test_files3 = ['2023-02-27', '2023-03-06', '2023-03-13', '2023-03-20', 
+    q3 = ['2023-02-27', '2023-03-06', '2023-03-13', '2023-03-20', 
          '2023-03-27', '2023-04-03', '2023-04-10', '2023-04-17', '2023-04-24']
-    test_files4 = ['2023-05-01', '2023-05-08', '2023-05-15', 
+    q4 = ['2023-05-01', '2023-05-08', '2023-05-15', 
          '2023-05-22', '2023-05-29', '2023-06-05', '2023-06-12', '2023-06-19','2023-07-10', 
          '2023-07-17', '2023-07-24']
 
     backtest_configs = [
+        # {
+        #     "put_pct": 1, 
+        #     "spread_adjustment": 0,
+        #     "aa": 1,
+        #     "risk_unit": .004,
+        #     "model": "stdcls",
+        #     "vc_level":"nvc",
+        #     "portfolio_cash": 500000,
+        #     "risk_adjustment": 0.05,
+        #     "pos_limit": "noposlimit",
+        #     "standard_risk": "0.6",
+        #     "volatility_threshold": 1,
+        #     "model_type": "cls",
+        #     "floor_value": 100
+        # },
+        # {
+        #     "put_pct": 1, 
+        #     "spread_adjustment": 0,
+        #     "aa": 1,
+        #     "risk_unit": .004,
+        #     "model": "stdcls",
+        #     "vc_level":"nvc",
+        #     "portfolio_cash": 500000,
+        #     "risk_adjustment": 0.05,
+        #     "pos_limit": "noposlimit",
+        #     "standard_risk": "0.6",
+        #     "volatility_threshold": .75,
+        #     "model_type": "cls",
+        #     "floor_value": 100
+        # },
         {
             "put_pct": 1, 
             "spread_adjustment": 0,
             "aa": 1,
-            "risk_unit": .002,
-            "model": "stdcls",
+            "risk_unit": .004,
+            "model": "stdclsAGG",
             "vc_level":"nvc",
             "portfolio_cash": 500000,
             "risk_adjustment": 0.05,
             "pos_limit": "noposlimit",
             "standard_risk": "0.6",
-            "volatility_threshold": 1,
+            "volatility_threshold": .75,
             "model_type": "cls",
-            "floor_value": 0.9
+            "floor_value": 100
         },
         {
             "put_pct": 1, 
             "spread_adjustment": 0,
             "aa": 1,
-            "risk_unit": .002,
+            "risk_unit": .004,
             "model": "stdclsAGG",
             "vc_level":"nvc",
             "portfolio_cash": 500000,
@@ -152,32 +182,97 @@ if __name__ == "__main__":
             "standard_risk": "0.6",
             "volatility_threshold": 1,
             "model_type": "cls",
-            "floor_value": 0.9
+            "floor_value": 100
         },
-        {
-            "put_pct": 1, 
-            "spread_adjustment": 0,
-            "aa": 1,
-            "risk_unit": .002,
-            "model": "VCcls",
-            "vc_level":"200$.9",
-            "portfolio_cash": 500000,
-            "risk_adjustment": 0.05,
-            "pos_limit": "noposlimit",
-            "standard_risk": "0.6",
-            "volatility_threshold": 1,
-            "model_type": "cls",
-            "floor_value": 0.9
-        }
+        # {
+        #     "put_pct": 1, 
+        #     "spread_adjustment": 0,
+        #     "aa": 1,
+        #     "risk_unit": .004,
+        #     "model": "VCcls",
+        #     "vc_level":"200$.9",
+        #     "portfolio_cash": 500000,
+        #     "risk_adjustment": 0.05,
+        #     "pos_limit": "noposlimit",
+        #     "standard_risk": "0.6",
+        #     "volatility_threshold": 1,
+        #     "model_type": "cls",
+        #     "floor_value": 100
+        # },
+        # {
+        #     "put_pct": 1, 
+        #     "spread_adjustment": 0,
+        #     "aa": 1,
+        #     "risk_unit": .004,
+        #     "model": "derivVOL",
+        #     "vc_level":"nvc",
+        #     "portfolio_cash": 500000,
+        #     "risk_adjustment": 0.05,
+        #     "pos_limit": "noposlimit",
+        #     "standard_risk": "0.6",
+        #     "volatility_threshold": 1,
+        #     "model_type": "cls",
+        #     "floor_value": -75
+        # },
+        # {
+        #     "put_pct": 1, 
+        #     "spread_adjustment": 0,
+        #     "aa": 1,
+        #     "risk_unit": .004,
+        #     "model": "derivVOL",
+        #     "vc_level":"nvc",
+        #     "portfolio_cash": 500000,
+        #     "risk_adjustment": 0.05,
+        #     "pos_limit": "noposlimit",
+        #     "standard_risk": "0.6",
+        #     "volatility_threshold": 1,
+        #     "model_type": "cls",
+        #     "floor_value": -50
+        # }
 ]
-    time_periods = [test_files,test_files2,test_files3,test_files4]
-    strategies = ["IDXC:3","IDXP:3","IDXC_1D:1","IDXP_1D:1","MA:3","MAP:3","MA_1D:1","MAP_1D:1","GAIN_1D:1","GAINP_1D:1","GAIN:3","GAINP:3","LOSERS:3","LOSERS_1D:1","LOSERSC:3","LOSERSC_1D:1","VDIFFC:3","VDIFFC_1D:1","VDIFFP_1D:1","VDIFFP:3"]
-    time_periods = [test_files,test_files2,test_files3,test_files4]
+    # strategies = ["IDXC:3","IDXP:3","IDXC_1D:1","IDXP_1D:1","MA:3","MAP:3","MA_1D:1","MAP_1D:1","GAIN_1D:1","GAINP_1D:1","GAIN:3","GAINP:3","LOSERS:3","LOSERS_1D:1","LOSERSC:3","LOSERSC_1D:1","VDIFFC:3","VDIFFC_1D:1","VDIFFP_1D:1","VDIFFP:3"]
+    # time_periods = [test_files2,test_files3,test_files4]
+    # models_tested = []
+    # error_models = []
+
+    # for config in backtest_configs:
+    #     trading_strat = f"modelVOL_dwnsdVOL:{config['model']}_{config['vc_level']}_vol{config['volatility_threshold']}_fv{config['floor_value']}"
+    #     for time in time_periods:
+    #         try:
+    #             start_dt = time[0]
+    #             end_date = time[-1]
+
+    #             start_date = start_dt.replace("-","/")
+    #             end_dt = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=7)
+    #             end_date = end_dt.strftime("%Y/%m/%d")
+    #             start_str = start_date.split("/")[1] + start_date.split("/")[2]
+    #             end_str = end_date.split("/")[1] + end_date.split("/")[2]
+
+    #             print(f"Starting {trading_strat} at {datetime.now()}")
+    #             portfolio_df, positions_df, full_df = backtest_orchestrator(start_date, end_date,file_names=time,strategies=strategies,local_data=False, config=config) 
+    #             s3.put_object(Body=portfolio_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/portfolio_report.csv')
+    #             s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/positions_report.csv')
+    #             s3.put_object(Body=full_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/all_positions.csv')
+    #             print(f"Done with {trading_strat} at {datetime.now()}!")
+    #         except Exception as e:
+    #             print(f"Error: {e} for {trading_strat}")
+    #             error_models.append(f"Error: {e} for {trading_strat}")
+    #             continue
+    #         models_tested.append(trading_strat)
+
+    # print(f"Completed all models at {datetime.now()}!")
+    # print(models_tested)
+    # print("Errors:")
+    # print(error_models)
+
+    ## TREND STRATEGIES ONLY
+    strategies = ["GAIN_1D:1","GAINP_1D:1","GAIN:3","GAINP:3","LOSERS:3","LOSERS_1D:1","LOSERSC:3","LOSERSC_1D:1"]
+    time_periods = [test_files3,test_files4]
     models_tested = []
     error_models = []
 
     for config in backtest_configs:
-        trading_strat = f"modelVOL_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['vc_level']}_vol{config['volatility_threshold']}"
+        trading_strat = f"modelVOLTREND_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['vc_level']}_vol{config['volatility_threshold']}"
         for time in time_periods:
             try:
                 start_dt = time[0]
@@ -205,41 +300,5 @@ if __name__ == "__main__":
     print(models_tested)
     print("Errors:")
     print(error_models)
-
-    # ## TREND STRATEGIES ONLY
-    # strategies = ["GAIN_1D:1","GAINP_1D:1","GAIN:3","GAINP:3","LOSERS:3","LOSERS_1D:1","LOSERSC:3","LOSERSC_1D:1"]
-    # time_periods = [test_files,test_files2]
-    # models_tested = []
-    # error_models = []
-
-    # for config in backtest_configs:
-    #     trading_strat = f"modelVOLTREND_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['vc_level']}_vol{config['volatility_threshold']}"
-    #     for time in time_periods:
-    #         try:
-    #             start_dt = time[0]
-    #             end_date = time[-1]
-
-    #             start_date = start_dt.replace("-","/")
-    #             end_dt = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=7)
-    #             end_date = end_dt.strftime("%Y/%m/%d")
-    #             start_str = start_date.split("/")[1] + start_date.split("/")[2]
-    #             end_str = end_date.split("/")[1] + end_date.split("/")[2]
-
-    #             print(f"Starting {trading_strat} at {datetime.now()}")
-    #             portfolio_df, positions_df, full_df = backtest_orchestrator(start_date, end_date,file_names=time,strategies=strategies,local_data=False, config=config) 
-    #             s3.put_object(Body=portfolio_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/portfolio_report.csv')
-    #             s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/positions_report.csv')
-    #             s3.put_object(Body=full_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/all_positions.csv')
-    #             print(f"Done with {trading_strat} at {datetime.now()}!")
-    #         except Exception as e:
-    #             print(f"Error: {e} for {trading_strat}")
-    #             error_models.append(f"Error: {e} for {trading_strat}")
-    #             continue
-    #     models_tested.append(trading_strat)
-
-    # print(f"Completed all models at {datetime.now()}!")
-    # print(models_tested)
-    # print("Errors:")
-    # print(error_models)
 
 
