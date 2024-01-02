@@ -162,12 +162,10 @@ if __name__ == "__main__":
             "model": "stdclsAGG",
             "vc_level":"nvc",
             "portfolio_cash": 500000,
-            "risk_adjustment": 0.05,
             "pos_limit": "noposlimit",
-            "standard_risk": "0.6",
-            "volatility_threshold": .75,
+            "volatility_threshold": 1,
             "model_type": "cls",
-            "floor_value": 100
+            "user": "cm3"
         },
         {
             "put_pct": 1, 
@@ -177,58 +175,24 @@ if __name__ == "__main__":
             "model": "stdclsAGG",
             "vc_level":"nvc",
             "portfolio_cash": 500000,
-            "risk_adjustment": 0.05,
             "pos_limit": "noposlimit",
-            "standard_risk": "0.6",
             "volatility_threshold": 1,
             "model_type": "cls",
-            "floor_value": 100
+            "user": "cm3"
         },
-        # {
-        #     "put_pct": 1, 
-        #     "spread_adjustment": 0,
-        #     "aa": 1,
-        #     "risk_unit": .004,
-        #     "model": "VCcls",
-        #     "vc_level":"200$.9",
-        #     "portfolio_cash": 500000,
-        #     "risk_adjustment": 0.05,
-        #     "pos_limit": "noposlimit",
-        #     "standard_risk": "0.6",
-        #     "volatility_threshold": 1,
-        #     "model_type": "cls",
-        #     "floor_value": 100
-        # },
-        # {
-        #     "put_pct": 1, 
-        #     "spread_adjustment": 0,
-        #     "aa": 1,
-        #     "risk_unit": .004,
-        #     "model": "derivVOL",
-        #     "vc_level":"nvc",
-        #     "portfolio_cash": 500000,
-        #     "risk_adjustment": 0.05,
-        #     "pos_limit": "noposlimit",
-        #     "standard_risk": "0.6",
-        #     "volatility_threshold": 1,
-        #     "model_type": "cls",
-        #     "floor_value": -75
-        # },
-        # {
-        #     "put_pct": 1, 
-        #     "spread_adjustment": 0,
-        #     "aa": 1,
-        #     "risk_unit": .004,
-        #     "model": "derivVOL",
-        #     "vc_level":"nvc",
-        #     "portfolio_cash": 500000,
-        #     "risk_adjustment": 0.05,
-        #     "pos_limit": "noposlimit",
-        #     "standard_risk": "0.6",
-        #     "volatility_threshold": 1,
-        #     "model_type": "cls",
-        #     "floor_value": -50
-        # }
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 1,
+            "risk_unit": .002,
+            "model": "VCcls",
+            "vc_level":"200$.9",
+            "portfolio_cash": 500000,
+            "pos_limit": "noposlimit",
+            "volatility_threshold": 1,
+            "model_type": "cls",
+            "user": "cm3"
+        }
 ]
     # strategies = ["IDXC:3","IDXP:3","IDXC_1D:1","IDXP_1D:1","MA:3","MAP:3","MA_1D:1","MAP_1D:1","GAIN_1D:1","GAINP_1D:1","GAIN:3","GAINP:3","LOSERS:3","LOSERS_1D:1","LOSERSC:3","LOSERSC_1D:1","VDIFFC:3","VDIFFC_1D:1","VDIFFP_1D:1","VDIFFP:3"]
     # time_periods = [test_files2,test_files3,test_files4]
@@ -267,12 +231,13 @@ if __name__ == "__main__":
 
     ## TREND STRATEGIES ONLY
     strategies = ["GAIN_1D:1","GAINP_1D:1","GAIN:3","GAINP:3","LOSERS:3","LOSERS_1D:1","LOSERSC:3","LOSERSC_1D:1"]
-    time_periods = [test_files3,test_files4]
+    time_periods = [q3,q4]
     models_tested = []
     error_models = []
+    nowstr = datetime.now().strftime("%Y%m%d")
 
     for config in backtest_configs:
-        trading_strat = f"modelVOLTREND_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['vc_level']}_vol{config['volatility_threshold']}"
+        trading_strat = f"{config['user']}-{nowstr}-modelVOL_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['vc_level']}_vol{config['volatility_threshold']}"
         for time in time_periods:
             try:
                 start_dt = time[0]
