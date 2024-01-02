@@ -69,7 +69,7 @@ def polygon_optiondata(options_ticker, from_date, to_date):
     res_option_df['ticker'] = options_ticker
 
     res_option_df =res_option_df[res_option_df['hour'] < 16]
-    res_option_df =res_option_df.loc[res_option_df['time'] >= datetime.strptime("09:45:00", "%H:%M:%S").time()]
+    res_option_df =res_option_df.loc[res_option_df['time'] >= datetime.strptime("09:30:00", "%H:%M:%S").time()]
     return res_option_df
 
 def polygon_stockdata_inv(symbol, from_date, to_date):
@@ -88,5 +88,5 @@ def polygon_stockdata_inv(symbol, from_date, to_date):
     stock_df['minute'] = stock_df['date'].apply(lambda x: x.minute)
 
     stock_df = stock_df[stock_df['hour'] < 16]
-    stock_df = stock_df.loc[stock_df['time'] >= datetime.strptime("09:45:00", "%H:%M:%S").time()]
+    stock_df = stock_df.loc[stock_df['time'] >= datetime.strptime("09:30:00", "%H:%M:%S").time()]
     return stock_df

@@ -110,16 +110,16 @@ if __name__ == "__main__":
          '2023-03-27', '2023-04-03', '2023-04-10', '2023-04-17', '2023-04-24', '2023-05-01', '2023-05-08', '2023-05-15', 
          '2023-05-22', '2023-05-29', '2023-06-05', '2023-06-12', '2023-06-19', '2023-06-26', '2023-07-03', '2023-07-10', 
          '2023-07-17', '2023-07-24', '2023-07-31', '2023-08-07', '2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
-         '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02', '2023-10-09'
+         '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02', '2023-10-09', '2023-10-16', '2023-10-23', '2023-10-30'
          ]
 
-    q1 =  ['2023-07-31','2023-08-07','2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
+    q4 =  ['2023-07-31','2023-08-07','2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
     '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02']
-    q2 = ['2023-01-02', '2023-01-09', '2023-01-16', '2023-01-23', 
+    q1 = ['2023-01-02', '2023-01-09', '2023-01-16', '2023-01-23', 
          '2023-01-30', '2023-02-06', '2023-02-13', '2023-02-20']
-    q3 = ['2023-02-27', '2023-03-06', '2023-03-13', '2023-03-20', 
+    q2 = ['2023-02-27', '2023-03-06', '2023-03-13', '2023-03-20', 
          '2023-03-27', '2023-04-03', '2023-04-10', '2023-04-17', '2023-04-24']
-    q4 = ['2023-05-01', '2023-05-08', '2023-05-15', 
+    q3 = ['2023-05-01', '2023-05-08', '2023-05-15', 
          '2023-05-22', '2023-05-29', '2023-06-05', '2023-06-12', '2023-06-19','2023-07-10', 
          '2023-07-17', '2023-07-24']
 
@@ -166,33 +166,20 @@ if __name__ == "__main__":
             "volatility_threshold": 1,
             "model_type": "cls",
             "user": "cm3"
-        },
-        {
-            "put_pct": 1, 
-            "spread_adjustment": 0,
-            "aa": 1,
-            "risk_unit": .004,
-            "model": "stdclsAGG",
-            "vc_level":"nvc",
-            "portfolio_cash": 500000,
-            "pos_limit": "noposlimit",
-            "volatility_threshold": 1,
-            "model_type": "cls",
-            "user": "cm3"
-        },
-        {
-            "put_pct": 1, 
-            "spread_adjustment": 0,
-            "aa": 1,
-            "risk_unit": .002,
-            "model": "VCcls",
-            "vc_level":"200$.9",
-            "portfolio_cash": 500000,
-            "pos_limit": "noposlimit",
-            "volatility_threshold": 1,
-            "model_type": "cls",
-            "user": "cm3"
         }
+        # {
+        #     "put_pct": 1, 
+        #     "spread_adjustment": 0,
+        #     "aa": 1,
+        #     "risk_unit": .004,
+        #     "model": "VCcls",
+        #     "vc_level":"200$.9",
+        #     "portfolio_cash": 500000,
+        #     "pos_limit": "noposlimit",
+        #     "volatility_threshold": 1,
+        #     "model_type": "cls",
+        #     "user": "cm3"
+        # }
 ]
     # strategies = ["IDXC:3","IDXP:3","IDXC_1D:1","IDXP_1D:1","MA:3","MAP:3","MA_1D:1","MAP_1D:1","GAIN_1D:1","GAINP_1D:1","GAIN:3","GAINP:3","LOSERS:3","LOSERS_1D:1","LOSERSC:3","LOSERSC_1D:1","VDIFFC:3","VDIFFC_1D:1","VDIFFP_1D:1","VDIFFP:3"]
     # time_periods = [test_files2,test_files3,test_files4]
@@ -231,13 +218,13 @@ if __name__ == "__main__":
 
     ## TREND STRATEGIES ONLY
     strategies = ["GAIN_1D:1","GAINP_1D:1","GAIN:3","GAINP:3","LOSERS:3","LOSERS_1D:1","LOSERSC:3","LOSERSC_1D:1"]
-    time_periods = [q3,q4]
+    time_periods = [q4]
     models_tested = []
     error_models = []
     nowstr = datetime.now().strftime("%Y%m%d")
 
     for config in backtest_configs:
-        trading_strat = f"{config['user']}-{nowstr}-modelVOL_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['vc_level']}_vol{config['volatility_threshold']}"
+        trading_strat = f"{config['user']}-{nowstr}-modelVOL_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['vc_level']}_vol{config['volatility_threshold']}_trdOPEN"
         for time in time_periods:
             try:
                 start_dt = time[0]

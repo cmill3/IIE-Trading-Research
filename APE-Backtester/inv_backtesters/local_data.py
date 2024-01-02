@@ -178,131 +178,106 @@ if __name__ == "__main__":
 
 
     strategy_info = {
-         "IDXC_1d": {
-              "file_path": 'TSSIM1_IDX-TLT_custHypP1_2018',
-              "time_span": 2,
-              "side": "C"
-         },
-        "IDXP_1d": {
-              "file_path": 'TSSIM1h_IDX-TLT_custHypP1_2018',
-              "time_span": 2,
-              "side": "P"
-         },
-         "IDXP": {
-              "file_path": 'DEFAULT-TLT_custHypP15_2018',
-              "time_span": 4,
-              "side": "P"
-         },
-        "IDXC": {
-              "file_path": 'DEFAULT-TLT_custHypP15_2018',
-              "time_span": 4,
-              "side": "C"
-         },
-         "VDIFFC_1d": {
-              "file_path": 'DEFAULT_noVOL_custHypP2_2018',
-              "time_span": 2,
-              "side": "C"
-         },
-        "VDIFFP_1d": {
-              "file_path": 'DEFAULT_noVOL_custHypP2_2018',
-              "time_span": 2,
-              "side": "P"
-         },
-         "VDIFFC": {
-              "file_path": 'DEFAULT_noVOL_custHypP33_2018',
-              "time_span": 4,
-              "side": "C"
-         },
-        "VDIFFP": {
-              "file_path": 'DEFAULT_noVOL_custHypP31_2018',
-              "time_span": 4,
-              "side": "P"
-         },
+        #  "IDXC_1d": {
+        #       "file_path": 'TSSIM1_IDX-TLT_custHypP1_2018',
+        #       "time_span": 2,
+        #       "side": "C"
+        #  },
+        # "IDXP_1d": {
+        #       "file_path": 'TSSIM1h_IDX-TLT_custHypP1_2018',
+        #       "time_span": 2,
+        #       "side": "P"
+        #  },
+        #  "IDXP": {
+        #       "file_path": 'DEFAULT-TLT_custHypP15_2018',
+        #       "time_span": 4,
+        #       "side": "P"
+        #  },
+        # "IDXC": {
+        #       "file_path": 'DEFAULT-TLT_custHypP15_2018',
+        #       "time_span": 4,
+        #       "side": "C"
+        #  },
+        #  "VDIFFC_1d": {
+        #       "file_path": 'DEFAULT_noVOL_custHypP2_2018',
+        #       "time_span": 2,
+        #       "side": "C"
+        #  },
+        # "VDIFFP_1d": {
+        #       "file_path": 'DEFAULT_noVOL_custHypP2_2018',
+        #       "time_span": 2,
+        #       "side": "P"
+        #  },
+        #  "VDIFFC": {
+        #       "file_path": 'DEFAULT_noVOL_custHypP33_2018',
+        #       "time_span": 4,
+        #       "side": "C"
+        #  },
+        # "VDIFFP": {
+        #       "file_path": 'DEFAULT_noVOL_custHypP31_2018',
+        #       "time_span": 4,
+        #       "side": "P"
+        #  },
          "GAIN_1d": {
-              "file_path": 'TSSIM1_noVOL_custHypP185_2018',
+              "file_path": 'TSSIM1:1_noVOLnoIDX_custHypP2_2018',
               "time_span": 2,
               "side": "C"
          },
         "LOSERS_1d": {
-              "file_path": 'TSSIM1_noVOL_custHypP15_2018',
+              "file_path": 'TSSIM1:1_noVOL_custHypP15_2018',
               "time_span": 2,
               "side": "P"
          },
          "GAIN": {
-              "file_path": 'DEFAULT_noVOLnoIDX_custHypP3_2018',
+              "file_path": 'TSSIM1_noVOLnoIDX_custHypP3_2018',
               "time_span": 4,
               "side": "C"
          },
         "LOSERS": {
-              "file_path": 'DEFAULT_noVOLnoIDX_custHypP225_2018',
+              "file_path": 'TSSIM1_noVOLnoIDX_custHypP225_2018',
               "time_span": 4,
               "side": "P"
          },
          "GAINP_1D": {
-              "file_path": 'DEFAULT_noVOLnoIDX_custHypP21_2018',
+              "file_path": 'TSSIM1_noVOLnoIDX_custHypP185_2018',
               "time_span": 2,
               "side": "P"
          },
         "LOSERSC_1D": {
-              "file_path": 'DEFAULT_noVOLnoIDX_custHypP15_2018',
+              "file_path": 'TSSIM1_noVOLnoIDX_custHypP15_2018',
               "time_span": 2,
               "side": "C"
          },
          "GAINP": {
-              "file_path": 'DEFAULT_noVOLnoIDX_custHypP3_2018',
+              "file_path": 'TSSIM2_noVOLnoIDX_custHypP28_2018',
               "time_span": 4,
               "side": "P"
          },
         "LOSERSC": {
-              "file_path": 'DEFAULT_noVOLnoIDX_custHypP25_2018',
+              "file_path": 'TSSIM1_noVOLnoIDX_custHypP25_2018',
               "time_span": 4,
               "side": "C"
          },
-        "LOSERS": {
-              "file_path": 'DEFAULT_noVOL_custHypP225_2018',
-              "time_span": 4,
-              "side": "P"
-         },
-         "GAINP_1D": {
-              "file_path": 'DEFAULT_noVOL_custHypP21_2018',
-              "time_span": 2,
-              "side": "P"
-         },
-        "LOSERSC_1D": {
-              "file_path": 'DEFAULT_noVOL_custHypP15_2018',
-              "time_span": 2,
-              "side": "C"
-         },
-         "GAINP": {
-              "file_path": 'DEFAULT_noVOL_custHypP29_2018',
-              "time_span": 4,
-              "side": "P"
-         },
-        "LOSERSC": {
-              "file_path": 'DEFAULT_noVOL_custHypP25_2018',
-              "time_span": 4,
-              "side": "C"
-         },
-         "MAP_1d": {
-              "file_path": 'DEFAULT_noVOL_custHypP2_2018',
-              "time_span": 2,
-              "side": "P"
-         },
-        "MA_1d": {
-              "file_path": 'TSSIM1_noVOL_custHypP21_2018',
-              "time_span": 2,
-              "side": "C"
-         },
-         "MAP": {
-              "file_path": 'DEFAULT_noVOL_custHypP3_2018',
-              "time_span": 4,
-              "side": "P"
-         },
-        "MA": {
-              "file_path": 'DEFAULT_noVOL_custHypP325_2018',
-              "time_span": 4,
-              "side": "C"
-         }
+        #  "MAP_1d": {
+        #       "file_path": 'DEFAULT_noVOL_custHypP2_2018',
+        #       "time_span": 2,
+        #       "side": "P"
+        #  },
+        # "MA_1d": {
+        #       "file_path": 'TSSIM1_noVOL_custHypP21_2018',
+        #       "time_span": 2,
+        #       "side": "C"
+        #  },
+        #  "MAP": {
+        #       "file_path": 'DEFAULT_noVOL_custHypP3_2018',
+        #       "time_span": 4,
+        #       "side": "P"
+        #  },
+        # "MA": {
+        #       "file_path": 'DEFAULT_noVOL_custHypP325_2018',
+        #       "time_span": 4,
+        #       "side": "C"
+        #  }
     }
 
     file_names = ['2023-01-02','2023-01-09', '2023-01-16', '2023-01-23', 

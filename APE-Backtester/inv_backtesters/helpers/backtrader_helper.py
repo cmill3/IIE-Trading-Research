@@ -370,7 +370,7 @@ def create_datetime_index(start_date, end_date):
 def create_portfolio_date_list(start_date, end_date):
     sy, sm, sd = start_date.split('/')
     ey, em, ed = end_date.split('/')
-    start_time = datetime(int(sy), int(sm), int(sd), 9, 45)
+    start_time = datetime(int(sy), int(sm), int(sd), 9, 30)
     end_time = datetime(int(ey), int(em), int(ed), 16, 0)
     end_date = create_end_date(end_time, 4)
     date_list, _, _  = create_datetime_index(start_time, end_date)
