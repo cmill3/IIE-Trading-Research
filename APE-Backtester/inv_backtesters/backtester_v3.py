@@ -65,7 +65,7 @@ def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,c
 
     if not local_data:
         cpu_count = os.cpu_count()
-        with concurrent.futures.ProcessPoolExecutor(max_workers=cpu_count) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=24) as executor:
             # Submit the processing tasks to the ThreadPoolExecutor
             processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies,config) for file_name in file_names]
 
@@ -103,25 +103,26 @@ if __name__ == "__main__":
     #      '2023-03-27', '2023-04-03', '2023-04-10', '2023-04-17', '2023-04-24', '2023-05-01', '2023-05-08', '2023-05-15', 
     #      '2023-05-22', '2023-05-29', '2023-06-05', '2023-06-12', '2023-06-19', '2023-06-26', '2023-07-03', '2023-07-10', 
     #      '2023-07-17', '2023-07-24', '2023-07-31', '2023-08-07', '2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
-    #      '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02']
+    #      '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02']  
     file_names = [
-         '2023-01-02', '2023-01-09', '2023-01-16', '2023-01-23', 
-         '2023-01-30', '2023-02-06', '2023-02-13', '2023-02-20', '2023-02-27', '2023-03-06', '2023-03-13', '2023-03-20', 
-         '2023-03-27', '2023-04-03', '2023-04-10', '2023-04-17', '2023-04-24', '2023-05-01', '2023-05-08', '2023-05-15', 
-         '2023-05-22', '2023-05-29', '2023-06-05', '2023-06-12', '2023-06-19', '2023-06-26', '2023-07-03', '2023-07-10', 
-         '2023-07-17', '2023-07-24', '2023-07-31', '2023-08-07', '2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
-         '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02', '2023-10-09', '2023-10-16', '2023-10-23', '2023-10-30'
-         ]
+     '2023-01-02', '2023-01-09', '2023-01-16', '2023-01-23', 
+     '2023-01-30', '2023-02-06', '2023-02-13', '2023-02-20', '2023-02-27', '2023-03-06', '2023-03-13', '2023-03-20', 
+     '2023-03-27', '2023-04-03', '2023-04-10', '2023-04-17', '2023-04-24', '2023-05-01', '2023-05-08', '2023-05-15', 
+     '2023-05-22', '2023-05-29', '2023-06-05', '2023-06-12', '2023-06-19', '2023-06-26', '2023-07-03', '2023-07-10', 
+     '2023-07-17', '2023-07-24', '2023-07-31', '2023-08-07', '2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
+     '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02', '2023-10-09', '2023-10-16', '2023-10-23', '2023-10-30',
+     '2023-11-06', '2023-11-13', '2023-11-20', '2023-11-27', '2023-12-04', '2023-12-11', '2023-12-18', '2023-12-25'
+     ]
 
-    q4 =  ['2023-07-31','2023-08-07','2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
-    '2023-09-11', '2023-09-18', '2023-09-25', '2023-10-02']
     q1 = ['2023-01-02', '2023-01-09', '2023-01-16', '2023-01-23', 
-         '2023-01-30', '2023-02-06', '2023-02-13', '2023-02-20']
-    q2 = ['2023-02-27', '2023-03-06', '2023-03-13', '2023-03-20', 
-         '2023-03-27', '2023-04-03', '2023-04-10', '2023-04-17', '2023-04-24']
-    q3 = ['2023-05-01', '2023-05-08', '2023-05-15', 
-         '2023-05-22', '2023-05-29', '2023-06-05', '2023-06-12', '2023-06-19','2023-07-10', 
-         '2023-07-17', '2023-07-24']
+     '2023-01-30', '2023-02-06', '2023-02-13', '2023-02-20', '2023-02-27']
+    q2 = ['2023-03-06', '2023-03-13', '2023-03-20', 
+     '2023-03-27', '2023-04-03', '2023-04-10', '2023-04-17', '2023-04-24', '2023-05-01', '2023-05-08', '2023-05-15', 
+     '2023-05-22', '2023-05-29']
+    q3 = ['2023-06-05', '2023-06-12', '2023-06-19', '2023-06-26', '2023-07-03', '2023-07-10', 
+     '2023-07-17', '2023-07-24', '2023-07-31', '2023-08-07', '2023-08-14', '2023-08-21', '2023-08-28','2023-09-04', '2023-09-11']
+    q4 =  ['2023-09-18', '2023-09-25','2023-10-02', '2023-10-09', '2023-10-16', '2023-10-23', '2023-10-30',
+     '2023-11-06', '2023-11-13', '2023-11-20', '2023-11-27', '2023-12-04', '2023-12-11', '2023-12-18']
 
     backtest_configs = [
         # {
@@ -139,21 +140,6 @@ if __name__ == "__main__":
         #     "model_type": "cls",
         #     "floor_value": 100
         # },
-        # {
-        #     "put_pct": 1, 
-        #     "spread_adjustment": 0,
-        #     "aa": 1,
-        #     "risk_unit": .004,
-        #     "model": "stdcls",
-        #     "vc_level":"nvc",
-        #     "portfolio_cash": 500000,
-        #     "risk_adjustment": 0.05,
-        #     "pos_limit": "noposlimit",
-        #     "standard_risk": "0.6",
-        #     "volatility_threshold": .75,
-        #     "model_type": "cls",
-        #     "floor_value": 100
-        # },
         {
             "put_pct": 1, 
             "spread_adjustment": 0,
@@ -166,28 +152,58 @@ if __name__ == "__main__":
             "volatility_threshold": 1,
             "model_type": "cls",
             "user": "cm3"
-        }
+        },
         # {
         #     "put_pct": 1, 
         #     "spread_adjustment": 0,
         #     "aa": 1,
         #     "risk_unit": .004,
-        #     "model": "VCcls",
-        #     "vc_level":"200$.9",
+        #     "model": "stdclsAGG",
+        #     "vc_level":"nvc",
         #     "portfolio_cash": 500000,
         #     "pos_limit": "noposlimit",
-        #     "volatility_threshold": 1,
+        #     "volatility_threshold": .5,
+        #     "model_type": "cls",
+        #     "user": "cm3"
+        # },
+        # {
+        #     "put_pct": 1, 
+        #     "spread_adjustment": 0,
+        #     "aa": 1,
+        #     "risk_unit": .002,
+        #     "model": "stdclsAGG",
+        #     "vc_level":"nvc",
+        #     "portfolio_cash": 500000,
+        #     "pos_limit": "noposlimit",
+        #     "volatility_threshold": .9,
+        #     "model_type": "cls",
+        #     "user": "cm3"
+        # },
+        # {
+        #     "put_pct": 1, 
+        #     "spread_adjustment": 0,
+        #     "aa": 1,
+        #     "risk_unit": .002,
+        #     "model": "stdclsAGG",
+        #     "vc_level":"nvc",
+        #     "portfolio_cash": 500000,
+        #     "pos_limit": "noposlimit",
+        #     "volatility_threshold": .8,
         #     "model_type": "cls",
         #     "user": "cm3"
         # }
 ]
+    
+    time_periods = [q1,q2,q3,q4]
+    models_tested = []
+    error_models = []
+    nowstr = datetime.now().strftime("%Y%m%d")
+
     # strategies = ["IDXC:3","IDXP:3","IDXC_1D:1","IDXP_1D:1","MA:3","MAP:3","MA_1D:1","MAP_1D:1","GAIN_1D:1","GAINP_1D:1","GAIN:3","GAINP:3","LOSERS:3","LOSERS_1D:1","LOSERSC:3","LOSERSC_1D:1","VDIFFC:3","VDIFFC_1D:1","VDIFFP_1D:1","VDIFFP:3"]
-    # time_periods = [test_files2,test_files3,test_files4]
-    # models_tested = []
-    # error_models = []
+    # strategies = ["MA:3","MAP:3","MA_1D:1","MAP_1D:1","VDIFFC:3","VDIFFC_1D:1","VDIFFP_1D:1","VDIFFP:3"]
 
     # for config in backtest_configs:
-    #     trading_strat = f"modelVOL_dwnsdVOL:{config['model']}_{config['vc_level']}_vol{config['volatility_threshold']}_fv{config['floor_value']}"
+    #     trading_strat = f"{config['user']}-{nowstr}-modelVOL_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['vc_level']}_vol{config['volatility_threshold']}_run2"
     #     for time in time_periods:
     #         try:
     #             start_dt = time[0]
@@ -209,22 +225,18 @@ if __name__ == "__main__":
     #             print(f"Error: {e} for {trading_strat}")
     #             error_models.append(f"Error: {e} for {trading_strat}")
     #             continue
-    #         models_tested.append(trading_strat)
+    #     models_tested.append(trading_strat)
 
     # print(f"Completed all models at {datetime.now()}!")
     # print(models_tested)
     # print("Errors:")
     # print(error_models)
 
-    ## TREND STRATEGIES ONLY
+    # ## TREND STRATEGIES ONLY
     strategies = ["GAIN_1D:1","GAINP_1D:1","GAIN:3","GAINP:3","LOSERS:3","LOSERS_1D:1","LOSERSC:3","LOSERSC_1D:1"]
-    time_periods = [q4]
-    models_tested = []
-    error_models = []
-    nowstr = datetime.now().strftime("%Y%m%d")
 
     for config in backtest_configs:
-        trading_strat = f"{config['user']}-{nowstr}-modelVOL_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['vc_level']}_vol{config['volatility_threshold']}_trdOPEN"
+        trading_strat = f"{config['user']}-{nowstr}-modelVOLTREND_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['vc_level']}_vol{config['volatility_threshold']}"
         for time in time_periods:
             try:
                 start_dt = time[0]
