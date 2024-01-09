@@ -65,7 +65,7 @@ def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,c
 
     if not local_data:
         cpu_count = os.cpu_count()
-        with concurrent.futures.ProcessPoolExecutor(max_workers=24) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=36) as executor:
             # Submit the processing tasks to the ThreadPoolExecutor
             processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies,config) for file_name in file_names]
 

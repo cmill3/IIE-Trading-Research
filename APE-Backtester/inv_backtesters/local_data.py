@@ -12,12 +12,9 @@ holidays = nyse.holidays()
 holidays_multiyear = holidays.holidays
 
 def add_contract_data_to_local(week,strategy_info,strategy,modeling_type):
-    # dfs = []
-    # for week in weeks:
         try:
             data, _ = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key=f"backtesting_data/inv_alerts/{strategy_info['file_path']}", 
                                                     file_name = f"{week}.csv",prefixes=[strategy],time_span=strategy_info['time_span'])
-            # data.drop(columns=['Unnamed: 0.6','Unnamed: 0.3','Unnamed: 0.2','Unnamed: 0.1','Unnamed: 0'],inplace=True)
             data.drop(columns=['Unnamed: 0.2','Unnamed: 0.1','Unnamed: 0'],inplace=True)
             data['side'] = strategy_info['side']
             data['contracts']= data.apply(lambda x: pull_contract_data(x),axis=1)
@@ -26,8 +23,6 @@ def add_contract_data_to_local(week,strategy_info,strategy,modeling_type):
             print(f"Finished {strategy} for {week}")
         except Exception as e:
             print(f"Error: {e} for {strategy}")
-    #         dfs.append(data)
-    # data = pd.concat(dfs,ignore_index=True)
     
 
         
@@ -186,21 +181,21 @@ if __name__ == "__main__":
               "time_span": 2,
               "side": "C"
          },
-        "VDIFFP_1d": {
-              "file_path": 'TSSIM1_TL15_custHypP16',
-              "time_span": 2,
-              "side": "P"
-         },
-         "VDIFFC": {
-              "file_path": 'TSSIM1_TL15_custHypP25',
-              "time_span": 4,
-              "side": "C"
-         },
-        "VDIFFP": {
-              "file_path": 'TSSIM1_TL15_custHypP24',
-              "time_span": 4,
-              "side": "P"
-         },
+        # "VDIFFP_1d": {
+        #       "file_path": 'TSSIM1_TL15_custHypP16',
+        #       "time_span": 2,
+        #       "side": "P"
+        #  },
+        #  "VDIFFC": {
+        #       "file_path": 'TSSIM1_TL15_custHypP25',
+        #       "time_span": 4,
+        #       "side": "C"
+        #  },
+        # "VDIFFP": {
+        #       "file_path": 'TSSIM1_TL15_custHypP24',
+        #       "time_span": 4,
+        #       "side": "P"
+        #  },
         #  "GAIN_1d": {
         #       "file_path": 'TSSIM1:1_TL15-VOL_custHypP175',
         #       "time_span": 2,
@@ -216,11 +211,11 @@ if __name__ == "__main__":
         #       "time_span": 4,
         #       "side": "C"
         #  },
-        "LOSERS": {
-              "file_path": 'TSSIM1_TL15-VOL_custHypP2',
-              "time_span": 4,
-              "side": "P"
-         },
+        # "LOSERS": {
+        #       "file_path": 'TSSIM1_TL15-VOL_custHypP2',
+        #       "time_span": 4,
+        #       "side": "P"
+        #  },
         #  "GAINP_1D": {
         #       "file_path": 'TSSIM1_TL15-VOL_custHyp18',
         #       "time_span": 2,
@@ -241,26 +236,26 @@ if __name__ == "__main__":
         #       "time_span": 4,
         #       "side": "C"
         #  },
-         "MAP_1d": {
-              "file_path": 'TSSIM1_TL15_custHypP165',
-              "time_span": 2,
-              "side": "P"
-         },
-        "MA_1d": {
-              "file_path": 'TSSIM1_TL15_custHypP17',
-              "time_span": 2,
-              "side": "C"
-         },
-         "MAP": {
-              "file_path": 'TSSIM1_TL15_custHypP25',
-              "time_span": 4,
-              "side": "P"
-         },
-        "MA": {
-              "file_path": 'TSSIM1_TL15_custHypP26',
-              "time_span": 4,
-              "side": "C"
-         }
+        #  "MAP_1d": {
+        #       "file_path": 'TSSIM1_TL15_custHypP165',
+        #       "time_span": 2,
+        #       "side": "P"
+        #  },
+        # "MA_1d": {
+        #       "file_path": 'TSSIM1_TL15_custHypP17',
+        #       "time_span": 2,
+        #       "side": "C"
+        #  },
+        #  "MAP": {
+        #       "file_path": 'TSSIM1_TL15_custHypP25',
+        #       "time_span": 4,
+        #       "side": "P"
+        #  },
+        # "MA": {
+        #       "file_path": 'TSSIM1_TL15_custHypP26',
+        #       "time_span": 4,
+        #       "side": "C"
+        #  }
     }
 
     file_names = [
@@ -278,10 +273,10 @@ if __name__ == "__main__":
     # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')
     
     for strategy in strategy_info:
-        with concurrent.futures.ProcessPoolExecutor(max_workers=8) as executor:
-            # Submit the processing tasks to the ThreadPoolExecutor
-            processed_weeks_futures = [executor.submit(add_contract_data_to_local,week,strategy_info[strategy],strategy,modeling_type) for week in file_names]
-    # add_contract_data_to_local(file_names,strategy_info[strategy])
+        # with concurrent.futures.ProcessPoolExecutor(max_workers=8) as executor:
+        #     # Submit the processing tasks to the ThreadPoolExecutor
+        #     processed_weeks_futures = [executor.submit(add_contract_data_to_local,week,strategy_info[strategy],strategy,modeling_type) for week in file_names]
+        add_contract_data_to_local(file_names[6],strategy_info[strategy],strategy,modeling_type)
 
     # for week in file_names:
     #     for strategy in ['BFC','BFP','BFC_1D','BFP_1D']:
