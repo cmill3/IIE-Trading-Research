@@ -186,7 +186,7 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
             elif strategy == "GAINP":
                 sell_dict = trade.tda_PUT_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=-.026,vol=float(row["threeD_stddev50"]),standard_risk=.015)
             elif strategy == "GAINP_1D":
-                sell_dict = trade.tda_PUT_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=-.018,vol=float(row["oneD_stddev50"]),standard_risk=.011)
+                sell_dict = trade.tda_PUT_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=-.017,vol=float(row["oneD_stddev50"]),standard_risk=.011)
         except Exception as e:
             print(f"Error {e} in sell_dict for {symbol} in {strategy} stdclassAgg")
             print(polygon_df)

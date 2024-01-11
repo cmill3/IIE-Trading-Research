@@ -156,26 +156,26 @@ def add_weekdays(date,days,symbol):
 
 if __name__ == "__main__":
     strategy_info = {
-         "IDXC_1d": {
-              "file_path": 'TSSIM1PCR2_custHypP09',
-              "time_span": 2,
-              "side": "C"
-         },
-        "IDXP_1d": {
-              "file_path": 'TSSIM1PCR1_custHypP079_2018',
-              "time_span": 2,
-              "side": "P"
-         },
-         "IDXP": {
-              "file_path": 'TSSIMPCR2_custHypP115_2018',
-              "time_span": 4,
-              "side": "P"
-         },
-        "IDXC": {
-              "file_path": 'TSSIM1PCR1_custHypP14_2018',
-              "time_span": 4,
-              "side": "C"
-         },
+        #  "IDXC_1d": {
+        #       "file_path": 'TSSIM1PCR2_custHypP09',
+        #       "time_span": 2,
+        #       "side": "C"
+        #  },
+        # "IDXP_1d": {
+        #       "file_path": 'TSSIM1PCR1_custHypP079_2018',
+        #       "time_span": 2,
+        #       "side": "P"
+        #  },
+        #  "IDXP": {
+        #       "file_path": 'TSSIMPCR2_custHypP115_2018',
+        #       "time_span": 4,
+        #       "side": "P"
+        #  },
+        # "IDXC": {
+        #       "file_path": 'TSSIM1PCR1_custHypP14_2018',
+        #       "time_span": 4,
+        #       "side": "C"
+        #  },
         #  "VDIFFC_1d": {
         #       "file_path": 'TSSIM1_TL15_custHypP16',
         #       "time_span": 2,
@@ -196,46 +196,46 @@ if __name__ == "__main__":
         #       "time_span": 4,
         #       "side": "P"
         #  },
-        #  "GAIN_1d": {
-        #       "file_path": 'TSSIM1:1_TL15-VOL_custHypP175',
-        #       "time_span": 2,
-        #       "side": "C"
-        #  },
-        # "LOSERS_1d": {
-        #       "file_path": 'TSSIM1:1_TL15-VOL_custHypP13',
-        #       "time_span": 2,
-        #       "side": "P"
-        #  },
-        #  "GAIN": {
-        #       "file_path": 'TSSIM1_TL15-VOL_custHypP275',
-        #       "time_span": 4,
-        #       "side": "C"
-        #  },
-        # "LOSERS": {
-        #       "file_path": 'TSSIM1_TL15-VOL_custHypP2',
-        #       "time_span": 4,
-        #       "side": "P"
-        #  },
-        #  "GAINP_1D": {
-        #       "file_path": 'TSSIM1_TL15-VOL_custHyp18',
-        #       "time_span": 2,
-        #       "side": "P"
-        #  },
-        # "LOSERSC_1D": {
-        #       "file_path": 'TSSIM1_TL15-VOL_custHypP16',
-        #       "time_span": 2,
-        #       "side": "C"
-        #  },
-        #  "GAINP": {
-        #       "file_path": 'TSSIM2_TL15-VOL_custHypP26',
-        #       "time_span": 4,
-        #       "side": "P"
-        #  },
-        # "LOSERSC": {
-        #       "file_path": 'TSSIM1_TL15-VOL_custHypP25',
-        #       "time_span": 4,
-        #       "side": "C"
-        #  },
+         "GAIN_1d": {
+              "file_path": 'TSSIM1:1_TL10TR6_custHypP16',
+              "time_span": 2,
+              "side": "C"
+         },
+        "LOSERS_1d": {
+              "file_path": 'TSSIM1:1_TL10TR6_custHypP13',
+              "time_span": 2,
+              "side": "P"
+         },
+         "GAIN": {
+              "file_path": 'TSSIM1_TL10TR6_custHypP265',
+              "time_span": 4,
+              "side": "C"
+         },
+        "LOSERS": {
+              "file_path": 'TSSIM1_TL10TR6_custHypP2',
+              "time_span": 4,
+              "side": "P"
+         },
+         "GAINP_1D": {
+              "file_path": 'TSSIM1_TL10TR6_custHyp18',
+              "time_span": 2,
+              "side": "P"
+         },
+        "LOSERSC_1D": {
+              "file_path": 'TSSIM1_TL10TR6_custHypP14',
+              "time_span": 2,
+              "side": "C"
+         },
+         "GAINP": {
+              "file_path": 'TSSIM2_TL10TR6_custHypP27',
+              "time_span": 4,
+              "side": "P"
+         },
+        "LOSERSC": {
+              "file_path": 'TSSIM1_TL10TR6_custHypP225',
+              "time_span": 4,
+              "side": "C"
+         },
         #  "MAP_1d": {
         #       "file_path": 'TSSIM1_TL15TR10_custHypP16',
         #       "time_span": 2,
