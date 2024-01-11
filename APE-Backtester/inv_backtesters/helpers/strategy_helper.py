@@ -37,8 +37,14 @@ def bet_sizer(contract_costs,buy_orders,sell_orders,risk_unit,contract_type,put_
         print("ERROR")
         print(buy_orders)
         print(contract_type)
-    spread_cost = sum(contract_costs)
+    spread_cost = sum(contract_costs[0:3])
     quantities = finalize_trade(buy_orders, spread_cost, target_cost)
+
+    if quantities == [0,0,0]:
+        if len(contract_costs) > 3:
+            spread_cost = contract_costs[3] * 100
+            if spread_cost < target_cost:
+                quantities = [0,0,0,1]
 
     if len(quantities) == 0:
         return None, None
@@ -124,7 +130,7 @@ def finalize_trade(contracts_details, spread_cost, target_cost):
                         contract = contracts_details[2]
                         single_contract_cost = 100 * contract['contract_cost']
                         if single_contract_cost > (1.1*target_cost):
-                            return [0,0,0]
+                                return [0,0,0]
                         else:
                             return [0,0,1]
                     else:

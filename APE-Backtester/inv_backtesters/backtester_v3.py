@@ -66,7 +66,7 @@ def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,c
     if not local_data:
         cpu_count = os.cpu_count()
         # build_backtest_data(file_names[0],strategies,config)
-        with concurrent.futures.ProcessPoolExecutor(max_workers=16) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=cpu_count) as executor:
             # Submit the processing tasks to the ThreadPoolExecutor
             processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies,config) for file_name in file_names]
 
@@ -145,10 +145,25 @@ if __name__ == "__main__":
             "put_pct": 1, 
             "spread_adjustment": 0,
             "aa": 0,
+            "risk_unit": .001,
+            "model": "stdclsAGG",
+            "vc_level":"300",
+            "portfolio_cash": 100000,
+            "pos_limit": "noposlimit",
+            "volatility_threshold": 1,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D"
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 0,
             "risk_unit": .002,
             "model": "stdclsAGG",
             "vc_level":"300",
-            "portfolio_cash": 500000,
+            "portfolio_cash": 100000,
             "pos_limit": "noposlimit",
             "volatility_threshold": 1,
             "model_type": "cls",
@@ -228,14 +243,48 @@ if __name__ == "__main__":
     error_models = []
     nowstr = datetime.now().strftime("%Y%m%d")
 
-    # strategies = ["IDXC:3","IDXP:3","IDXC_1D:1","IDXP_1D:1","MA:3","MAP:3","MA_1D:1","MAP_1D:1","GAIN_1D:1","GAINP_1D:1","GAIN:3","GAINP:3","LOSERS:3","LOSERS_1D:1","LOSERSC:3","LOSERSC_1D:1","VDIFFC:3","VDIFFC_1D:1","VDIFFP_1D:1","VDIFFP:3"]
-    # strategies = ["MA:3","MAP:3","MA_1D:1","MAP_1D:1","VDIFFC:3","VDIFFC_1D:1","VDIFFP_1D:1","VDIFFP:3"]
-    strategies = ["MA:3","MAP:3","MA_1D:1","MAP_1D:1","GAIN_1D:1","GAINP_1D:1","GAIN:3","GAINP:3","LOSERS:3","LOSERS_1D:1","LOSERSC:3","LOSERSC_1D:1"]
+    # # strategies = ["IDXC:3","IDXP:3","IDXC_1D:1","IDXP_1D:1","MA:3","MAP:3","MA_1D:1","MAP_1D:1","GAIN_1D:1","GAINP_1D:1","GAIN:3","GAINP:3","LOSERS:3","LOSERS_1D:1","LOSERSC:3","LOSERSC_1D:1","VDIFFC:3","VDIFFC_1D:1","VDIFFP_1D:1","VDIFFP:3"]
+    # # strategies = ["MA:3","MAP:3","MA_1D:1","MAP_1D:1","VDIFFC:3","VDIFFC_1D:1","VDIFFP_1D:1","VDIFFP:3"]
+    # strategies = ["MA:3","MAP:3","MA_1D:1","MAP_1D:1","GAIN_1D:1","GAINP_1D:1","GAIN:3","GAINP:3","LOSERS:3","LOSERS_1D:1","LOSERSC:3","LOSERSC_1D:1"]
 
+
+    # for config in backtest_configs:
+    #     config['risk_unit'] = .0008
+    #     trading_strat = f"{config['user']}-{nowstr}-modelVOLTRENDMA_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['vc_level']}_vol{config['volatility_threshold']}"
+    #     for time in time_periods:
+    #         try:
+    #             start_dt = time[0]
+    #             end_date = time[-1]
+
+    #             start_date = start_dt.replace("-","/")
+    #             end_dt = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=7)
+    #             end_date = end_dt.strftime("%Y/%m/%d")
+    #             start_str = start_date.split("/")[1] + start_date.split("/")[2]
+    #             end_str = end_date.split("/")[1] + end_date.split("/")[2]
+
+    #             print(f"Starting {trading_strat} at {datetime.now()}")
+    #             portfolio_df, positions_df, full_df = backtest_orchestrator(start_date, end_date,file_names=time,strategies=strategies,local_data=False, config=config) 
+    #             s3.put_object(Body=portfolio_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/portfolio_report.csv')
+    #             s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/positions_report.csv')
+    #             s3.put_object(Body=full_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/all_positions.csv')
+    #             print(f"Done with {trading_strat} at {datetime.now()}!")
+    #         except Exception as e:
+    #             print(f"Error: {e} for {trading_strat}")
+    #             error_models.append(f"Error: {e} for {trading_strat}")
+    #             continue
+    #     models_tested.append(trading_strat)
+
+    # print(f"Completed all models at {datetime.now()}!")
+    # print(models_tested)
+    # print("Errors:")
+    # print(error_models)
+
+    ## TREND STRATEGIES ONLY
+    time_periods = [q1,q2,q3,q4]
+    strategies = ["GAIN_1D:1","GAINP_1D:1","LOSERS_1D:1","LOSERSC_1D:1"]
 
     for config in backtest_configs:
-        config['risk_unit'] = .0008
-        trading_strat = f"{config['user']}-{nowstr}-modelVOLTRENDMA_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['vc_level']}_vol{config['volatility_threshold']}"
+        trading_strat = f"{config['user']}-{nowstr}-modelVOLTREND1D_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['vc_level']}_vol{config['volatility_threshold']}"
         for time in time_periods:
             try:
                 start_dt = time[0]
@@ -266,11 +315,10 @@ if __name__ == "__main__":
 
     ## TREND STRATEGIES ONLY
     time_periods = [q1,q2,q3,q4]
-    strategies = ["GAIN_1D:1","GAINP_1D:1","GAIN:3","GAINP:3","LOSERS:3","LOSERS_1D:1","LOSERSC:3","LOSERSC_1D:1"]
+    strategies = ["GAIN:3","GAINP:3","LOSERS:3","LOSERSC:3"]
 
     for config in backtest_configs:
-        config['risk_unit'] = .001
-        trading_strat = f"{config['user']}-{nowstr}-modelVOLTREND_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['vc_level']}_vol{config['volatility_threshold']}"
+        trading_strat = f"{config['user']}-{nowstr}-modelVOLTREND3D_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['vc_level']}_vol{config['volatility_threshold']}"
         for time in time_periods:
             try:
                 start_dt = time[0]

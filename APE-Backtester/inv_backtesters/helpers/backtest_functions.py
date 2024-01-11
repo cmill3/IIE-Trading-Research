@@ -39,7 +39,7 @@ def create_simulation_data_inv(row,config):
         days_back = 4
     end_date = backtrader_helper.create_end_date(start_date, days_back)
     # option_symbol, polygon_dfs = backtrader_helper.data_pull(symbol, start_date, end_date, mkt_price, strategy, contracts)
-    trading_aggregates, option_symbols = backtrader_helper.create_options_aggs_inv(row,start_date,end_date=end_date,spread_length=3,config=config)
+    trading_aggregates, option_symbols = backtrader_helper.create_options_aggs_inv(row,start_date,end_date=end_date,spread_length=4,config=config)
     return start_date, end_date, row['symbol'], row['o'], row['strategy'], option_symbols, trading_aggregates
 
 def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, polygon_df, position_id, trading_date, alert_hour,order_id,config,row):
@@ -186,7 +186,7 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
             elif strategy == "GAINP":
                 sell_dict = trade.tda_PUT_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=-.026,vol=float(row["threeD_stddev50"]),standard_risk=.015)
             elif strategy == "GAINP_1D":
-                sell_dict = trade.tda_PUT_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=-.018,vol=float(row["oneD_stddev50"]),standard_risk=.011)
+                sell_dict = trade.tda_PUT_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=-.017,vol=float(row["oneD_stddev50"]),standard_risk=.011)
         except Exception as e:
             print(f"Error {e} in sell_dict for {symbol} in {strategy} stdclassAgg")
             print(polygon_df)
