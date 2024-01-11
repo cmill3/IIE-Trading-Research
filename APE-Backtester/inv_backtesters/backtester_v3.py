@@ -141,21 +141,21 @@ if __name__ == "__main__":
     #         "model_type": "cls",
     #         "user": "cm3"
     #     },
-        {
-            "put_pct": 1, 
-            "spread_adjustment": 0,
-            "aa": 0,
-            "risk_unit": .001,
-            "model": "stdclsAGG",
-            "vc_level":"300",
-            "portfolio_cash": 100000,
-            "pos_limit": "noposlimit",
-            "volatility_threshold": 1,
-            "model_type": "cls",
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "oneD_vol": "return_vol_5D"
-        },
+        # {
+        #     "put_pct": 1, 
+        #     "spread_adjustment": 0,
+        #     "aa": 0,
+        #     "risk_unit": .001,
+        #     "model": "stdclsAGG",
+        #     "vc_level":"300",
+        #     "portfolio_cash": 100000,
+        #     "pos_limit": "noposlimit",
+        #     "volatility_threshold": 1,
+        #     "model_type": "cls",
+        #     "user": "cm3",
+        #     "threeD_vol": "return_vol_10D",
+        #     "oneD_vol": "return_vol_5D"
+        # },
         {
             "put_pct": 1, 
             "spread_adjustment": 0,
