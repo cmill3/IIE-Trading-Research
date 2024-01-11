@@ -24,7 +24,7 @@ def tda_PUT_3D_stdcls(polygon_df, simulation_date, quantity, config, target_pct,
         hour = row['date'].hour
         # Floor_pct = ((float(min_value) - float(open_price))/float(open_price)) + (standard_risk + (-1*config['risk_adjustment']))
 
-        if deriv_pct_change > 300:
+        if deriv_pct_change > int(config['vc_level']):
             sell_code = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,sell_code)  
             return sell_dict
@@ -86,7 +86,7 @@ def tda_CALL_3D_stdcls(polygon_df, simulation_date, quantity, config, target_pct
         hour = row['date'].hour
         # Floor_pct = ((float(max_value) - float(open_price))/float(open_price)) - (float(standard_risk) + (-1*config['risk_adjustment']))
 
-        if deriv_pct_change > 300:
+        if deriv_pct_change > int(config['vc_level']):
             sell_code = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,sell_code)  
             return sell_dict
@@ -147,7 +147,7 @@ def tda_PUT_1D_stdcls(polygon_df, simulation_date, quantity, config, target_pct,
         Floor_pct = (vol * config['volatility_threshold'])
         hour = row['date'].hour
         # Floor_pct = ((float(min_value) - float(open_price))/float(open_price)) + (standard_risk + (-1*config['risk_adjustment']))
-        if deriv_pct_change > 300:
+        if deriv_pct_change > int(config['vc_level']):
             sell_code = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,sell_code)  
             return sell_dict
@@ -210,7 +210,7 @@ def tda_CALL_1D_stdcls(polygon_df, simulation_date, quantity, config, target_pct
         hour = row['date'].hour
         # Floor_pct = ((float(max_value) - float(open_price))/float(open_price)) - (standard_risk + (-1*config['risk_adjustment']))
 
-        if deriv_pct_change > 300:
+        if deriv_pct_change > int(config['vc_level']):
             sell_code = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,sell_code)  
             return sell_dict
@@ -272,7 +272,7 @@ def tda_PUT_3D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_p
         Floor_pct = (vol * config['volatility_threshold'])
         hour = row['date'].hour
         # Floor_pct = ((float(min_value) - float(open_price))/float(open_price)) + (standard_risk + (-1*config['risk_adjustment']))
-        if deriv_pct_change > 300:
+        if deriv_pct_change > int(config['vc_level']):
             sell_code = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,sell_code)  
             return sell_dict
@@ -336,7 +336,7 @@ def tda_CALL_3D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_
         hour = row['date'].hour
         # Floor_pct = ((float(max_value) - float(open_price))/float(open_price)) - (float(standard_risk) + (-1*config['risk_adjustment']))
 
-        if deriv_pct_change > 300:
+        if deriv_pct_change > int(config['vc_level']):
             sell_code = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,sell_code)  
             return sell_dict
@@ -399,7 +399,7 @@ def tda_PUT_1D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_p
         hour = row['date'].hour
         # Floor_pct = ((float(min_value) - float(open_price))/float(open_price)) + (standard_risk + (-1*config['risk_adjustment']))
 
-        if deriv_pct_change > 300:
+        if deriv_pct_change > int(config['vc_level']):
             sell_code = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,sell_code)  
             return sell_dict
@@ -462,7 +462,7 @@ def tda_CALL_1D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_
         hour = row['date'].hour
         # Floor_pct = ((float(max_value) - float(open_price))/float(open_price)) - (standard_risk + (-1*config['risk_adjustment']))
 
-        if deriv_pct_change > 300:
+        if deriv_pct_change > int(config['vc_level']):
             sell_code = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,sell_code)  
             return sell_dict

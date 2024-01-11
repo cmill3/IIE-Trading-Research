@@ -101,7 +101,7 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
     expiries = ast.literal_eval(row['expiries'])
 
     ## ASSIGNMENT ADJUSTMENT
-    threeD_cutoff, oneD_cutoff = map_assignment_adjustment(config['aa'])
+    # threeD_cutoff, oneD_cutoff = map_assignment_adjustment(config['aa'])
     # if row['strategy'] in ["BFP","IDXP","LOSERS",'VDIFFP',"MAP","GAINP","BFC","IDXC","GAIN",'VDIFFC',"MA","LOSERSC"]:
     #     if start_date.weekday() > threeD_cutoff:
     #         expiry = expiries[0]
@@ -112,7 +112,10 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
     #         expiry = expiries[0]
     #     else:
     #         expiry = expiries[1]
-    expiry = expiries[0]
+    if row['strategy'] in ["IDXC_1D","IDXP","IDXC","IDXP_1D"]:
+        expiry = expiries[config['aa']]
+    else:
+        expiry = expiries[0]
     
     strike = row['symbol'] + expiry
     try:
@@ -498,8 +501,8 @@ def configure_trade_data(df,config):
     filt_one = one.loc[one['day_of_week'].isin([1,2,3])]
     filt_three = three.loc[three['day_of_week'].isin([0,1,2])]
 
-    one_idxF = one_idx.loc[one_idx['day_of_week'].isin([0,1,2,3,4])]
-    three_idxF = three_idx.loc[three_idx['day_of_week'].isin([0,1,2,3])]
+    one_idxF = one_idx.loc[one_idx['day_of_week'].isin([0,1,2,3])]
+    three_idxF = three_idx.loc[three_idx['day_of_week'].isin([0,1,2])]
 
     trade_df = pd.concat([one_idxF,three_idxF,filt_one,filt_three])
     return trade_df

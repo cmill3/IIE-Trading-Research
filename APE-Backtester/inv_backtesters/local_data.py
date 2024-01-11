@@ -156,31 +156,31 @@ def add_weekdays(date,days,symbol):
 
 if __name__ == "__main__":
     strategy_info = {
-        #  "IDXC_1d": {
-        #       "file_path": 'TSSIM1_IDX-TLT_custHypP1_2018',
-        #       "time_span": 2,
-        #       "side": "C"
-        #  },
-        # "IDXP_1d": {
-        #       "file_path": 'TSSIM1h_IDX-TLT_custHypP1_2018',
-        #       "time_span": 2,
-        #       "side": "P"
-        #  },
-        #  "IDXP": {
-        #       "file_path": 'DEFAULT-TLT_custHypP15_2018',
-        #       "time_span": 4,
-        #       "side": "P"
-        #  },
-        # "IDXC": {
-        #       "file_path": 'DEFAULT-TLT_custHypP15_2018',
-        #       "time_span": 4,
-        #       "side": "C"
-        #  },
-         "VDIFFC_1d": {
-              "file_path": 'TSSIM1_TL15_custHypP16',
+         "IDXC_1d": {
+              "file_path": 'TSSIM1PCR2_custHypP09',
               "time_span": 2,
               "side": "C"
          },
+        "IDXP_1d": {
+              "file_path": 'TSSIM1PCR1_custHypP079_2018',
+              "time_span": 2,
+              "side": "P"
+         },
+         "IDXP": {
+              "file_path": 'TSSIMPCR2_custHypP115_2018',
+              "time_span": 4,
+              "side": "P"
+         },
+        "IDXC": {
+              "file_path": 'TSSIM1PCR1_custHypP14_2018',
+              "time_span": 4,
+              "side": "C"
+         },
+        #  "VDIFFC_1d": {
+        #       "file_path": 'TSSIM1_TL15_custHypP16',
+        #       "time_span": 2,
+        #       "side": "C"
+        #  },
         # "VDIFFP_1d": {
         #       "file_path": 'TSSIM1_TL15_custHypP16',
         #       "time_span": 2,
@@ -237,22 +237,22 @@ if __name__ == "__main__":
         #       "side": "C"
         #  },
         #  "MAP_1d": {
-        #       "file_path": 'TSSIM1_TL15_custHypP165',
+        #       "file_path": 'TSSIM1_TL15TR10_custHypP16',
         #       "time_span": 2,
         #       "side": "P"
         #  },
         # "MA_1d": {
-        #       "file_path": 'TSSIM1_TL15_custHypP17',
+        #       "file_path": 'TSSIM1_TL15TR10_custHypP17',
         #       "time_span": 2,
         #       "side": "C"
         #  },
         #  "MAP": {
-        #       "file_path": 'TSSIM1_TL15_custHypP25',
+        #       "file_path": 'TSSIM1_TL15TR10_custHypP25',
         #       "time_span": 4,
         #       "side": "P"
         #  },
         # "MA": {
-        #       "file_path": 'TSSIM1_TL15_custHypP26',
+        #       "file_path": 'TSSIM1_TL15TR10_custHypP26',
         #       "time_span": 4,
         #       "side": "C"
         #  }
@@ -273,10 +273,10 @@ if __name__ == "__main__":
     # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')
     
     for strategy in strategy_info:
-        # with concurrent.futures.ProcessPoolExecutor(max_workers=8) as executor:
-        #     # Submit the processing tasks to the ThreadPoolExecutor
-        #     processed_weeks_futures = [executor.submit(add_contract_data_to_local,week,strategy_info[strategy],strategy,modeling_type) for week in file_names]
-        add_contract_data_to_local(file_names[6],strategy_info[strategy],strategy,modeling_type)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+            # Submit the processing tasks to the ThreadPoolExecutor
+            processed_weeks_futures = [executor.submit(add_contract_data_to_local,week,strategy_info[strategy],strategy,modeling_type) for week in file_names]
+        # add_contract_data_to_local(file_names,strategy_info[strategy],strategy,modeling_type)
 
     # for week in file_names:
     #     for strategy in ['BFC','BFP','BFC_1D','BFP_1D']:
