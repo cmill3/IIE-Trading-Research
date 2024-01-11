@@ -66,7 +66,7 @@ def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,c
     if not local_data:
         cpu_count = os.cpu_count()
         # build_backtest_data(file_names[0],strategies,config)
-        with concurrent.futures.ProcessPoolExecutor(max_workers=16) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=cpu_count) as executor:
             # Submit the processing tasks to the ThreadPoolExecutor
             processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies,config) for file_name in file_names]
 
@@ -141,6 +141,21 @@ if __name__ == "__main__":
     #         "model_type": "cls",
     #         "user": "cm3"
     #     },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 0,
+            "aa": 0,
+            "risk_unit": .001,
+            "model": "stdclsAGG",
+            "vc_level":"300",
+            "portfolio_cash": 100000,
+            "pos_limit": "noposlimit",
+            "volatility_threshold": 1,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D"
+        },
         {
             "put_pct": 1, 
             "spread_adjustment": 0,
