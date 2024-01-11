@@ -285,7 +285,7 @@ if __name__ == "__main__":
 
     for config in backtest_configs:
         config['risk_unit'] = .001
-        trading_strat = f"{config['user']}-{nowstr}-modelVOLTREND3DLOW_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['vc_level']}_vol{config['volatility_threshold']}"
+        trading_strat = f"{config['user']}-{nowstr}-modelVOLTREND3DHIGH_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['vc_level']}_vol{config['volatility_threshold']}"
         for time in time_periods:
             try:
                 start_dt = time[0]
@@ -320,7 +320,7 @@ if __name__ == "__main__":
 
     for config in backtest_configs:
         config['risk_unit'] = .001
-        trading_strat = f"{config['user']}-{nowstr}-modelVOLTREND1DLOW_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['vc_level']}_vol{config['volatility_threshold']}"
+        trading_strat = f"{config['user']}-{nowstr}-modelVOLTREND1DHIGH_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['vc_level']}_vol{config['volatility_threshold']}"
         for time in time_periods:
             try:
                 start_dt = time[0]
