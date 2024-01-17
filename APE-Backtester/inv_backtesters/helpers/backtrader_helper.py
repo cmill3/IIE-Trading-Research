@@ -156,7 +156,7 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
             enriched_df.dropna(inplace=True)
             enriched_options_aggregates.append(enriched_df)
             options.append(contract)
-            if len(options) >= spread_length:
+            if len(options) >= (spread_length+1):
                 break
         except Exception as e:
             print(f"Error: {e} in options agg for {row['symbol']} of {row['strategy']}")

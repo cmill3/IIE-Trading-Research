@@ -11,7 +11,7 @@ nyse = mcal.get_calendar('NYSE')
 holidays = nyse.holidays()
 holidays_multiyear = holidays.holidays
 
-def add_contract_data_to_local(week,strategy_info,strategy,modeling_type):
+def add_contract_data_to_local(week,strategy_info,strategy,data_type):
         try:
             data, _ = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key=f"backtesting_data/inv_alerts/{strategy_info['file_path']}", 
                                                     file_name = f"{week}.csv",prefixes=[strategy],time_span=strategy_info['time_span'])
@@ -19,7 +19,7 @@ def add_contract_data_to_local(week,strategy_info,strategy,modeling_type):
             data['side'] = strategy_info['side']
             data['contracts']= data.apply(lambda x: pull_contract_data(x),axis=1)
             data['expiries'] = data.apply(lambda x: generate_expiry_dates_row(x),axis=1)
-            data.to_csv(f'/Users/charlesmiller/Documents/backtesting_data/{modeling_type}/{strategy}/{week}.csv', index=False)
+            data.to_csv(f'/Users/charlesmiller/Documents/backtesting_data/{data_type}/{strategy}/{week}.csv', index=False)
             print(f"Finished {strategy} for {week}")
         except Exception as e:
             print(f"Error: {e} for {strategy}")
@@ -197,46 +197,46 @@ if __name__ == "__main__":
         #       "side": "P"
         #  },
         #  "GAIN_1d": {
-        #       "file_path": 'TSSIM1:1_TL10TR6_custHypP16',
+        #       "file_path": 'TSSIM1:1_TL15-VOL_custHypP175',
         #       "time_span": 2,
         #       "side": "C"
         #  },
         # "LOSERS_1d": {
-        #       "file_path": 'TSSIM1:1_TL10TR6_custHypP13',
+        #       "file_path": 'TSSIM1:1_TL15-VOL_custHypP13',
         #       "time_span": 2,
         #       "side": "P"
         #  },
         #  "GAIN": {
-        #       "file_path": 'TSSIM1_TL10TR6_custHypP265',
+        #       "file_path": 'TSSIM1_TL15-VOL_custHypP275',
         #       "time_span": 4,
         #       "side": "C"
         #  },
         # "LOSERS": {
-        #       "file_path": 'TSSIM1_TL10TR6_custHypP2',
-        #       "time_span": 4,
-        #       "side": "P"
+        #       "file_path": 'TSSIM1_TL15-VOL_custHypP2',
         #  },
-        #  "GAINP_1D": {
-        #       "file_path": 'TSSIM1_TL10TR6_custHyp18',
+
+        #       "file_path": 'TSSIM1_TL15-VOL_custHyp18',
         #       "time_span": 2,
         #       "side": "P"
         #  },
         # "LOSERSC_1D": {
-        #       "file_path": 'TSSIM1_TL10TR6_custHypP14',
+        #       "file_path": 'TSSIM1_TL15-VOL_custHypP16',
         #       "time_span": 2,
         #       "side": "C"
         #  },
         #  "GAINP": {
-        #       "file_path": 'TSSIM2_TL10TR6_custHypP27',
+        #       "file_path": 'TSSIM2_TL15-VOL_custHypP26',
         #       "time_span": 4,
         #       "side": "P"
         #  },
         # "LOSERSC": {
-        #       "file_path": 'TSSIM1_TL10TR6_custHypP225',
+
+        # "MAP_1d": {
+        #       "file_path": 'TSSIM1_TL15-VOL_custHypP25',
         #       "time_span": 4,
         #       "side": "C"
         #  },
-        "MAP_1d": {
+         "MAP_1d": {
               "file_path": 'TSSIM1_TL15_custHypP145',
               "time_span": 2,
               "side": "P"
@@ -268,17 +268,19 @@ if __name__ == "__main__":
      '2023-10-02', '2023-10-09', '2023-10-16', '2023-10-23', '2023-10-30',
      '2023-11-06', '2023-11-13', '2023-11-20', '2023-11-27', '2023-12-04', '2023-12-11', '2023-12-18'
      ]
-    modeling_type = 'TL15'
+    data_type = 'TL15'
     
     # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')
     
     for strategy in strategy_info:
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             # Submit the processing tasks to the ThreadPoolExecutor
-            processed_weeks_futures = [executor.submit(add_contract_data_to_local,week,strategy_info[strategy],strategy,modeling_type) for week in file_names]
+            processed_weeks_futures = [executor.submit(add_contract_data_to_local,week,strategy_info[strategy],strategy,data_type) for week in file_names]
         # add_contract_data_to_local(file_names,strategy_info[strategy],strategy,modeling_type)
 
     # for week in file_names:
     #     for strategy in ['BFC','BFP','BFC_1D','BFP_1D']:
     #         df = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/{strategy}/2023-10-02.csv')
     #         print(f"num of columns for {strategy} in {week}: {(len(df.columns))}")
+            
+
