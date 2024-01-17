@@ -2,7 +2,7 @@ import math
 
 
 ### BET SIZING FUNCTIONS ###
-def build_trade(position, risk_unit,put_adjustment,portfolio_cash):
+def build_trade(position, risk_unit,put_adjustment,portfolio_cash,config):
     buy_orders = []
     sell_orders = []
     contract_costs = []
@@ -18,13 +18,13 @@ def build_trade(position, risk_unit,put_adjustment,portfolio_cash):
         contract_costs.append(transaction['buy_info']['contract_cost'])
         contract_type = transaction['buy_info']['contract_type']
     
-    sized_buys, sized_sells = bet_sizer(contract_costs, buy_orders, sell_orders, risk_unit, contract_type,put_adjustment,portfolio_cash)
+    sized_buys, sized_sells = bet_sizer(contract_costs, buy_orders, sell_orders, risk_unit, contract_type,put_adjustment,portfolio_cash,config)
     if sized_buys == None:
         print("ERROR in build_trade, no trades")
         print(position)
     return sized_buys, sized_sells
 
-def bet_sizer(contract_costs,buy_orders,sell_orders,risk_unit,contract_type,put_adjustment,portfolio_cash):
+def bet_sizer(contract_costs,buy_orders,sell_orders,risk_unit,contract_type,put_adjustment,portfolio_cash,config):
     ## FUNDS ADJUSTMENT
     available_funds = portfolio_cash
     ## PUT ADJUSTMENT
@@ -37,7 +37,7 @@ def bet_sizer(contract_costs,buy_orders,sell_orders,risk_unit,contract_type,put_
         print("ERROR")
         print(buy_orders)
         print(contract_type)
-    spread_cost = sum(contract_costs[0:3])
+    spread_cost = sum(contract_costs[0:config['spread_length']])
     quantities = finalize_trade(buy_orders, spread_cost, target_cost)
 
     if quantities == [0,0,0]:
