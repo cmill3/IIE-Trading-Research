@@ -197,65 +197,65 @@ if __name__ == "__main__":
         #       "side": "P"
         #  },
         #  "GAIN_1d": {
-        #       "file_path": 'TSSIM1:1_TL15-VOL_custHypP175',
+        #       "file_path": 'TSSIM1:1_TL15-EXP_custHypP18',
         #       "time_span": 2,
         #       "side": "C"
         #  },
         # "LOSERS_1d": {
-        #       "file_path": 'TSSIM1:1_TL15-VOL_custHypP13',
+        #       "file_path": 'TSSIM1:1_TL15-EXP_custHypP15',
         #       "time_span": 2,
         #       "side": "P"
         #  },
         #  "GAIN": {
-        #       "file_path": 'TSSIM1_TL15-VOL_custHypP275',
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypP28',
         #       "time_span": 4,
         #       "side": "C"
         #  },
         # "LOSERS": {
-        #       "file_path": 'TSSIM1_TL15-VOL_custHypP2',
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypP23',
+        #       "time_span": 4,
+        #       "side": "P"
         #  },
-
-        #       "file_path": 'TSSIM1_TL15-VOL_custHyp18',
+        #  "GAINP_1D": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypP18',
         #       "time_span": 2,
         #       "side": "P"
         #  },
         # "LOSERSC_1D": {
-        #       "file_path": 'TSSIM1_TL15-VOL_custHypP16',
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypP16',
         #       "time_span": 2,
         #       "side": "C"
         #  },
         #  "GAINP": {
-        #       "file_path": 'TSSIM2_TL15-VOL_custHypP26',
+        #       "file_path": 'TSSIM2_TL15-EXP_custHypP27',
         #       "time_span": 4,
         #       "side": "P"
         #  },
         # "LOSERSC": {
-
-        # "MAP_1d": {
-        #       "file_path": 'TSSIM1_TL15-VOL_custHypP25',
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypP25',
         #       "time_span": 4,
         #       "side": "C"
         #  },
-         "MAP_1d": {
-              "file_path": 'TSSIM1_TL15_custHypP145',
-              "time_span": 2,
-              "side": "P"
-         },
-        "MA_1d": {
-              "file_path": 'TSSIM1_TL15_custHypP15',
-              "time_span": 2,
-              "side": "C"
-         },
-         "MAP": {
-              "file_path": 'TSSIM1_TL15_custHypP23',
-              "time_span": 4,
-              "side": "P"
-         },
-        "MA": {
-              "file_path": 'TSSIM1_TL15_custHypP24',
-              "time_span": 4,
-              "side": "C"
-         }
+        #  "MAP_1d": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypP165',
+        #       "time_span": 2,
+        #       "side": "P"
+        #  },
+        # "MA_1d": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypP17',
+        #       "time_span": 2,
+        #       "side": "C"
+        #  },
+        #  "MAP": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypP24',
+        #       "time_span": 4,
+        #       "side": "P"
+        #  },
+        # "MA": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypP26',
+        #       "time_span": 4,
+        #       "side": "C"
+        #  }
     }
 
     file_names = [
