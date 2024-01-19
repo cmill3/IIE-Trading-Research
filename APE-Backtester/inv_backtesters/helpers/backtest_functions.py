@@ -164,13 +164,13 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
             elif strategy == "VDIFFP_1d":
                 sell_dict = trade.tda_PUT_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=-.016,vol=float(row["oneD_stddev50"]),standard_risk=.01)
             elif strategy == "GAIN":
-                sell_dict = trade.tda_CALL_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=.03,vol=float(row["threeD_stddev50"]),standard_risk=.0175)
+                sell_dict = trade.tda_CALL_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=.0265,vol=float(row["threeD_stddev50"]),standard_risk=.0175)
             elif strategy == "GAIN_1d":
                 sell_dict = trade.tda_CALL_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=.0175,vol=float(row["oneD_stddev50"]),standard_risk=.01)
             elif strategy == "LOSERS":
-                sell_dict = trade.tda_PUT_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=-.0225,vol=float(row["threeD_stddev50"]),standard_risk=.0175)
+                sell_dict = trade.tda_PUT_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=-.02,vol=float(row["threeD_stddev50"]),standard_risk=.0175)
             elif strategy == "LOSERS_1d":
-                sell_dict = trade.tda_PUT_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=-.0155,vol=float(row["oneD_stddev50"]),standard_risk=.01)
+                sell_dict = trade.tda_PUT_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=-.013,vol=float(row["oneD_stddev50"]),standard_risk=.01)
             elif strategy == "IDXC":
                 sell_dict = trade.tda_CALL_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=.014,vol=float(row["threeD_stddev50"]),standard_risk=.0075)
             elif strategy == "IDXC_1d":

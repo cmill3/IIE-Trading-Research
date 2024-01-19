@@ -145,7 +145,7 @@ if __name__ == "__main__":
             "model": "stdclsAGGRM",
             "vc_level":"400",
             "portfolio_cash": 100000,
-            "pos_limit": "noposlimit",
+            "pos_limit": "poslimit",
             "volatility_threshold": 1,
             "model_type": "cls",
             "user": "cm3",
