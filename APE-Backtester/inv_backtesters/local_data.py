@@ -196,63 +196,63 @@ if __name__ == "__main__":
         #       "time_span": 4,
         #       "side": "P"
         #  },
-         "GAIN_1d": {
-              "file_path": 'GAIN_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.6',
+          "GAIN_1d": {
+              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
               "time_span": 2,
               "side": "C"
          },
         "LOSERS_1d": {
-              "file_path": 'LOSERS_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.4',
+              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
               "time_span": 2,
               "side": "P"
          },
          "GAIN": {
-              "file_path": 'GAIN:RM220_TSSIM1_TL15-EXP_custHypTP0.6',
+              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
               "time_span": 4,
               "side": "C"
          },
         "LOSERS": {
-              "file_path": 'LOSERS:RM220_TSSIM1_TL15-EXP_custHypTP0.4',
+              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
               "time_span": 4,
               "side": "P"
          },
          "GAINP_1d": {
-              "file_path": 'GAINP_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.4',
+              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
               "time_span": 2,
               "side": "P"
          },
         "LOSERSC_1d": {
-              "file_path": 'LOSERSC_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.6',
+              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
               "time_span": 2,
               "side": "C"
          },
          "GAINP": {
-              "file_path": 'GAINP:RM220_TSSIM1_TL15-EXP_custHypTP0.4',
+              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
               "time_span": 4,
               "side": "P"
          },
         "LOSERSC": {
-              "file_path": 'LOSERSC:RM220_TSSIM1_TL15-EXP_custHypTP0.6',
+              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
               "time_span": 4,
               "side": "C"
          },
          "MAP_1d": {
-              "file_path": 'MAP_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.3',
+              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
               "time_span": 2,
               "side": "P"
          },
         "MA_1d": {
-              "file_path": 'MA_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.6',
+              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
               "time_span": 2,
               "side": "C"
          },
          "MAP": {
-              "file_path": 'MAP:RM220_TSSIM1_TL15-EXP_custHypTP0.4',
+              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
               "time_span": 4,
               "side": "P"
          },
         "MA": {
-              "file_path": 'MA:RM220_TSSIM1_TL15-EXP_custHypTP0.6',
+              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
               "time_span": 4,
               "side": "C"
          }
@@ -283,3 +283,64 @@ if __name__ == "__main__":
     #         df = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/{strategy}/2023-10-02.csv')
     #         print(f"num of columns for {strategy} in {week}: {(len(df.columns))}")
         
+
+        #  "GAIN_1d": {
+        #       "file_path": 'TSSIM1:1_TL15-EXP_custHypP18',
+        #       "time_span": 2,
+        #       "side": "C"
+        #  },
+        # "LOSERS_1d": {
+        #       "file_path": 'TSSIM1:1_TL15-EXP_custHypP15',
+        #       "time_span": 2,
+        #       "side": "P"
+        #  },
+        #  "GAIN": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypP28',
+        #       "time_span": 4,
+        #       "side": "C"
+        #  },
+        # "LOSERS": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypP23',
+        #       "time_span": 4,
+        #       "side": "P"
+        #  },
+        #  "GAINP_1D": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypP18',
+        #       "time_span": 2,
+        #       "side": "P"
+        #  },
+        # "LOSERSC_1D": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypP16',
+        #       "time_span": 2,
+        #       "side": "C"
+        #  },
+        #  "GAINP": {
+        #       "file_path": 'TSSIM2_TL15-EXP_custHypP27',
+        #       "time_span": 4,
+        #       "side": "P"
+        #  },
+        # "LOSERSC": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypP25',
+        #       "time_span": 4,
+        #       "side": "C"
+        #  },
+        #  "MAP_1d": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypP165',
+        #       "time_span": 2,
+        #       "side": "P"
+        #  },
+        # "MA_1d": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypP17',
+        #       "time_span": 2,
+        #       "side": "C"
+        #  },
+        #  "MAP": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypP24',
+        #       "time_span": 4,
+        #       "side": "P"
+        #  },
+        # "MA": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypP26',
+        #       "time_span": 4,
+        #       "side": "C"
+        #  }
