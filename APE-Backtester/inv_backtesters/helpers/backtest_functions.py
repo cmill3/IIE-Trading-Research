@@ -46,9 +46,9 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
     open_price = open_prices[0]
     open_datetime = datetime(int(trading_date.split("-")[0]),int(trading_date.split("-")[1]),int(trading_date.split("-")[2]),int(alert_hour),0,0,tzinfo=pytz.timezone('US/Eastern'))
     contract_cost = round(open_price * 100,2)
-    if strategy in ["BFC","BFC_1D","IDXC","IDXC_1d","GAIN","GAIN_1d",'VDIFFC','VDIFFC_1d',"MA","MA_1d","LOSERSC_1D","LOSERSC"]:
+    if strategy in ["BFC","BFC_1D","IDXC","IDXC_1d","GAIN","GAIN_1d",'VDIFFC','VDIFFC_1d',"MA","MA_1d","LOSERSC_1d","LOSERSC"]:
         contract_type = "calls"
-    elif strategy in ["BFP","BFP_1D","IDXP","IDXP_1d","LOSERS","LOSERS_1d",'VDIFFP','VDIFFP_1d',"MAP","MAP_1d","GAINP","GAINP_1D"]:
+    elif strategy in ["BFP","BFP_1D","IDXP","IDXP_1d","LOSERS","LOSERS_1d",'VDIFFP','VDIFFP_1d',"MAP","MAP_1d","GAINP","GAINP_1d"]:
         contract_type = "puts"
         
     buy_dict = {"open_price": open_price, "open_datetime": open_datetime, "quantity": 1, "contract_cost": contract_cost, "option_symbol": option_symbol, "position_id": position_id, "contract_type": contract_type}
@@ -89,11 +89,11 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
                 sell_dict = trade.tda_PUT_1D_stdcls(polygon_df,open_datetime,1,config,target_pct=-.0085,vol=float(row["oneD_stddev50"]),standard_risk=.0045)
             elif strategy == "LOSERSC":
                 sell_dict = trade.tda_CALL_3D_stdcls(polygon_df,open_datetime,1,config,target_pct=.0265,vol=float(row["threeD_stddev50"]),standard_risk=.015)
-            elif strategy == "LOSERSC_1D":
+            elif strategy == "LOSERSC_1d":
                 sell_dict = trade.tda_CALL_1D_stdcls(polygon_df,open_datetime,1,config,target_pct=.017,vol=float(row["oneD_stddev50"]),standard_risk=.011)
             elif strategy == "GAINP":
                 sell_dict = trade.tda_PUT_3D_stdcls(polygon_df,open_datetime,1,config,target_pct=-.029,vol=float(row["threeD_stddev50"]),standard_risk=.015)
-            elif strategy == "GAINP_1D":
+            elif strategy == "GAINP_1d":
                 sell_dict = trade.tda_PUT_1D_stdcls(polygon_df,open_datetime,1,config,target_pct=-.02,vol=float(row["oneD_stddev50"]),standard_risk=.011)
         except Exception as e:
             print(f"Error {e} in sell_dict for {symbol} in {strategy} stdcls")
@@ -135,11 +135,11 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
     #             sell_dict = trade.tda_PUT_1D_VCcls(polygon_df,open_datetime,1,config,target_pct=-.0085,vol=float(row["oneD_stddev50"]),standard_risk=.0045)
     #         elif strategy == "LOSERSC":
     #             sell_dict = trade.tda_CALL_3D_VCcls(polygon_df,open_datetime,1,config,target_pct=.0225,vol=float(row["threeD_stddev50"]),standard_risk=.015)
-    #         elif strategy == "LOSERSC_1D":
+    #         elif strategy == "LOSERSC_1d":
     #             sell_dict = trade.tda_CALL_1D_VCcls(polygon_df,open_datetime,1,config,target_pct=.014,vol=float(row["oneD_stddev50"]),standard_risk=.011)
     #         elif strategy == "GAINP":
     #             sell_dict = trade.tda_PUT_3D_VCcls(polygon_df,open_datetime,1,config,target_pct=-.028,vol=float(row["threeD_stddev50"]),standard_risk=.015)
-    #         elif strategy == "GAINP_1D":
+    #         elif strategy == "GAINP_1d":
     #             sell_dict = trade.tda_PUT_1D_VCcls(polygon_df,open_datetime,1,config,target_pct=-.0185,vol=float(row["oneD_stddev50"]),standard_risk=.011)
     #     except Exception as e:
     #         print(f"Error {e} in sell_dict for {symbol} in {strategy} VCcls")
@@ -181,12 +181,58 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
                 sell_dict = trade.tda_PUT_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=-.0079,vol=float(row["oneD_stddev50"]),standard_risk=.0045)
             elif strategy == "LOSERSC":
                 sell_dict = trade.tda_CALL_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=.0265,vol=float(row["threeD_stddev50"]),standard_risk=.015)
-            elif strategy == "LOSERSC_1D":
+            elif strategy == "LOSERSC_1d":
                 sell_dict = trade.tda_CALL_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=.017,vol=float(row["oneD_stddev50"]),standard_risk=.011)
             elif strategy == "GAINP":
                 sell_dict = trade.tda_PUT_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=-.029,vol=float(row["threeD_stddev50"]),standard_risk=.015)
-            elif strategy == "GAINP_1D":
+            elif strategy == "GAINP_1d":
                 sell_dict = trade.tda_PUT_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=-.02,vol=float(row["oneD_stddev50"]),standard_risk=.011)
+        except Exception as e:
+            print(f"Error {e} in sell_dict for {symbol} in {strategy} stdclassAgg")
+            print(polygon_df)
+            return {}
+    elif config['model'] == "stdclsAGGRM":
+        try:
+            if strategy == "MA":
+                sell_dict = trade.tda_CALL_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["threeD_stddev50"]),standard_risk=.016)
+            elif strategy == "MA_1d":
+                sell_dict = trade.tda_CALL_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["oneD_stddev50"]),standard_risk=.01)
+            elif strategy == "MAP":
+                sell_dict = trade.tda_PUT_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["threeD_stddev50"]),standard_risk=.016)
+            elif strategy == "MAP_1d":
+                sell_dict = trade.tda_PUT_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["oneD_stddev50"]),standard_risk=.01)
+            elif strategy == "VDIFFC":
+                sell_dict = trade.tda_CALL_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["threeD_stddev50"]),standard_risk=.02)
+            elif strategy == "VDIFFC_1d":
+                sell_dict = trade.tda_CALL_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["oneD_stddev50"]),standard_risk=.01)
+            elif strategy == "VDIFFP":
+                sell_dict = trade.tda_PUT_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["threeD_stddev50"]),standard_risk=.02)
+            elif strategy == "VDIFFP_1d":
+                sell_dict = trade.tda_PUT_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["oneD_stddev50"]),standard_risk=.01)
+            elif strategy == "GAIN":
+                sell_dict = trade.tda_CALL_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["threeD_stddev50"]),standard_risk=.0175)
+            elif strategy == "GAIN_1d":
+                sell_dict = trade.tda_CALL_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["oneD_stddev50"]),standard_risk=.01)
+            elif strategy == "LOSERS":
+                sell_dict = trade.tda_PUT_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["threeD_stddev50"]),standard_risk=.0175)
+            elif strategy == "LOSERS_1d":
+                sell_dict = trade.tda_PUT_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=-row['target_value'],vol=float(row["oneD_stddev50"]),standard_risk=.01)
+            elif strategy == "IDXC":
+                sell_dict = trade.tda_CALL_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["threeD_stddev50"]),standard_risk=.0075)
+            elif strategy == "IDXC_1d":
+                sell_dict = trade.tda_CALL_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["oneD_stddev50"]),standard_risk=.0045)
+            elif strategy == "IDXP":
+                sell_dict = trade.tda_PUT_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["threeD_stddev50"]),standard_risk=.0075)
+            elif strategy == "IDXP_1d":
+                sell_dict = trade.tda_PUT_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["oneD_stddev50"]),standard_risk=.0045)
+            elif strategy == "LOSERSC":
+                sell_dict = trade.tda_CALL_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["threeD_stddev50"]),standard_risk=.015)
+            elif strategy == "LOSERSC_1d":
+                sell_dict = trade.tda_CALL_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["oneD_stddev50"]),standard_risk=.011)
+            elif strategy == "GAINP":
+                sell_dict = trade.tda_PUT_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["threeD_stddev50"]),standard_risk=.015)
+            elif strategy == "GAINP_1d":
+                sell_dict = trade.tda_PUT_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["oneD_stddev50"]),standard_risk=.011)
         except Exception as e:
             print(f"Error {e} in sell_dict for {symbol} in {strategy} stdclassAgg")
             print(polygon_df)
@@ -227,11 +273,11 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
     #             sell_dict = trade.tda_PUT_1D_derivVOL(polygon_df,open_datetime,1,config,target_pct=-.0085,vol=float(row["oneD_stddev50"]),standard_risk=.0045)
     #         elif strategy == "LOSERSC":
     #             sell_dict = trade.tda_CALL_3D_derivVOL(polygon_df,open_datetime,1,config,target_pct=.025,vol=float(row["threeD_stddev50"]),standard_risk=.015)
-    #         elif strategy == "LOSERSC_1D":
+    #         elif strategy == "LOSERSC_1d":
     #             sell_dict = trade.tda_CALL_1D_derivVOL(polygon_df,open_datetime,1,config,target_pct=.015,vol=float(row["oneD_stddev50"]),standard_risk=.011)
     #         elif strategy == "GAINP":
     #             sell_dict = trade.tda_PUT_3D_derivVOL(polygon_df,open_datetime,1,config,target_pct=-.028,vol=float(row["threeD_stddev50"]),standard_risk=.015)
-    #         elif strategy == "GAINP_1D":
+    #         elif strategy == "GAINP_1d":
     #             sell_dict = trade.tda_PUT_1D_derivVOL(polygon_df,open_datetime,1,config,target_pct=-.018,vol=float(row["oneD_stddev50"]),standard_risk=.011)
     #     except Exception as e:
     #         print(f"Error {e} in sell_dict for {symbol} in {strategy} stdclassAgg")
@@ -279,10 +325,6 @@ def simulate_trades_invalerts(data,config):
             try:
                 open_prices = df['o'].values
                 ticker = df.iloc[0]['ticker']
-                # if avg_volume < 20:
-                #     print(f"low volume for {ticker}")
-                #     print(df)
-                #     continue
                 order_id = f"{order_num}_{order_dt}"
                 results_dict = buy_iterate_sellV2_invalerts(symbol, ticker, open_prices, strategy, df, position_id, trading_date, alert_hour, order_id,config,row)
                 print(f"results_dict for {symbol} and {ticker}")
@@ -302,6 +344,8 @@ def simulate_trades_invalerts(data,config):
         
         try:
             position_trades = {"position_id": position_id, "transactions": results, "open_datetime": results_dict['open_trade_dt']}
+            # print("TEST")
+            # print(position_trades)
         except Exception as e:
             print(f"Error in position_trades for {position_id}")
             print(results)

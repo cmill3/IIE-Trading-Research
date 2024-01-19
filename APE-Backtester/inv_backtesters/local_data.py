@@ -71,7 +71,7 @@ def s3_to_local(file_name):
 
 def generate_expiry_dates(date_str,symbol,strategy):
     if symbol in ['SPY','QQQ','IWM']:
-        if strategy in ["BFP_1d","LOSERS_1d",'VDIFFP_1d',"MAP_1d","GAINP_1D","BFC_1d","IDXC_1d","IDXP_1d","GAIN_1d",'VDIFFC_1d',"MA_1d","LOSERSC_1D"]:
+        if strategy in ["BFP_1d","LOSERS_1d",'VDIFFP_1d',"MAP_1d","GAINP_1d","BFC_1d","IDXC_1d","IDXP_1d","GAIN_1d",'VDIFFC_1d',"MA_1d","LOSERSC_1d"]:
             day_of = add_weekdays(date_str,1,symbol)
             next_day = add_weekdays(date_str,2,symbol)
             return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
@@ -112,7 +112,7 @@ def create_index_date(date):
 def generate_expiry_dates_row(row):
     date_str = row['date'].split(" ")[0]
     if row['symbol'] in ['SPY','QQQ','IWM']:
-        if row['strategy'] in ["BFP_1d","LOSERS_1d",'VDIFFP_1d',"MAP_1d","GAINP_1D","BFC_1d","IDXC_1d","IDXP_1d","GAIN_1d",'VDIFFC_1d',"MA_1d","LOSERSC_1D"]:
+        if row['strategy'] in ["BFP_1d","LOSERS_1d",'VDIFFP_1d',"MAP_1d","GAINP_1d","BFC_1d","IDXC_1d","IDXP_1d","GAIN_1d",'VDIFFC_1d',"MA_1d","LOSERSC_1d"]:
             day_of = add_weekdays(date_str,1,row['symbol'])
             next_day = add_weekdays(date_str,2,row['symbol'])
             return [day_of.strftime('%y%m%d'),next_day.strftime('%y%m%d')]
@@ -196,63 +196,63 @@ if __name__ == "__main__":
         #       "time_span": 4,
         #       "side": "P"
         #  },
-        #  "GAIN_1d": {
-        #       "file_path": 'TSSIM1:1_TL15-VOL_custHypP175',
-        #       "time_span": 2,
-        #       "side": "C"
-        #  },
-        # "LOSERS_1d": {
-        #       "file_path": 'TSSIM1:1_TL15-VOL_custHypP13',
-        #       "time_span": 2,
-        #       "side": "P"
-        #  },
-        #  "GAIN": {
-        #       "file_path": 'TSSIM1_TL15-VOL_custHypP275',
-        #       "time_span": 4,
-        #       "side": "C"
-        #  },
-        # "LOSERS": {
-        #       "file_path": 'TSSIM1_TL15-VOL_custHypP2',
-        #       "time_span": 4,
-        #       "side": "P"
-        #  },
-        #  "GAINP_1D": {
-        #       "file_path": 'TSSIM1_TL15-VOL_custHyp18',
-        #       "time_span": 2,
-        #       "side": "P"
-        #  },
-        # "LOSERSC_1D": {
-        #       "file_path": 'TSSIM1_TL15-VOL_custHypP16',
-        #       "time_span": 2,
-        #       "side": "C"
-        #  },
-        #  "GAINP": {
-        #       "file_path": 'TSSIM2_TL15-VOL_custHypP26',
-        #       "time_span": 4,
-        #       "side": "P"
-        #  },
-        # "LOSERSC": {
-        #       "file_path": 'TSSIM1_TL15-VOL_custHypP25',
-        #       "time_span": 4,
-        #       "side": "C"
-        #  },
+         "GAIN_1d": {
+              "file_path": 'GAIN_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.6',
+              "time_span": 2,
+              "side": "C"
+         },
+        "LOSERS_1d": {
+              "file_path": 'LOSERS_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.4',
+              "time_span": 2,
+              "side": "P"
+         },
+         "GAIN": {
+              "file_path": 'GAIN:RM220_TSSIM1_TL15-EXP_custHypTP0.6',
+              "time_span": 4,
+              "side": "C"
+         },
+        "LOSERS": {
+              "file_path": 'LOSERS:RM220_TSSIM1_TL15-EXP_custHypTP0.4',
+              "time_span": 4,
+              "side": "P"
+         },
+         "GAINP_1d": {
+              "file_path": 'GAINP_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.4',
+              "time_span": 2,
+              "side": "P"
+         },
+        "LOSERSC_1d": {
+              "file_path": 'LOSERSC_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.6',
+              "time_span": 2,
+              "side": "C"
+         },
+         "GAINP": {
+              "file_path": 'GAINP:RM220_TSSIM1_TL15-EXP_custHypTP0.4',
+              "time_span": 4,
+              "side": "P"
+         },
+        "LOSERSC": {
+              "file_path": 'LOSERSC:RM220_TSSIM1_TL15-EXP_custHypTP0.6',
+              "time_span": 4,
+              "side": "C"
+         },
          "MAP_1d": {
-              "file_path": 'TSSIM1_TL15_custHypP145',
+              "file_path": 'MAP_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.3',
               "time_span": 2,
               "side": "P"
          },
         "MA_1d": {
-              "file_path": 'TSSIM1_TL15_custHypP15',
+              "file_path": 'MA_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.6',
               "time_span": 2,
               "side": "C"
          },
          "MAP": {
-              "file_path": 'TSSIM1_TL15_custHypP23',
+              "file_path": 'MAP:RM220_TSSIM1_TL15-EXP_custHypTP0.4',
               "time_span": 4,
               "side": "P"
          },
         "MA": {
-              "file_path": 'TSSIM1_TL15_custHypP24',
+              "file_path": 'MA:RM220_TSSIM1_TL15-EXP_custHypTP0.6',
               "time_span": 4,
               "side": "C"
          }
@@ -268,7 +268,7 @@ if __name__ == "__main__":
      '2023-10-02', '2023-10-09', '2023-10-16', '2023-10-23', '2023-10-30',
      '2023-11-06', '2023-11-13', '2023-11-20', '2023-11-27', '2023-12-04', '2023-12-11', '2023-12-18'
      ]
-    data_type = 'TL15'
+    data_type = 'TL15RMHT'
     
     # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')
     
@@ -282,5 +282,4 @@ if __name__ == "__main__":
     #     for strategy in ['BFC','BFP','BFC_1D','BFP_1D']:
     #         df = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/{strategy}/2023-10-02.csv')
     #         print(f"num of columns for {strategy} in {week}: {(len(df.columns))}")
-            
-
+        
