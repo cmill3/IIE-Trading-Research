@@ -121,10 +121,10 @@ if __name__ == "__main__":
     backtest_configs = [
 #  {
 #             "put_pct": 1, 
-#             "spread_adjustment": 0,
+#             "spread_adjustment": 1,
 #             "aa": 0,
-#             "risk_unit": .0008,
-#             "model": "stdclsAGGRM",
+#             "risk_unit": .00073,
+#             "model": "VCcls",
 #             "vc_level":"400",
 #             "portfolio_cash": 100000,
 #             "pos_limit": "noposlimit",
@@ -141,7 +141,7 @@ if __name__ == "__main__":
             "put_pct": 1, 
             "spread_adjustment": 1,
             "aa": 0,
-            "risk_unit": .0008,
+            "risk_unit": .00073 ,
             "model": "stdclsAGGRM",
             "vc_level":"400",
             "portfolio_cash": 100000,
@@ -151,7 +151,7 @@ if __name__ == "__main__":
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "TL15",
+            "dataset": "TL15RM",
             "spread_length": 2,
 
         },
@@ -189,7 +189,7 @@ if __name__ == "__main__":
 
     for config in backtest_configs:
         trading_strat = f"{config['user']}-20240119-modelVOLTRENDMAHT_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['dataset']}_vol{config['volatility_threshold']}_sp{config['spread_length']}_sa{config['spread_adjustment']}"
-        starting_cash = 832243
+        starting_cash = config['portfolio_cash']
         for time in time_periods:
             try:
                 start_dt = time[0]
