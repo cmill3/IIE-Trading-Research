@@ -240,10 +240,16 @@ def tda_CALL_1D_stdcls(polygon_df, simulation_date, quantity, config, target_pct
                 sell_code = 4
                 reason = "Hit point of no confidence, sell."
             elif pct_change >= target_pct:
-                Floor_pct = (.9*underlying_gain)
-                if pct_change <= Floor_pct:
-                    sell_code = 6
-                    reason = "Hit exit target, sell."
+                if current_weekday == 4 and hour >= 11:
+                    Floor_pct = (.99*underlying_gain)
+                    if pct_change <= Floor_pct:
+                        sell_code = 8
+                        reason = "Hit exit target, sell."
+                else:
+                    Floor_pct = (.9*underlying_gain)
+                    if pct_change <= Floor_pct:
+                        sell_code = 6
+                        reason = "Hit exit target, sell."
             elif pct_change < (.5*(target_pct)):
                 sell_code = 5
                 reason = "Failed momentum gate, sell."
@@ -261,6 +267,7 @@ def tda_CALL_1D_stdcls(polygon_df, simulation_date, quantity, config, target_pct
 def tda_PUT_3D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_pct, vol, standard_risk):
     open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
+    target_pct = float(target_pct)
     for index, row in polygon_df.iterrows():
         if index == 0:
             continue
@@ -303,10 +310,16 @@ def tda_PUT_3D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_p
                 sell_code = 4
                 reason = "Hit point of no confidence, sell."
             elif pct_change <= target_pct:
-                Floor_pct = (.9*underlying_gain)
-                if pct_change >= Floor_pct:
-                    sell_code = 6
-                    reason = "Hit exit target, sell."
+                if current_weekday == 4 and hour >= 11:
+                    Floor_pct = (.99*underlying_gain)
+                    if pct_change >= Floor_pct:
+                        sell_code = 8
+                        reason = "Hit exit target, sell."
+                else:
+                    Floor_pct = (.9*underlying_gain)
+                    if pct_change >= Floor_pct:
+                        sell_code = 6
+                        reason = "Hit exit target, sell."
             elif pct_change > (.5*(target_pct)):
                 sell_code = 5
                 reason = "Failed momentum gate, sell."
@@ -324,6 +337,7 @@ def tda_PUT_3D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_p
 def tda_CALL_3D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_pct, vol, standard_risk):
     open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
+    target_pct = float(target_pct)
     for index, row in polygon_df.iterrows():
         if index == 0:
             continue
@@ -366,10 +380,16 @@ def tda_CALL_3D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_
                 sell_code = 4
                 reason = "Hit point of no confidence, sell."
             elif pct_change >= target_pct:
-                Floor_pct = (.9*underlying_gain)
-                if pct_change <= Floor_pct:
-                    sell_code = 6
-                    reason = "Hit exit target, sell."
+                if current_weekday == 4 and hour >= 11:
+                    Floor_pct = (.99*underlying_gain)
+                    if pct_change <= Floor_pct:
+                        sell_code = 8
+                        reason = "Hit exit target, sell."
+                else:
+                    Floor_pct = (.9*underlying_gain)
+                    if pct_change <= Floor_pct:
+                        sell_code = 6
+                        reason = "Hit exit target, sell."
             elif pct_change < (.5*(target_pct)):
                 sell_code = 5
                 reason = "Failed momentum gate, sell."
@@ -386,6 +406,7 @@ def tda_CALL_3D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_
 
 def tda_PUT_1D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_pct, vol, standard_risk):
     open_price = polygon_df.iloc[0]['underlying_price']
+    target_pct = float(target_pct)
     derivative_open_price = polygon_df.iloc[0]['o']
     for index, row in polygon_df.iterrows():
         if index == 0:
@@ -429,10 +450,16 @@ def tda_PUT_1D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_p
                 sell_code = 4
                 reason = "Hit point of no confidence, sell."
             elif pct_change <= target_pct:
-                Floor_pct = (.9*underlying_gain)
-                if pct_change >= Floor_pct:
-                    sell_code = 6
-                    reason = "Hit exit target, sell."
+                if current_weekday == 4 and hour >= 11:
+                    Floor_pct = (.99*underlying_gain)
+                    if pct_change >= Floor_pct:
+                        sell_code = 8
+                        reason = "Hit exit target, sell."
+                else:
+                    Floor_pct = (.9*underlying_gain)
+                    if pct_change >= Floor_pct:
+                        sell_code = 6
+                        reason = "Hit exit target, sell."
             elif pct_change > (.5*(target_pct)):
                 sell_code = 5
                 reason = "Failed momentum gate, sell."
@@ -449,6 +476,7 @@ def tda_PUT_1D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_p
 
 def tda_CALL_1D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_pct, vol, standard_risk):
     open_price = polygon_df.iloc[0]['underlying_price']
+    target_pct = float(target_pct)
     derivative_open_price = polygon_df.iloc[0]['o']
     for index, row in polygon_df.iterrows():
         if index == 0:
@@ -492,15 +520,20 @@ def tda_CALL_1D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_
                 Floor_pct = (.9*underlying_gain)
             elif pct_change > target_pct:
                 Floor_pct = (.75*underlying_gain)
-
             if pct_change < Floor_pct:
                 sell_code = 4
                 reason = "Hit point of no confidence, sell."
             elif pct_change >= target_pct:
-                Floor_pct = (.9*underlying_gain)
-                if pct_change <= Floor_pct:
-                    sell_code = 6
-                    reason = "Hit exit target, sell."
+                if current_weekday == 4 and hour >= 11:
+                    Floor_pct = (.99*underlying_gain)
+                    if pct_change <= Floor_pct:
+                        sell_code = 8
+                        reason = "Hit exit target, sell."
+                else:
+                    Floor_pct = (.9*underlying_gain)
+                    if pct_change <= Floor_pct:
+                        sell_code = 6
+                        reason = "Hit exit target, sell."
             elif pct_change < (.5*(target_pct)):
                 sell_code = 5
                 reason = "Failed momentum gate, sell."
@@ -519,6 +552,7 @@ def tda_PUT_3D_VCcls(polygon_df, simulation_date, quantity, config, target_pct, 
     open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
     is_vc = False
+    target_pct = float(target_pct)
     for index, row in polygon_df.iterrows():
         if index == 0:
             continue
@@ -532,17 +566,17 @@ def tda_PUT_3D_VCcls(polygon_df, simulation_date, quantity, config, target_pct, 
         # Floor_pct = ((float(min_value) - float(open_price))/float(open_price)) + (standard_risk + (-1*config['risk_adjustment']))
 
         vc_amt,risk_pct = config['vc_level'].split("$")
-        if deriv_pct_change > 300:
+        if deriv_pct_change > 400:
             sell_code = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,sell_code)  
             return sell_dict
         elif deriv_pct_change > float(vc_amt):
             Floor_pct = (float(risk_pct)*underlying_gain)
             is_vc = True
-        elif pct_change < (2*target_pct):
-            Floor_pct = (.9*underlying_gain)
-        elif pct_change < target_pct:
-            Floor_pct = (.75*underlying_gain)
+        # elif pct_change < (2*target_pct):
+        #     Floor_pct = (.9*underlying_gain)
+        # elif pct_change < target_pct:
+        #     Floor_pct = (.75*underlying_gain)
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         day_diff, current_weekday = get_day_diff(simulation_date, row['date'])
@@ -572,10 +606,16 @@ def tda_PUT_3D_VCcls(polygon_df, simulation_date, quantity, config, target_pct, 
                     sell_code = 4
                     reason = "Hit point of no confidence, sell."
             elif pct_change <= target_pct:
-                Floor_pct = (.9*underlying_gain)
-                if pct_change >= Floor_pct:
-                    sell_code = 6
-                    reason = "Hit exit target, sell."
+                if current_weekday == 4 and hour >= 11:
+                    Floor_pct = (.99*underlying_gain)
+                    if pct_change >= Floor_pct:
+                        sell_code = 8
+                        reason = "Hit exit target, sell."
+                else:
+                    Floor_pct = (.9*underlying_gain)
+                    if pct_change >= Floor_pct:
+                        sell_code = 6
+                        reason = "Hit exit target, sell."
             elif pct_change > (.5*(target_pct)):
                 sell_code = 5
                 reason = "Failed momentum gate, sell."
@@ -594,6 +634,7 @@ def tda_CALL_3D_VCcls(polygon_df, simulation_date, quantity, config, target_pct,
     open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
     is_vc = False
+    target_pct = float(target_pct)
     for index, row in polygon_df.iterrows():
         if index == 0:
             continue
@@ -607,18 +648,13 @@ def tda_CALL_3D_VCcls(polygon_df, simulation_date, quantity, config, target_pct,
         # Floor_pct = ((float(max_value) - float(open_price))/float(open_price)) - (standard_risk + (-1*config['risk_adjustment']))
 
         vc_amt,risk_pct = config['vc_level'].split("$")
-
-        if deriv_pct_change > 300:
+        if deriv_pct_change > 400:
             sell_code = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,sell_code)  
             return sell_dict
         elif deriv_pct_change > float(vc_amt):
             Floor_pct = (float(risk_pct)*underlying_gain)
             is_vc = True
-        elif pct_change < (2*target_pct):
-            Floor_pct = (.9*underlying_gain)
-        elif pct_change < target_pct:
-            Floor_pct = (.75*underlying_gain)
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         day_diff, current_weekday = get_day_diff(simulation_date, row['date'])
@@ -648,10 +684,16 @@ def tda_CALL_3D_VCcls(polygon_df, simulation_date, quantity, config, target_pct,
                     sell_code = 4
                     reason = "Hit point of no confidence, sell."
             elif pct_change >= target_pct:
-                Floor_pct = (.9*underlying_gain)
-                if pct_change <= Floor_pct:
-                    sell_code = 6
-                    reason = "Hit exit target, sell."
+                if current_weekday == 4 and hour >= 11:
+                    Floor_pct = (.99*underlying_gain)
+                    if pct_change <= Floor_pct:
+                        sell_code = 8
+                        reason = "Hit exit target, sell."
+                else:
+                    Floor_pct = (.9*underlying_gain)
+                    if pct_change <= Floor_pct:
+                        sell_code = 6
+                        reason = "Hit exit target, sell."
             elif pct_change < (.5*(target_pct)):
                 sell_code = 5
                 reason = "Failed momentum gate, sell."
@@ -670,6 +712,7 @@ def tda_PUT_1D_VCcls(polygon_df, simulation_date, quantity, config, target_pct, 
     open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
     is_vc = False
+    target_pct = float(target_pct)
     for index, row in polygon_df.iterrows():
         if index == 0:
             continue
@@ -683,18 +726,13 @@ def tda_PUT_1D_VCcls(polygon_df, simulation_date, quantity, config, target_pct, 
         # Floor_pct = ((float(min_value) - float(open_price))/float(open_price)) + (standard_risk + (-1*config['risk_adjustment']))
 
         vc_amt,risk_pct = config['vc_level'].split("$")
-
-        if deriv_pct_change > 300:
+        if deriv_pct_change > 400:
             sell_code = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,sell_code)  
             return sell_dict
         elif deriv_pct_change > float(vc_amt):
             Floor_pct = (float(risk_pct)*underlying_gain)
             is_vc = True
-        elif pct_change < (2*target_pct):
-            Floor_pct = (.9*underlying_gain)
-        elif pct_change < target_pct:
-            Floor_pct = (.75*underlying_gain)
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         day_diff, current_weekday = get_day_diff(simulation_date, row['date'])
@@ -724,10 +762,16 @@ def tda_PUT_1D_VCcls(polygon_df, simulation_date, quantity, config, target_pct, 
                     sell_code = 4
                     reason = "Hit point of no confidence, sell."
             elif pct_change <= target_pct:
-                Floor_pct = (.9*underlying_gain)
-                if pct_change >= Floor_pct:
-                    sell_code = 6
-                    reason = "Hit exit target, sell."
+                if current_weekday == 4 and hour >= 11:
+                    Floor_pct = (.99*underlying_gain)
+                    if pct_change >= Floor_pct:
+                        sell_code = 8
+                        reason = "Hit exit target, sell."
+                else:
+                    Floor_pct = (.9*underlying_gain)
+                    if pct_change >= Floor_pct:
+                        sell_code = 6
+                        reason = "Hit exit target, sell."
             elif pct_change > (.5*(target_pct)):
                 sell_code = 5
                 reason = "Failed momentum gate, sell."
@@ -747,6 +791,7 @@ def tda_CALL_1D_VCcls(polygon_df, simulation_date, quantity, config, target_pct,
     open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
     is_vc = False
+    target_pct = float(target_pct)
     for index, row in polygon_df.iterrows():
         if index == 0:
             continue
@@ -760,17 +805,13 @@ def tda_CALL_1D_VCcls(polygon_df, simulation_date, quantity, config, target_pct,
         # Floor_pct = ((float(max_value) - float(open_price))/float(open_price)) - (standard_risk + (-1*config['risk_adjustment']))
 
         vc_amt,risk_pct = config['vc_level'].split("$")
-        if deriv_pct_change > 300:
+        if deriv_pct_change > 400:
             sell_code = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,sell_code)  
             return sell_dict
         elif deriv_pct_change > float(vc_amt):
             Floor_pct = (float(risk_pct)*underlying_gain)
             is_vc = True
-        elif pct_change < (2*target_pct):
-            Floor_pct = (.9*underlying_gain)
-        elif pct_change < target_pct:
-            Floor_pct = (.75*underlying_gain)
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         day_diff, current_weekday = get_day_diff(simulation_date, row['date'])
@@ -800,10 +841,16 @@ def tda_CALL_1D_VCcls(polygon_df, simulation_date, quantity, config, target_pct,
                     sell_code = 4
                     reason = "Hit point of no confidence, sell."
             elif pct_change >= target_pct:
-                Floor_pct = (.9*underlying_gain)
-                if pct_change <= Floor_pct:
-                    sell_code = 6
-                    reason = "Hit exit target, sell."
+                if current_weekday == 4 and hour >= 11:
+                    Floor_pct = (.99*underlying_gain)
+                    if pct_change <= Floor_pct:
+                        sell_code = 8
+                        reason = "Hit exit target, sell."
+                else:
+                    Floor_pct = (.9*underlying_gain)
+                    if pct_change <= Floor_pct:
+                        sell_code = 6
+                        reason = "Hit exit target, sell."
             elif pct_change < (.5*(target_pct)):
                 sell_code = 5
                 reason = "Failed momentum gate, sell."
