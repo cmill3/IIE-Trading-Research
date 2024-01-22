@@ -196,26 +196,26 @@ if __name__ == "__main__":
         #       "time_span": 4,
         #       "side": "P"
         #  },
-          "GAIN_1d": {
-              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
-              "time_span": 2,
-              "side": "C"
-         },
-        "LOSERS_1d": {
-              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
-              "time_span": 2,
-              "side": "P"
-         },
-         "GAIN": {
-              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
-              "time_span": 4,
-              "side": "C"
-         },
-        "LOSERS": {
-              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
-              "time_span": 4,
-              "side": "P"
-         },
+        #  "GAIN_1d": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
+        #       "time_span": 2,
+        #       "side": "C"
+        #  },
+        # "LOSERS_1d": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
+        #       "time_span": 2,
+        #       "side": "P"
+        #  },
+        #  "GAIN": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
+        #       "time_span": 4,
+        #       "side": "C"
+        #  },
+        # "LOSERS": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
+        #       "time_span": 4,
+        #       "side": "P"
+        #  },
          "GAINP_1d": {
               "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
               "time_span": 2,
@@ -226,36 +226,36 @@ if __name__ == "__main__":
               "time_span": 2,
               "side": "C"
          },
-         "GAINP": {
-              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
-              "time_span": 4,
-              "side": "P"
-         },
-        "LOSERSC": {
-              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
-              "time_span": 4,
-              "side": "C"
-         },
-         "MAP_1d": {
-              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
-              "time_span": 2,
-              "side": "P"
-         },
-        "MA_1d": {
-              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
-              "time_span": 2,
-              "side": "C"
-         },
-         "MAP": {
-              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
-              "time_span": 4,
-              "side": "P"
-         },
-        "MA": {
-              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
-              "time_span": 4,
-              "side": "C"
-         }
+        #  "GAINP": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
+        #       "time_span": 4,
+        #       "side": "P"
+        #  },
+        # "LOSERSC": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
+        #       "time_span": 4,
+        #       "side": "C"
+        #  },
+        #  "MAP_1d": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
+        #       "time_span": 2,
+        #       "side": "P"
+        #  },
+        # "MA_1d": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
+        #       "time_span": 2,
+        #       "side": "C"
+        #  },
+        #  "MAP": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
+        #       "time_span": 4,
+        #       "side": "P"
+        #  },
+        # "MA": {
+        #       "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
+        #       "time_span": 4,
+        #       "side": "C"
+        #  }
     }
 
     file_names = [
@@ -268,7 +268,7 @@ if __name__ == "__main__":
      '2023-10-02', '2023-10-09', '2023-10-16', '2023-10-23', '2023-10-30',
      '2023-11-06', '2023-11-13', '2023-11-20', '2023-11-27', '2023-12-04', '2023-12-11', '2023-12-18'
      ]
-    data_type = 'TL15RMHT'
+    data_type = 'TL15'
     
     # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')
     
