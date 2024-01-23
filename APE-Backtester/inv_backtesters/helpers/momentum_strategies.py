@@ -264,7 +264,7 @@ def tda_CALL_1D_stdcls(polygon_df, simulation_date, quantity, config, target_pct
     sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,"never sold")
     return sell_dict
 
-def tda_PUT_3D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_pct, vol, standard_risk):
+def tda_PUT_3D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_pct, vol):
     open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
     target_pct = float(target_pct)
@@ -334,7 +334,7 @@ def tda_PUT_3D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_p
     sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,"never sold")
     return sell_dict
 
-def tda_CALL_3D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_pct, vol, standard_risk):
+def tda_CALL_3D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_pct, vol):
     open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
     target_pct = float(target_pct)
@@ -404,7 +404,7 @@ def tda_CALL_3D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_
     sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,"never sold")
     return sell_dict
 
-def tda_PUT_1D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_pct, vol, standard_risk):
+def tda_PUT_1D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_pct, vol):
     open_price = polygon_df.iloc[0]['underlying_price']
     target_pct = float(target_pct)
     derivative_open_price = polygon_df.iloc[0]['o']
@@ -474,7 +474,7 @@ def tda_PUT_1D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_p
     sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,"never sold")
     return sell_dict
 
-def tda_CALL_1D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_pct, vol, standard_risk):
+def tda_CALL_1D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_pct, vol):
     open_price = polygon_df.iloc[0]['underlying_price']
     target_pct = float(target_pct)
     derivative_open_price = polygon_df.iloc[0]['o']
@@ -548,7 +548,7 @@ def tda_CALL_1D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_
     sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,"never sold")
     return sell_dict
 
-def tda_PUT_3D_VCcls(polygon_df, simulation_date, quantity, config, target_pct, vol, standard_risk):
+def tda_PUT_3D_VCcls(polygon_df, simulation_date, quantity, config, target_pct, vol):
     open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
     is_vc = False
