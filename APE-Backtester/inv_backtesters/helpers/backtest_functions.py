@@ -6,6 +6,7 @@ import warnings
 import helpers.momentum_strategies as trade
 import boto3
 import pytz
+from helpers.RMF_strategies import tda_CALL_1D_RMF, tda_PUT_1D_RMF, tda_CALL_3D_RMF, tda_PUT_3D_RMF
 
 s3 = boto3.client('s3')
 
@@ -283,6 +284,66 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
     #         print(f"Error {e} in sell_dict for {symbol} in {strategy} stdclassAgg")
     #         print(polygon_df)
     #         return {}
+    elif config['model'] == "CDVOL":
+        try:
+            # if strategy == "MA":
+            #     sell_dict = trade.tda_CALL_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["threeD_stddev50"]),standard_risk=.016)
+            # elif strategy == "MA_1d":
+            #     sell_dict = trade.tda_CALL_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["oneD_stddev50"]),standard_risk=.01)
+            # elif strategy == "MAP":
+            #     sell_dict = trade.tda_PUT_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["threeD_stddev50"]),standard_risk=.016)
+            # elif strategy == "MAP_1d":
+            #     sell_dict = trade.tda_PUT_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["oneD_stddev50"]),standard_risk=.01)
+            # elif strategy == "VDIFFC":
+            #     sell_dict = trade.tda_CALL_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["threeD_stddev50"]),standard_risk=.02)
+            # elif strategy == "VDIFFC_1d":
+            #     sell_dict = trade.tda_CALL_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["oneD_stddev50"]),standard_risk=.01)
+            # elif strategy == "VDIFFP":
+            #     sell_dict = trade.tda_PUT_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["threeD_stddev50"]),standard_risk=.02)
+            # elif strategy == "VDIFFP_1d":
+                # sell_dict = trade.tda_PUT_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["oneD_stddev50"]),standard_risk=.01)
+            if strategy == "CDGAIN":
+                sell_dict = trade.tda_CALL_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["threeD_stddev50"]),standard_risk=.0175)
+            elif strategy == "CDGAIN_1d":
+                sell_dict = trade.tda_CALL_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["oneD_stddev50"]),standard_risk=.01)
+            elif strategy == "CDLOSE":
+                sell_dict = trade.tda_PUT_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["threeD_stddev50"]),standard_risk=.0175)
+            elif strategy == "CDLOSE_1d":
+                sell_dict = trade.tda_PUT_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=-row['target_pct'],vol=float(row["oneD_stddev50"]),standard_risk=.01)
+            # elif strategy == "IDXC":
+            #     sell_dict = trade.tda_CALL_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["threeD_stddev50"]),standard_risk=.0075)
+            # elif strategy == "IDXC_1d":
+            #     sell_dict = trade.tda_CALL_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["oneD_stddev50"]),standard_risk=.0045)
+            # elif strategy == "IDXP":
+            #     sell_dict = trade.tda_PUT_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["threeD_stddev50"]),standard_risk=.0075)
+            # elif strategy == "IDXP_1d":
+            #     sell_dict = trade.tda_PUT_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["oneD_stddev50"]),standard_risk=.0045)
+            # elif strategy == "LOSERSC":
+            #     sell_dict = trade.tda_CALL_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["threeD_stddev50"]),standard_risk=.015)
+            # elif strategy == "LOSERSC_1d":
+            #     sell_dict = trade.tda_CALL_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["oneD_stddev50"]),standard_risk=.011)
+            # elif strategy == "GAINP":
+            #     sell_dict = trade.tda_PUT_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["threeD_stddev50"]),standard_risk=.015)
+            # elif strategy == "GAINP_1d":
+            #     sell_dict = trade.tda_PUT_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["oneD_stddev50"]),standard_risk=.011)
+        except Exception as e:
+            print(f"Error {e} in sell_dict for {symbol} in {strategy} stdclassAgg")
+            print(polygon_df)
+            return {}
+    elif config['model'] == "RMF":
+        try:
+            if strategy in THREED_STRATEGIES and strategy in CALL_STRATEGIES:
+                sell_code, reason = tda_CALL_3D_RMF(row, current_price,abs((.8*ALGORITHM_CONFIG[row['trading_strategy']]['target_value'])))
+            elif strategy in THREED_STRATEGIES and strategy in PUT_STRATEGIES:
+                sell_code, reason = tda_PUT_3D_RMF(row, current_price,abs((.8*ALGORITHM_CONFIG[row['trading_strategy']]['target_value'])))
+            elif strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
+                sell_code, reason = tda_CALL_1D_RMF(row, current_price,abs((.8*ALGORITHM_CONFIG[row['trading_strategy']]['target_value'])))
+            elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
+                sell_code, reason = tda_PUT_1D_RMF(row, current_price,abs((.8*ALGORITHM_CONFIG[row['trading_strategy']]['target_value'])))
+        except Exception as e:
+            print(f"Error {e} in sell_dict for {symbol} in {strategy} stdclassAgg")
+            print(polygon_df)
+            return {}
     
     try:
         sell_dict['position_id'] = position_id

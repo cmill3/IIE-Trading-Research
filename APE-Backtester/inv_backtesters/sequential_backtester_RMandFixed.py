@@ -123,7 +123,7 @@ if __name__ == "__main__":
             "put_pct": 1, 
             "spread_adjustment": 1,
             "aa": 0,
-            "risk_unit": .00065,
+            "risk_unit": .00073,
             "model": "VCcls",
             "vc_level":"200$.8",
             "portfolio_cash": 100000,
@@ -133,7 +133,7 @@ if __name__ == "__main__":
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "TL15",
+            "dataset": "RM+FIX",
             "spread_length": 2,
 
         },
