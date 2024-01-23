@@ -196,26 +196,26 @@ if __name__ == "__main__":
         #       "time_span": 4,
         #       "side": "P"
         #  },
-        #   "GAIN_1d": {
-        #       "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
-        #       "time_span": 2,
-        #       "side": "C"
-        #  },
-        # "LOSERS_1d": {
-        #       "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
-        #       "time_span": 2,
-        #       "side": "P"
-        #  },
-        #  "GAIN": {
-        #       "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
-        #       "time_span": 4,
-        #       "side": "C"
-        #  },
-        # "LOSERS": {
-        #       "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
-        #       "time_span": 4,
-        #       "side": "P"
-        #  },
+    #    "GAIN_1d": {
+    #           "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
+    #           "time_span": 2,
+    #           "side": "C"
+    #      },
+    #     "LOSERS_1d": {
+    #           "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
+    #           "time_span": 2,
+    #           "side": "P"
+    #      },
+    #      "GAIN": {
+    #           "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
+    #           "time_span": 4,
+    #           "side": "C"
+    #      },
+    #     "LOSERS": {
+    #           "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
+    #           "time_span": 4,
+    #           "side": "P"
+    #      },
         #  "GAINP_1d": {
         #       "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
         #       "time_span": 2,
@@ -304,63 +304,124 @@ if __name__ == "__main__":
     #         print(f"num of columns for {strategy} in {week}: {(len(df.columns))}")
         
 
-        #  "GAIN_1d": {
-        #       "file_path": 'TSSIM1:1_TL15-EXP_custHypP18',
+    #    "GAIN_1d": {
+    #           "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
+    #           "time_span": 2,
+    #           "side": "C"
+    #      },
+    #     "LOSERS_1d": {
+    #           "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
+    #           "time_span": 2,
+    #           "side": "P"
+    #      },
+    #      "GAIN": {
+    #           "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
+    #           "time_span": 4,
+    #           "side": "C"
+    #      },
+    #     "LOSERS": {
+    #           "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
+    #           "time_span": 4,
+    #           "side": "P"
+    #      },
+    #      "GAINP_1d": {
+    #           "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
+    #           "time_span": 2,
+    #           "side": "P"
+    #      },
+    #     "LOSERSC_1d": {
+    #           "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
+    #           "time_span": 2,
+    #           "side": "C"
+    #      },
+    #      "GAINP": {
+    #           "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
+    #           "time_span": 4,
+    #           "side": "P"
+    #      },
+    #     "LOSERSC": {
+    #           "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
+    #           "time_span": 4,
+    #           "side": "C"
+    #      },
+    #      "MAP_1d": {
+    #           "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
+    #           "time_span": 2,
+    #           "side": "P"
+    #      },
+    #     "MA_1d": {
+    #           "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
+    #           "time_span": 2,
+    #           "side": "C"
+    #      },
+    #      "MAP": {
+    #           "file_path": 'TSSIM1_TL15-EXP_custHypTP0.45',
+    #           "time_span": 4,
+    #           "side": "P"
+    #      },
+    #     "MA": {
+    #           "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
+    #           "time_span": 4,
+    #           "side": "C"
+    #      }
+    
+        #      "GAIN_1d": {
+        #       "file_path": 'GAIN_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.55',
         #       "time_span": 2,
         #       "side": "C"
         #  },
         # "LOSERS_1d": {
-        #       "file_path": 'TSSIM1:1_TL15-EXP_custHypP15',
+        #       "file_path": 'LOSERS_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.45',
         #       "time_span": 2,
         #       "side": "P"
         #  },
         #  "GAIN": {
-        #       "file_path": 'TSSIM1_TL15-EXP_custHypP28',
+        #       "file_path": 'GAIN:RM220_TSSIM1_TL15-EXP_custHypTP0.55',
         #       "time_span": 4,
         #       "side": "C"
         #  },
         # "LOSERS": {
-        #       "file_path": 'TSSIM1_TL15-EXP_custHypP23',
+        #       "file_path": 'LOSERS:RM220TSSIM1_TL15-EXP_custHypTP0.45',
         #       "time_span": 4,
         #       "side": "P"
         #  },
-        #  "GAINP_1D": {
-        #       "file_path": 'TSSIM1_TL15-EXP_custHypP18',
+        #  "GAINP_1d": {
+        #       "file_path": 'GAINP_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.45',
         #       "time_span": 2,
         #       "side": "P"
         #  },
-        # "LOSERSC_1D": {
-        #       "file_path": 'TSSIM1_TL15-EXP_custHypP16',
+        # "LOSERSC_1d": {
+        #       "file_path": 'LOSERSC_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.55',
         #       "time_span": 2,
         #       "side": "C"
         #  },
         #  "GAINP": {
-        #       "file_path": 'TSSIM2_TL15-EXP_custHypP27',
+        #       "file_path": 'GAINP:RM220_TSSIM1_TL15-EXP_custHypTP0.45',
         #       "time_span": 4,
         #       "side": "P"
         #  },
         # "LOSERSC": {
-        #       "file_path": 'TSSIM1_TL15-EXP_custHypP25',
+        #       "file_path": 'LOSERSC:RM220_TSSIM1_TL15-EXP_custHypTP0.55',
         #       "time_span": 4,
         #       "side": "C"
         #  },
         #  "MAP_1d": {
-        #       "file_path": 'TSSIM1_TL15-EXP_custHypP165',
+        #       "file_path": 'MA_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.45',
         #       "time_span": 2,
         #       "side": "P"
         #  },
         # "MA_1d": {
-        #       "file_path": 'TSSIM1_TL15-EXP_custHypP17',
+        #       "file_path": 'MA_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.55',
         #       "time_span": 2,
         #       "side": "C"
         #  },
         #  "MAP": {
-        #       "file_path": 'TSSIM1_TL15-EXP_custHypP24',
+        #       "file_path": 'MAP:RM220_TSSIM1_TL15-EXP_custHypTP0.45',
         #       "time_span": 4,
         #       "side": "P"
         #  },
         # "MA": {
-        #       "file_path": 'TSSIM1_TL15-EXP_custHypP26',
+        #       "file_path": 'MA:RM220_TSSIM1_TL15-EXP_custHypTP0.55',
         #       "time_span": 4,
         #       "side": "C"
         #  }

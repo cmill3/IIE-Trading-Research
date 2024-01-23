@@ -7,6 +7,7 @@ import helpers.momentum_strategies as trade
 import boto3
 import pytz
 from helpers.constants import *
+from helpers.RMF_strategies import tda_CALL_1D_RMF, tda_PUT_1D_RMF, tda_CALL_3D_RMF, tda_PUT_3D_RMF
 
 s3 = boto3.client('s3')
 
