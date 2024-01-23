@@ -9,7 +9,7 @@ import ast
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-def tda_PUT_3D_stdcls(polygon_df, simulation_date, quantity, config, target_pct, vol, standard_risk):
+def tda_PUT_3D_stdcls(polygon_df, simulation_date, quantity, config, target_pct, vol):
     open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
     for index, row in polygon_df.iterrows():

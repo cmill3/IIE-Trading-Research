@@ -86,6 +86,7 @@ def polygon_stockdata_inv(symbol, from_date, to_date):
     stock_df['time'] = stock_df['date'].apply(lambda x: x.time())
     stock_df['hour'] = stock_df['date'].apply(lambda x: x.hour)
     stock_df['minute'] = stock_df['date'].apply(lambda x: x.minute)
+    stock_df['ticker'] = symbol
 
     stock_df = stock_df[stock_df['hour'] < 16]
     stock_df = stock_df.loc[stock_df['time'] >= datetime.strptime("09:30:00", "%H:%M:%S").time()]

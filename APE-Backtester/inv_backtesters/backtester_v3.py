@@ -222,7 +222,7 @@ if __name__ == "__main__":
     # print(error_models)
 
     ## TREND STRATEGIES ONLY
-    strategies = ["GAIN:3","GAINP:3","LOSERS:3","LOSERSC:3","GAIN_1D:1","GAINP_1D:1","LOSERS_1D:1","LOSERSC_1D:1"]
+    # strategies = ["GAIN:3","GAINP:3","LOSERS:3","LOSERSC:3","GAIN_1D:1","GAINP_1D:1","LOSERS_1D:1","LOSERSC_1D:1"]
 
     for config in backtest_configs:
         trading_strat = f"{config['user']}-{nowstr}-modelVOLTREND_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['dataset']}_vol{config['volatility_threshold']}"
