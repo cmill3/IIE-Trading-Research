@@ -160,7 +160,7 @@ if __name__ == "__main__":
             "spread_adjustment": 1,
             "aa": 0,
             "risk_unit": .00082 ,
-            "model": "stdclsAGG",
+            "model": "stdcls",
             "vc_level":"400",
             "portfolio_cash": 100000,
             "pos_limit": "noposlimit",
