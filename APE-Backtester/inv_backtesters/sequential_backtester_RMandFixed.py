@@ -20,7 +20,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 bucket_name = 'icarus-research-data'  #s3 bucket name
 object_keybase = 'training_datasets/expanded_1d_datasets/' #s3 key not including date, date is added in pullcsv func
 
-def build_backtest_data(file_name,strategies,config):
+def build_backtest_data_RMF(file_name,strategies,config):
     full_purchases_list = []
     full_positions_list = []
     full_sales_list = []
@@ -29,7 +29,12 @@ def build_backtest_data(file_name,strategies,config):
     for strategy in strategies:
         name, prediction_horizon = strategy.split(":")
         data = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/{config["dataset"]}/{name}/{file_name}.csv')
+        rm_data = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/{config["RM_dataset"]}/{name}/{file_name}.csv')
         data['prediction_horizon'] = prediction_horizon
+        data['rm_prediction'] = rm_data['predictions']
+        data['rm_target_pct'] = rm_data['target_value']
+        data['rm_probabilities'] = rm_data['probabilities']
+        data['aggregate_classification'] = data.apply(aggregate_classification)
         dfs.append(data)
     
     backtest_data = pd.concat(dfs,ignore_index=True)
@@ -38,7 +43,7 @@ def build_backtest_data(file_name,strategies,config):
         predictions = helper.configure_regression_predictions(backtest_data,config)
         filtered_by_date = helper.configure_trade_data(predictions,config)
     elif config['model_type'] == "cls":
-        predictions = backtest_data.loc[backtest_data['predictions'] == 1]
+        predictions = backtest_data.loc[backtest_data['predictions'] != '00']
         filtered_by_date = helper.configure_trade_data(predictions,config)
     
     ## What we will do is instead of simulating one trade at a time we will do one time period at a time and then combine and create results then.
@@ -46,6 +51,16 @@ def build_backtest_data(file_name,strategies,config):
     full_positions_list.extend(positions_list)
 
     return positions_list
+
+def aggregate_classification(row):
+    if row['predictions'] == 1 and row['rm_prediction'] == 1:
+        return '11'
+    elif row['predictions'] == 1 and row['rm_prediction'] == 0:
+        return '10'
+    elif row['predictions'] == 0 and row['rm_prediction'] == 1:
+        return '01'
+    else:
+        return '00'
 
 def run_trades_simulation(full_positions_list,start_date,end_date,config,period_cash):
     full_date_list = helper.create_portfolio_date_list(start_date, end_date)
@@ -70,7 +85,7 @@ def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,c
         # build_backtest_data(file_names[0],strategies,config)
         with concurrent.futures.ProcessPoolExecutor(max_workers=6) as executor:
             # Submit the processing tasks to the ThreadPoolExecutor
-            processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies,config) for file_name in file_names]
+            processed_weeks_futures = [executor.submit(build_backtest_data_RMF,file_name,strategies,config) for file_name in file_names]
 
         # Step 4: Retrieve the results from the futures
         processed_weeks_results = [future.result() for future in processed_weeks_futures]

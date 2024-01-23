@@ -102,16 +102,29 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
             if strategy in THREED_STRATEGIES and strategy in CALL_STRATEGIES:
                 sell_dict = trade.tda_CALL_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["threeD_stddev50"]),standard_risk=.0175)
             elif strategy in THREED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict = trade.tda_CALL_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["oneD_stddev50"]),standard_risk=.01)
+                sell_dict = trade.tda_CALL_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["threeD_stddev50"]),standard_risk=.01)
             elif strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_PUT_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["threeD_stddev50"]),standard_risk=.0175)
+                sell_dict = trade.tda_PUT_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["oneD_stddev50"]),standard_risk=.0175)
             elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
                 sell_dict = trade.tda_PUT_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=-row['target_pct'],vol=float(row["oneD_stddev50"]),standard_risk=.01)
         except Exception as e:
             print(f"Error {e} in sell_dict for {symbol} in {strategy} CDVOL")
             print(polygon_df)
             return {}
-    
+    elif config['model'] == "RMF":
+        try:
+            if strategy in THREED_STRATEGIES and strategy in CALL_STRATEGIES:
+                sell_dict = tda_CALL_3D_RMF(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],rm_target_pct=row['rm_target_pct'],vol=float(row["threeD_stddev50"]),aggregate_classification=row['aggregate_classification'])
+            elif strategy in THREED_STRATEGIES and strategy in PUT_STRATEGIES:
+                sell_dict = tda_PUT_3D_RMF(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],rm_target_pct=row['rm_target_pct'],vol=float(row["threeD_stddev50"]),aggregate_classification=row['aggregate_classification'])
+            elif strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
+                sell_dict = tda_CALL_1D_RMF(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],rm_target_pct=row['rm_target_pct'],vol=float(row["oneD_stddev50"]),aggregate_classification=row['aggregate_classification'])
+            elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
+                sell_dict = tda_PUT_1D_RMF(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],rm_target_pct=row['rm_target_pct'],vol=float(row["oneD_stddev50"]),aggregate_classification=row['aggregate_classification'])
+        except Exception as e:
+            print(f"Error {e} in sell_dict for {symbol} in {strategy} RMF")
+            print(polygon_df)
+            return {}
     try:
         sell_dict['position_id'] = position_id
         results_dict = backtrader_helper.create_results_dict(buy_dict, sell_dict, order_id)
