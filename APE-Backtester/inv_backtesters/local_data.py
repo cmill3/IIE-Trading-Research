@@ -257,22 +257,22 @@ if __name__ == "__main__":
         #       "side": "C"
         #  }
         "CDGAIN": {
-              "file_path": 'TSSIM1:1_TL15-EXP_custHypTP0.5',
+              "file_path": 'TSSIM1:1_TL15-EXP_custHypTP0.45',
               "time_span": 4,
               "side": "C"
          },
         "CDLOSE": {
-              "file_path": 'TSSIM1:1_TL15-EXP_custHypTP0.5',
+              "file_path": 'TSSIM1:1_TL15-EXP_custHypTP0.55',
               "time_span": 4,
               "side": "P"
          },
           "CDGAIN_1d": {
-              "file_path": 'TSSIM1:1_TL15-EXP_custHypTP0.5',
+              "file_path": 'TSSIM1:1_TL15-EXP_custHypTP0.45',
               "time_span": 2,
               "side": "C"
          },
         "CDLOSE_1d": {
-              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.5',
+              "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
               "time_span": 2,
               "side": "P"
          },
