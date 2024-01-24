@@ -119,11 +119,29 @@ if __name__ == "__main__":
 
 
     backtest_configs = [
-        {
+        # {
+        #     "put_pct": 1, 
+        #     "spread_adjustment": 1,
+        #     "aa": 0,
+        #     "risk_unit": .001 ,
+        #     "model": "CDVOL",
+        #     "vc_level":"400",
+        #     "portfolio_cash": 100000,
+        #     "pos_limit": "noposlimit",
+        #     "volatility_threshold": 1,
+        #     "model_type": "cls",
+        #     "user": "cm3",
+        #     "threeD_vol": "return_vol_10D",
+        #     "oneD_vol": "return_vol_5D",
+        #     "dataset": "CDVOL",
+        #     "spread_length": 2,
+
+        # },
+    {
             "put_pct": 1, 
             "spread_adjustment": 1,
             "aa": 0,
-            "risk_unit": .001 ,
+            "risk_unit": .0018 ,
             "model": "CDVOL",
             "vc_level":"400",
             "portfolio_cash": 100000,
@@ -137,44 +155,25 @@ if __name__ == "__main__":
             "spread_length": 2,
 
         },
-    #     {
-    #         "put_pct": 1, 
-    #         "spread_adjustment": 1,
-    #         "aa": 0,
-    #         "risk_unit": .0015 ,
-    #         "model": "CDVOL",
-    #         "vc_level":"400",
-    #         "portfolio_cash": 100000,
-    #         "pos_limit": "noposlimit",
-    #         "volatility_threshold": 1,
-    #         "model_type": "cls",
-    #         "user": "cm3",
-    #         "threeD_vol": "return_vol_10D",
-    #         "oneD_vol": "return_vol_5D",
-    #         "dataset": "CDVOL",
-    #         "spread_length": 2,
+    {
+            "put_pct": 1, 
+            "spread_adjustment": 1,
+            "aa": 0,
+            "risk_unit": .0022 ,
+            "model": "CDVOL",
+            "vc_level":"400",
+            "portfolio_cash": 100000,
+            "pos_limit": "noposlimit",
+            "volatility_threshold": 1,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOL",
+            "spread_length": 2,
 
-    #     },
-    #   {
-    #         "put_pct": 1, 
-    #         "spread_adjustment": 1,
-    #         "aa": 0,
-    #         "risk_unit": .002 ,
-    #         "model": "CDVOL",
-    #         "vc_level":"400",
-    #         "portfolio_cash": 100000,
-    #         "pos_limit": "noposlimit",
-    #         "volatility_threshold": 1,
-    #         "model_type": "cls",
-    #         "user": "cm3",
-    #         "threeD_vol": "return_vol_10D",
-    #         "oneD_vol": "return_vol_5D",
-    #         "dataset": "CDVOL",
-    #         "spread_length": 2,
-
-    #     },
-]
-    
+        },
+    ]
     # time_periods = [q1,q2,q3,q4]
     models_tested = []
     error_models = []
@@ -185,13 +184,13 @@ if __name__ == "__main__":
     # strategies = ["MA:3","MAP:3","MA_1D:1","MAP_1D:1","GAIN_1D:1","GAINP_1D:1","GAIN:3","GAINP:3","LOSERS:3","LOSERS_1D:1","LOSERSC:3","LOSERSC_1D:1"]
 
     ## TREND STRATEGIES ONLY
-    time_periods = [m9,m10,m11,m12]
+    time_periods = [m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,m12]
     strategies = ["CDGAIN:3","CDLOSE:3","CDGAIN_1D:1","CDLOSE_1D:1"]
     # strategies = ["GAIN:3","GAINP:3","LOSERS:3","LOSERSC:3","GAIN_1D:1","GAINP_1D:1","LOSERS_1D:1","LOSERSC_1D:1","MA:3","MAP:3","MA_1D:1","MAP_1D:1"]
 
     for config in backtest_configs:
-        trading_strat = f"{config['user']}-{nowstr}-modelVOLTRENDMA_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['dataset']}_vol{config['volatility_threshold']}_sp{config['spread_length']}_sa{config['spread_adjustment']}"
-        starting_cash = 374213
+        trading_strat = f"{config['user']}-{nowstr}-modelVOLTRENDLT_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['dataset']}_vol{config['volatility_threshold']}_sp{config['spread_length']}_sa{config['spread_adjustment']}"
+        starting_cash = config['portfolio_cash']
         for time in time_periods:
             try:
                 start_dt = time[0]
