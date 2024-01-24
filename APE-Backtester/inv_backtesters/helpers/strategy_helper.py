@@ -197,3 +197,34 @@ def build_trade_analytics(row, polygon_df, derivative_open_price, index, quantit
     trade_dict["option_symbol"] = row['ticker']
     trade_dict["sell_code"] = sell_code
     return trade_dict
+
+
+def build_trade_analytics_RMF(row, polygon_df, derivative_open_price, index, quantity, sell_code, aggregate_classification, hilo_score):
+    trade_dict = {}
+    before_df = polygon_df.iloc[:index]
+    after_df = polygon_df.iloc[index:]
+    trade_dict['max_value_before'] = before_df['h'].max()
+    trade_dict['max_value_before_idx'] = before_df['h'].idxmax()
+    trade_dict['max_value_before_date'] = before_df.loc[trade_dict['max_value_before_idx']]['date'].strftime("%Y-%m-%d %H:%M")
+    trade_dict['max_value_before_pct_change'] = ((trade_dict['max_value_before'] - derivative_open_price)/derivative_open_price)
+
+    if len(after_df) > 0:
+        trade_dict['max_value_after'] = after_df['h'].max()
+        trade_dict['max_value_after_idx'] = after_df['h'].idxmax()
+        trade_dict['max_value_after_date'] = after_df.loc[trade_dict['max_value_after_idx']]['date'].strftime("%Y-%m-%d %H:%M")
+        trade_dict['max_value_after_pct_change'] = ((trade_dict['max_value_after'] - derivative_open_price)/derivative_open_price)
+    else:
+        trade_dict['max_value_after'] = None
+        trade_dict['max_value_after_idx'] = None
+        trade_dict['max_value_after_date'] = None
+        trade_dict['max_value_after_pct_change'] = None
+
+    trade_dict["close_price"] = row['o']
+    trade_dict["close_datetime"] = row['date'].to_pydatetime()
+    trade_dict["quantity"] = quantity
+    trade_dict["contract_cost"] = (row['o']*100)
+    trade_dict["option_symbol"] = row['ticker']
+    trade_dict["sell_code"] = sell_code
+    trade_dict["aggregate_classification"] = aggregate_classification
+    trade_dict["hilo_score"] = hilo_score
+    return trade_dict

@@ -4,7 +4,7 @@ from helpers.strategy_helper import *
 import helpers.bf_strategies as ts
 
 
-def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit,put_adjustment,config):
+def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit,put_adjustment,config,results_dict_func):
     positions_taken = []
     contracts_bought = []
     contracts_sold = []
@@ -49,7 +49,7 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit,
                                     sales_dict[sale_dt].append(sale_info)
                         if orders_taken:
                             current_positions.append((position['position_id'].split("-")[0] + position['position_id'].split("-")[1]))
-                            results_dicts = extract_results_dict(position)
+                            results_dicts = results_dict_func(position)
                             positions_taken.append({'position_id':position['position_id'],"results":results_dicts,"quantity":quantities})
                             value['period_net_returns'] = (value['sale_returns'] - value['purchase_costs'])
                 else:
@@ -108,7 +108,7 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit,
                                     sales_dict[sale_dt].append(sale_info)
                         if orders_taken:
                             current_positions.append((position['position_id'].split("-")[0] + position['position_id'].split("-")[1]))
-                            results_dicts = extract_results_dict(position)
+                            results_dicts = results_dict_func(position)
                             positions_taken.append({'position_id':position['position_id'],"results":results_dicts,"quantity":quantities})
                 else:
                     if passed_trades_dict.get(key) is not None:
@@ -133,7 +133,7 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit,
     print(diff2)
     return portfolio_df, passed_trades_df, positions_taken, positions_dict
 
-def simulate_portfolio_poslimit(positions_list, datetime_list, portfolio_cash, risk_unit,put_adjustment, config):
+def simulate_portfolio_poslimit(positions_list, datetime_list, portfolio_cash, risk_unit,put_adjustment, config, results_dict_func):
     positions_taken = []
     contracts_bought = []
     contracts_sold = []
@@ -181,7 +181,7 @@ def simulate_portfolio_poslimit(positions_list, datetime_list, portfolio_cash, r
                                     sales_dict[sale_dt].append(sale_info)
                         if orders_taken:
                             current_positions.append((position['position_id'].split("-")[0] + position['position_id'].split("-")[1]))
-                            results_dicts = extract_results_dict(position)
+                            results_dicts = results_dict_func(position)
                             positions_taken.append({'position_id':position['position_id'],"results":results_dicts,"quantity":quantities})
                             value['period_net_returns'] = (value['sale_returns'] - value['purchase_costs'])
                     else:
@@ -244,7 +244,7 @@ def simulate_portfolio_poslimit(positions_list, datetime_list, portfolio_cash, r
                             if (position['position_id'].split("-")[0] + position['position_id'].split("-")[1]) not in current_positions:
                                 current_positions.append((position['position_id'].split("-")[0] + position['position_id'].split("-")[1]))
                         if orders_taken:
-                            results_dicts = extract_results_dict(position)
+                            results_dicts = results_dict_func(position)
                             positions_taken.append({'position_id':position['position_id'],"results":results_dicts,"quantity":quantities})
                     else:
                         if passed_trades_dict.get(key) is not None:

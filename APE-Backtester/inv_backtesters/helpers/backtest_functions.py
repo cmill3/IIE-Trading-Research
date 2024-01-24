@@ -36,9 +36,9 @@ def create_simulation_data_inv(row,config):
     date_str = row['date'].split(" ")[0]
     start_date = datetime(int(date_str.split("-")[0]),int(date_str.split("-")[1]),int(date_str.split("-")[2]),int(row['hour']),0,0)
     if row['strategy'].find("_1D"):
-        days_back = 2
+        days_back = 1
     else:
-        days_back = 4
+        days_back = 3
     end_date = backtrader_helper.create_end_date(start_date, days_back)
     trading_aggregates, option_symbols = backtrader_helper.create_options_aggs_inv(row,start_date,end_date=end_date,spread_length=config['spread_length'],config=config)
     return start_date, end_date, row['symbol'], row['o'], row['strategy'], option_symbols, trading_aggregates
@@ -100,13 +100,13 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
     elif config['model'] == "CDVOL":
         try:
             if strategy in THREED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["threeD_stddev50"]),standard_risk=.0175)
+                sell_dict = trade.tda_CALL_3D_CDVOL(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["threeD_stddev50"]))
             elif strategy in THREED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict = trade.tda_CALL_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["threeD_stddev50"]),standard_risk=.01)
+                sell_dict = trade.tda_CALL_1D_CDVOL(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["threeD_stddev50"]))
             elif strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_PUT_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["oneD_stddev50"]),standard_risk=.0175)
+                sell_dict = trade.tda_PUT_3D_CDVOL(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["oneD_stddev50"]))
             elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict = trade.tda_PUT_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=-row['target_pct'],vol=float(row["oneD_stddev50"]),standard_risk=.01)
+                sell_dict = trade.tda_PUT_1D_CDVOL(polygon_df,open_datetime,1,config,target_pct=-row['target_pct'],vol=float(row["oneD_stddev50"]))
         except Exception as e:
             print(f"Error {e} in sell_dict for {symbol} in {strategy} CDVOL")
             print(polygon_df)
