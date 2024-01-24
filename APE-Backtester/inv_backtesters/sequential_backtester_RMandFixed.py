@@ -9,10 +9,8 @@ import helpers.portfolio_simulation as portfolio_sim
 import warnings
 import concurrent.futures
 import os
-# from pandas._libs.mode_warnings import SettingWithCopyWarning
 
-
-warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 # warnings.filterwarnings("ignore", category=SettingWithCopyWarning)
 
@@ -29,13 +27,30 @@ def build_backtest_data_RMF(file_name,strategies,config):
     for strategy in strategies:
         name, prediction_horizon = strategy.split(":")
         data = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/{config["dataset"]}/{name}/{file_name}.csv')
-        rm_data = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/{config["RM_dataset"]}/{name}/{file_name}.csv')
-        data['prediction_horizon'] = prediction_horizon
-        data['rm_prediction'] = rm_data['predictions']
-        data['rm_target_pct'] = rm_data['target_value']
-        data['rm_probabilities'] = rm_data['probabilities']
-        data['aggregate_classification'] = data.apply(aggregate_classification)
-        dfs.append(data)
+        rm_data = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/{config["rm_dataset"]}/{name}/{file_name}.csv')
+        rm_tgt = rm_data['target_value'].iloc[0]
+        tgt = data['target_value'].iloc[0]
+        rm_data = rm_data.rename(columns={"predictions": "rm_predictions","probabilities": "rm_probabilities","target_value": "rm_target_pct"})
+        merged_df = pd.merge(data, rm_data, on=['symbol', 'date', 'hour'], how='outer', suffixes=('', '_y'), indicator=True)
+        merged_df['target_pct'] = tgt
+        merged_df['rm_target_pct'] = rm_tgt
+
+        # Iterate through columns except for 'symbol'
+        for col in merged_df.columns:
+            if "_y" in col:
+                original_col = col[:-2]  # Remove the "_df1" or "_df2" suffix
+                merged_df[original_col] = merged_df[f"{original_col}"].combine_first(merged_df[f"{original_col}_y"])
+        merged_df['in_both'] = merged_df['_merge'] == 'both'
+        merged_df['in_df1_only'] = merged_df['_merge'] == 'left_only'
+        merged_df['in_df2_only'] = merged_df['_merge'] == 'right_only'
+
+        merged_df['prediction_horizon'] = prediction_horizon
+        merged_df['aggregate_classification'] = merged_df.apply(aggregate_classification,axis=1)
+        merged_df = merged_df.drop(merged_df.filter(like='_y').columns, axis=1) 
+        merged_df = merged_df.sort_values(by='t', ascending=True)
+        # Reset the index to reindex the DataFrame after sorting
+        merged_df = merged_df.reset_index(drop=True)
+        dfs.append(merged_df)
     
     backtest_data = pd.concat(dfs,ignore_index=True)
     # backtest_data = backtest_data[backtest_data['probabilities'] > config['probability']]
@@ -43,7 +58,7 @@ def build_backtest_data_RMF(file_name,strategies,config):
         predictions = helper.configure_regression_predictions(backtest_data,config)
         filtered_by_date = helper.configure_trade_data(predictions,config)
     elif config['model_type'] == "cls":
-        predictions = backtest_data.loc[backtest_data['predictions'] != '00']
+        predictions = backtest_data.loc[backtest_data['aggregate_classification'] != '0']
         filtered_by_date = helper.configure_trade_data(predictions,config)
     
     ## What we will do is instead of simulating one trade at a time we will do one time period at a time and then combine and create results then.
@@ -53,26 +68,26 @@ def build_backtest_data_RMF(file_name,strategies,config):
     return positions_list
 
 def aggregate_classification(row):
-    if row['predictions'] == 1 and row['rm_prediction'] == 1:
+    if row['in_both'] == True:
         return '11'
-    elif row['predictions'] == 1 and row['rm_prediction'] == 0:
-        return '10'
-    elif row['predictions'] == 0 and row['rm_prediction'] == 1:
-        return '01'
+    elif row['in_df1_only'] == True:
+        return '12'
+    elif row['in_df2_only'] == True:
+        return '21'
     else:
-        return '00'
+        return '0'
 
 def run_trades_simulation(full_positions_list,start_date,end_date,config,period_cash):
     full_date_list = helper.create_portfolio_date_list(start_date, end_date)
     if config['pos_limit'] == "poslimit":
         portfolio_df, passed_trades_df, positions_taken, positions_dict = portfolio_sim.simulate_portfolio_poslimit(
             full_positions_list, full_date_list,portfolio_cash=period_cash, risk_unit=config['risk_unit'],put_adjustment=config['put_pct'],
-            config=config
+            config=config, results_dict_func=helper.extract_results_dict_RMF
             )
     elif config['pos_limit'] == "noposlimit":
         portfolio_df, passed_trades_df, positions_taken, positions_dict = portfolio_sim.simulate_portfolio(
             full_positions_list, full_date_list,portfolio_cash=period_cash, risk_unit=config['risk_unit'],put_adjustment=config['put_pct'],
-            config=config
+            config=config, results_dict_func=helper.extract_results_dict_RMF
             )
     positions_df = pd.DataFrame.from_dict(positions_taken)
     return portfolio_df, positions_df
@@ -82,7 +97,7 @@ def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,c
 
     if not local_data:
         cpu_count = os.cpu_count()
-        # build_backtest_data(file_names[0],strategies,config)
+        # build_backtest_data_RMF(file_names[0],strategies,config)
         with concurrent.futures.ProcessPoolExecutor(max_workers=6) as executor:
             # Submit the processing tasks to the ThreadPoolExecutor
             processed_weeks_futures = [executor.submit(build_backtest_data_RMF,file_name,strategies,config) for file_name in file_names]
@@ -134,30 +149,12 @@ if __name__ == "__main__":
 
 
     backtest_configs = [
- {
-            "put_pct": 1, 
-            "spread_adjustment": 1,
-            "aa": 0,
-            "risk_unit": .00073,
-            "model": "VCcls",
-            "vc_level":"200$.8",
-            "portfolio_cash": 100000,
-            "pos_limit": "noposlimit",
-            "volatility_threshold": 1,
-            "model_type": "cls",
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "oneD_vol": "return_vol_5D",
-            "dataset": "RM+FIX",
-            "spread_length": 2,
-
-        },
         # {
         #     "put_pct": 1, 
         #     "spread_adjustment": 1,
         #     "aa": 0,
-        #     "risk_unit": .00073,
-        #     "model": "stdclsAGGRM",
+        #     "risk_unit": .0006,
+        #     "model": "RMF",
         #     "vc_level":"400",
         #     "portfolio_cash": 100000,
         #     "pos_limit": "noposlimit",
@@ -166,27 +163,66 @@ if __name__ == "__main__":
         #     "user": "cm3",
         #     "threeD_vol": "return_vol_10D",
         #     "oneD_vol": "return_vol_5D",
-        #     "dataset": "TL15RM",
-        #     "spread_length": 3,
+        #     "dataset": "TL15",
+        #     "rm_dataset": "TL15RMHT",
+        #     "spread_length": 2,
+
         # },
-        #  {
+        # {
         #     "put_pct": 1, 
-        #     "spread_adjustment": 0,
+        #     "spread_adjustment": 1,
         #     "aa": 0,
-        #     "risk_unit": .0025,
-        #     "model": "stdclsAGG",
-        #     "vc_level":"300",
+        #     "risk_unit": .0007,
+        #     "model": "RMF",
+        #     "vc_level":"400",
         #     "portfolio_cash": 100000,
-        #     "pos_limit": "poslimit",
+        #     "pos_limit": "noposlimit",
         #     "volatility_threshold": 1,
         #     "model_type": "cls",
         #     "user": "cm3",
         #     "threeD_vol": "return_vol_10D",
         #     "oneD_vol": "return_vol_5D",
-        #     "dataset": "TL15"
-
+        #     "dataset": "TL15",
+        #     "rm_dataset": "TL15RMHT",
+        #     "spread_length": 2,
         # },
-]
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 1,
+            "aa": 0,
+            "risk_unit": .0008,
+            "model": "RMF",
+            "vc_level":"400",
+            "portfolio_cash": 100000,
+            "pos_limit": "noposlimit",
+            "volatility_threshold": 0.5,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "TL15",
+            "rm_dataset": "TL15RMHT",
+            "spread_length": 2,
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 1,
+            "aa": 0,
+            "risk_unit": .0008,
+            "model": "RMF",
+            "vc_level":"400",
+            "portfolio_cash": 100000,
+            "pos_limit": "noposlimit",
+            "volatility_threshold": 1,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "TL15",
+            "rm_dataset": "TL15RMHT",
+            "spread_length": 2,
+        },
+    ]
     
     # time_periods = [q1,q2,q3,q4]
     models_tested = []
@@ -198,11 +234,13 @@ if __name__ == "__main__":
     # strategies = ["MA:3","MAP:3","MA_1D:1","MAP_1D:1","GAIN_1D:1","GAINP_1D:1","GAIN:3","GAINP:3","LOSERS:3","LOSERS_1D:1","LOSERSC:3","LOSERSC_1D:1"]
 
     ## TREND STRATEGIES ONLY
+    # time_periods = [m1]
+    # strategies = ["GAIN:3"]
     time_periods = [m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,m12]
     strategies = ["GAIN:3","GAINP:3","LOSERS:3","LOSERSC:3","GAIN_1D:1","GAINP_1D:1","LOSERS_1D:1","LOSERSC_1D:1","MA:3","MAP:3","MA_1D:1","MAP_1D:1"]
 
     for config in backtest_configs:
-        trading_strat = f"{config['user']}-{nowstr}-modelVOLTRENDMA_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['dataset']}_vol{config['volatility_threshold']}_sp{config['spread_length']}_sa{config['spread_adjustment']}"
+        trading_strat = f"{config['user']}-{nowstr}-modelVOLTRENDMA_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['dataset']}_{config['rm_dataset']}_vol{config['volatility_threshold']}_sp{config['spread_length']}_sa{config['spread_adjustment']}"
         starting_cash = config['portfolio_cash']
         for time in time_periods:
             try:
