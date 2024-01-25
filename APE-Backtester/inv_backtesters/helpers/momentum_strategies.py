@@ -297,7 +297,7 @@ def tda_CALL_1D_stdcls(polygon_df, simulation_date, quantity, config, target_pct
                 Floor_pct = (.9*underlying_gain)
             elif pct_change > target_pct:
                 Floor_pct = (.75*underlying_gain)
-                
+
             if pct_change < Floor_pct:
                 sell_code = 4
                 reason = "Hit point of no confidence, sell."
@@ -368,12 +368,9 @@ def tda_PUT_3D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_p
             elif pct_change < target_pct:
                 Floor_pct = (.9*underlying_gain)
 
-            if hour == 15:
+            if hour == 15 or (current_weekday == 4 and hour >= 12):
                 sell_code = 7
                 reason = "End of day, sell."
-            elif pct_change > Floor_pct:
-                sell_code = 4
-                reason = "Hit point of no confidence, sell."
             elif pct_change <= target_pct:
                 if current_weekday == 4 and hour >= 11:
                     Floor_pct = (.99*underlying_gain)
@@ -385,6 +382,9 @@ def tda_PUT_3D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_p
                     if pct_change >= Floor_pct:
                         sell_code = 6
                         reason = "Hit exit target, sell."
+            elif pct_change > Floor_pct:
+                sell_code = 4
+                reason = "Hit point of no confidence, sell."
             elif pct_change > (.5*(target_pct)):
                 sell_code = 5
                 reason = "Failed momentum gate, sell."
@@ -438,12 +438,9 @@ def tda_CALL_3D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_
             elif pct_change > target_pct:
                 Floor_pct = (.9*underlying_gain)
 
-            if hour == 15:
+            if hour == 15 or (current_weekday == 4 and hour >= 12):
                 sell_code = 7
                 reason = "End of day, sell."
-            elif pct_change < Floor_pct:
-                sell_code = 4
-                reason = "Hit point of no confidence, sell."
             elif pct_change >= target_pct:
                 if current_weekday == 4 and hour >= 11:
                     Floor_pct = (.99*underlying_gain)
@@ -455,6 +452,9 @@ def tda_CALL_3D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_
                     if pct_change <= Floor_pct:
                         sell_code = 6
                         reason = "Hit exit target, sell."
+            elif pct_change < Floor_pct:
+                sell_code = 4
+                reason = "Hit point of no confidence, sell."
             elif pct_change < (.5*(target_pct)):
                 sell_code = 5
                 reason = "Failed momentum gate, sell."
@@ -507,12 +507,10 @@ def tda_PUT_1D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_p
                 Floor_pct = (.95*underlying_gain)
             elif pct_change > target_pct:
                 Floor_pct = (.9*underlying_gain)
-            if hour == 15:
+
+            if hour == 15 or (current_weekday == 4 and hour >= 12):
                 sell_code = 7
                 reason = "End of day, sell."
-            elif pct_change > Floor_pct:
-                sell_code = 4
-                reason = "Hit point of no confidence, sell."
             elif pct_change <= target_pct:
                 if current_weekday == 4 and hour >= 11:
                     Floor_pct = (.99*underlying_gain)
@@ -524,6 +522,9 @@ def tda_PUT_1D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_p
                     if pct_change >= Floor_pct:
                         sell_code = 6
                         reason = "Hit exit target, sell."
+            elif pct_change > Floor_pct:
+                sell_code = 4
+                reason = "Hit point of no confidence, sell."
             elif pct_change > (.5*(target_pct)):
                 sell_code = 5
                 reason = "Failed momentum gate, sell."
@@ -582,12 +583,9 @@ def tda_CALL_1D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_
             elif pct_change > target_pct:
                 Floor_pct = (.9*underlying_gain)
 
-            if hour == 15:
+            if hour == 15 or (current_weekday == 4 and hour >= 12):
                 sell_code = 7
                 reason = "End of day, sell."
-            elif pct_change < Floor_pct:
-                sell_code = 4
-                reason = "Hit point of no confidence, sell."
             elif pct_change >= target_pct:
                 if current_weekday == 4 and hour >= 11:
                     Floor_pct = (.99*underlying_gain)
@@ -599,6 +597,9 @@ def tda_CALL_1D_stdclsAGG(polygon_df, simulation_date, quantity, config, target_
                     if pct_change <= Floor_pct:
                         sell_code = 6
                         reason = "Hit exit target, sell."
+            elif pct_change < Floor_pct:
+                sell_code = 4
+                reason = "Hit point of no confidence, sell."
             elif pct_change < (.5*(target_pct)):
                 sell_code = 5
                 reason = "Failed momentum gate, sell."
