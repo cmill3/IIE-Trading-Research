@@ -83,7 +83,7 @@ def s3_data_inv(bucket_name, object_key, prefixes):
     df.dropna(inplace = True)
     df.reset_index(inplace= True, drop = True)
     df['contracts'] = df['contracts'].apply(lambda x: ast.literal_eval(x))
-    df['contracts_available'] = df['contracts'].apply(lambda x: len(x)>=12)
+    # df['contracts_available'] = df['contracts'].apply(lambda x: len(x)>=12)
     return df
 
 def create_results_dict(buy_dict, sell_dict,order_id):
