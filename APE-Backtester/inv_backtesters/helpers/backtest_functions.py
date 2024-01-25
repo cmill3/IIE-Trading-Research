@@ -35,9 +35,9 @@ def pull_data_invalerts(bucket_name, object_key, file_name, prefixes, time_span)
 def create_simulation_data_inv(row,config):
     date_str = row['date'].split(" ")[0]
     start_date = datetime(int(date_str.split("-")[0]),int(date_str.split("-")[1]),int(date_str.split("-")[2]),int(row['hour']),0,0)
-    if row['strategy'].find("_1D"):
+    if row['strategy'] in ONED_STRATEGIES:
         days_back = 1
-    else:
+    elif row['strategy'] in THREED_STRATEGIES:
         days_back = 3
     end_date = backtrader_helper.create_end_date(start_date, days_back)
     trading_aggregates, option_symbols = backtrader_helper.create_options_aggs_inv(row,start_date,end_date=end_date,spread_length=config['spread_length'],config=config)
