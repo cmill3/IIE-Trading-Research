@@ -313,7 +313,7 @@ if __name__ == "__main__":
     # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')
     
     for strategy in strategy_info:
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
             # Submit the processing tasks to the ThreadPoolExecutor
             processed_weeks_futures = [executor.submit(add_contract_data_to_local,week,strategy_info[strategy],strategy,data_type) for week in file_names]
         # add_contract_data_to_local(file_names,strategy_info[strategy],strategy,modeling_type)
