@@ -123,9 +123,9 @@ if __name__ == "__main__":
             "put_pct": 1, 
             "spread_adjustment": 1,
             "aa": 0,
-            "risk_unit": .0008 ,
-            "model": "stdclsAGG",
-            "vc_level":"400",
+            "risk_unit": .002 ,
+            "model": "CDVOL",
+            "vc_level":400,
             "portfolio_cash": 100000,
             "pos_limit": "noposlimit",
             "volatility_threshold": 0.5,
@@ -133,7 +133,7 @@ if __name__ == "__main__":
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "TL15RMLT",
+            "dataset": "CDVOL",
             "spread_length": 2,
 
         },
@@ -141,9 +141,9 @@ if __name__ == "__main__":
             "put_pct": 1, 
             "spread_adjustment": 1,
             "aa": 0,
-            "risk_unit": .00078 ,
-            "model": "stdclsAGG",
-            "vc_level":"400",
+            "risk_unit": .0025 ,
+            "model": "CDVOL",
+            "vc_level":400,
             "portfolio_cash": 100000,
             "pos_limit": "noposlimit",
             "volatility_threshold": 1,
@@ -151,43 +151,7 @@ if __name__ == "__main__":
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "TL15RMLT",
-            "spread_length": 2,
-
-        },
-{
-            "put_pct": 1, 
-            "spread_adjustment": 1,
-            "aa": 0,
-            "risk_unit": .00088 ,
-            "model": "stdclsAGG",
-            "vc_level":"400",
-            "portfolio_cash": 100000,
-            "pos_limit": "noposlimit",
-            "volatility_threshold": 0.5,
-            "model_type": "cls",
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "oneD_vol": "return_vol_5D",
-            "dataset": "TL15RM",
-            "spread_length": 2,
-
-        },
-      {
-            "put_pct": 1, 
-            "spread_adjustment": 1,
-            "aa": 0,
-            "risk_unit": .00082 ,
-            "model": "stdclsAGG",
-            "vc_level":"400",
-            "portfolio_cash": 100000,
-            "pos_limit": "noposlimit",
-            "volatility_threshold": 1,
-            "model_type": "cls",
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "oneD_vol": "return_vol_5D",
-            "dataset": "TL15RM",
+            "dataset": "CDVOL",
             "spread_length": 2,
 
         },
@@ -195,9 +159,9 @@ if __name__ == "__main__":
             "put_pct": 1, 
             "spread_adjustment": 1,
             "aa": 0,
-            "risk_unit": .00093,
-            "model": "stdclsAGG",
-            "vc_level":"400",
+            "risk_unit": .002 ,
+            "model": "CDVOL",
+            "vc_level":300,
             "portfolio_cash": 100000,
             "pos_limit": "noposlimit",
             "volatility_threshold": 0.5,
@@ -205,17 +169,17 @@ if __name__ == "__main__":
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "TL15RMHT",
+            "dataset": "CDVOL",
             "spread_length": 2,
 
         },
-      {
+        {
             "put_pct": 1, 
             "spread_adjustment": 1,
             "aa": 0,
-            "risk_unit": .00087 ,
-            "model": "stdclsAGG",
-            "vc_level":"400",
+            "risk_unit": .0025,
+            "model": "CDVOL",
+            "vc_level":300,
             "portfolio_cash": 100000,
             "pos_limit": "noposlimit",
             "volatility_threshold": 1,
@@ -223,10 +187,118 @@ if __name__ == "__main__":
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "TL15RMHT",
+            "dataset": "CDVOL",
             "spread_length": 2,
 
         },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 1,
+            "aa": 0,
+            "risk_unit": .002 ,
+            "model": "CDVOL",
+            "vc_level":200,
+            "portfolio_cash": 100000,
+            "pos_limit": "noposlimit",
+            "volatility_threshold": 1,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOL",
+            "spread_length": 2,
+
+        },
+      {
+            "put_pct": 1, 
+            "spread_adjustment": 1,
+            "aa": 0,
+            "risk_unit": .0025,
+            "model": "CDVOL",
+            "vc_level":250,
+            "portfolio_cash": 100000,
+            "pos_limit": "noposlimit",
+            "volatility_threshold": .5,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOL",
+            "spread_length": 2,
+
+        },
+# {
+#             "put_pct": 1, 
+#             "spread_adjustment": 1,
+#             "aa": 0,
+#             "risk_unit": .002 ,
+#             "model": "CDVOL",
+#             "vc_level":"400",
+#             "portfolio_cash": 100000,
+#             "pos_limit": "noposlimit",
+#             "volatility_threshold": 0.5,
+#             "model_type": "cls",
+#             "user": "cm3",
+#             "threeD_vol": "return_vol_10D",
+#             "oneD_vol": "return_vol_5D",
+#             "dataset": "CDVOL",
+#             "spread_length": 2,
+
+#         },
+    #   {
+    #         "put_pct": 1, 
+    #         "spread_adjustment": 1,
+    #         "aa": 0,
+    #         "risk_unit": .00082 ,
+    #         "model": "stdclsAGG",
+    #         "vc_level":"400",
+    #         "portfolio_cash": 100000,
+    #         "pos_limit": "noposlimit",
+    #         "volatility_threshold": 1,
+    #         "model_type": "cls",
+    #         "user": "cm3",
+    #         "threeD_vol": "return_vol_10D",
+    #         "oneD_vol": "return_vol_5D",
+    #         "dataset": "TL15RM",
+    #         "spread_length": 2,
+
+    #     },
+    #     {
+    #         "put_pct": 1, 
+    #         "spread_adjustment": 1,
+    #         "aa": 0,
+    #         "risk_unit": .00093,
+    #         "model": "stdclsAGG",
+    #         "vc_level":"400",
+    #         "portfolio_cash": 100000,
+    #         "pos_limit": "noposlimit",
+    #         "volatility_threshold": 0.5,
+    #         "model_type": "cls",
+    #         "user": "cm3",
+    #         "threeD_vol": "return_vol_10D",
+    #         "oneD_vol": "return_vol_5D",
+    #         "dataset": "TL15RMHT",
+    #         "spread_length": 2,
+
+    #     },
+    #   {
+    #         "put_pct": 1, 
+    #         "spread_adjustment": 1,
+    #         "aa": 0,
+    #         "risk_unit": .00087 ,
+    #         "model": "stdclsAGG",
+    #         "vc_level":"400",
+    #         "portfolio_cash": 100000,
+    #         "pos_limit": "noposlimit",
+    #         "volatility_threshold": 1,
+    #         "model_type": "cls",
+    #         "user": "cm3",
+    #         "threeD_vol": "return_vol_10D",
+    #         "oneD_vol": "return_vol_5D",
+    #         "dataset": "TL15RMHT",
+    #         "spread_length": 2,
+
+    #     },
 ]
     
     # time_periods = [q1,q2,q3,q4]
@@ -248,7 +320,7 @@ if __name__ == "__main__":
         trading_strat = f"{config['user']}-{nowstr}-modelVOLTRENDMA_dwnsdVOL:{config['model']}_{config['dataset']}_vol{config['volatility_threshold']}"
         starting_cash = config['portfolio_cash']
         for time in time_periods:
-            try:
+            # try:
                 start_dt = time[0]
                 end_date = time[-1]
 
@@ -265,11 +337,11 @@ if __name__ == "__main__":
                 s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/positions_report.csv')
                 s3.put_object(Body=full_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/all_positions.csv')
                 print(f"Done with {trading_strat} at {datetime.now()}!")
-            except Exception as e:
-                print(f"Error: {e} for {trading_strat}")
-                error_models.append(f"Error: {e} for {trading_strat}")
-                continue
-        models_tested.append(trading_strat)
+            # except Exception as e:
+            #     print(f"Error: {e} for {trading_strat}")
+            #     error_models.append(f"Error: {e} for {trading_strat}")
+            #     continue
+        models_tested.append(f'{trading_strat}${config["portfolio_cash"]}_{config["risk_unit"]}')
 
     print(f"Completed all models at {datetime.now()}!")
     print(models_tested)
