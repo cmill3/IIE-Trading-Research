@@ -50,7 +50,8 @@ def build_backtest_data_RMF(file_name,strategies,config):
         merged_df = merged_df.sort_values(by='t', ascending=True)
         # Reset the index to reindex the DataFrame after sorting
         merged_df = merged_df.reset_index(drop=True)
-        dfs.append(merged_df)
+        final_df = merged_df.loc[merged_df['in_both'] == True]
+        dfs.append(final_df)
     
     backtest_data = pd.concat(dfs,ignore_index=True)
     # backtest_data = backtest_data[backtest_data['probabilities'] > config['probability']]
@@ -82,12 +83,12 @@ def run_trades_simulation(full_positions_list,start_date,end_date,config,period_
     if config['pos_limit'] == "poslimit":
         portfolio_df, passed_trades_df, positions_taken, positions_dict = portfolio_sim.simulate_portfolio_poslimit(
             full_positions_list, full_date_list,portfolio_cash=period_cash, risk_unit=config['risk_unit'],put_adjustment=config['put_pct'],
-            config=config, results_dict_func=helper.extract_results_dict_RMF
+            config=config, results_dict_func=helper.extract_results_dict
             )
     elif config['pos_limit'] == "noposlimit":
         portfolio_df, passed_trades_df, positions_taken, positions_dict = portfolio_sim.simulate_portfolio(
             full_positions_list, full_date_list,portfolio_cash=period_cash, risk_unit=config['risk_unit'],put_adjustment=config['put_pct'],
-            config=config, results_dict_func=helper.extract_results_dict_RMF
+            config=config, results_dict_func=helper.extract_results_dict
             )
     positions_df = pd.DataFrame.from_dict(positions_taken)
     return portfolio_df, positions_df
@@ -190,12 +191,12 @@ if __name__ == "__main__":
             "put_pct": 1, 
             "spread_adjustment": 1,
             "aa": 0,
-            "risk_unit": .0008,
+            "risk_unit": .0012,
             "model": "RMF",
             "vc_level":"400",
             "portfolio_cash": 100000,
             "pos_limit": "noposlimit",
-            "volatility_threshold": 0.5,
+            "volatility_threshold": 1,
             "model_type": "cls",
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
@@ -208,7 +209,7 @@ if __name__ == "__main__":
             "put_pct": 1, 
             "spread_adjustment": 1,
             "aa": 0,
-            "risk_unit": .0008,
+            "risk_unit": .0015,
             "model": "RMF",
             "vc_level":"400",
             "portfolio_cash": 100000,
@@ -236,12 +237,12 @@ if __name__ == "__main__":
     ## TREND STRATEGIES ONLY
     # time_periods = [m1]
     # strategies = ["GAIN:3"]
-    time_periods = [m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,m12]
+    time_periods = [m11,m12]
     strategies = ["GAIN:3","GAINP:3","LOSERS:3","LOSERSC:3","GAIN_1D:1","GAINP_1D:1","LOSERS_1D:1","LOSERSC_1D:1","MA:3","MAP:3","MA_1D:1","MAP_1D:1"]
 
     for config in backtest_configs:
-        trading_strat = f"{config['user']}-{nowstr}-modelVOLTRENDMA_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['dataset']}_{config['rm_dataset']}_vol{config['volatility_threshold']}_sp{config['spread_length']}_sa{config['spread_adjustment']}"
-        starting_cash = config['portfolio_cash']
+        trading_strat = f"{config['user']}-{nowstr}-modelVOLTRENDMA_dwnsdVOL:{config['model']}2_{config['pos_limit']}_{config['dataset']}_{config['rm_dataset']}_vol{config['volatility_threshold']}_sp{config['spread_length']}_sa{config['spread_adjustment']}"
+        starting_cash = 3348361
         for time in time_periods:
             try:
                 start_dt = time[0]
