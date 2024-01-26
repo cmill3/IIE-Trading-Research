@@ -123,43 +123,7 @@ if __name__ == "__main__":
             "put_pct": 1, 
             "spread_adjustment": 1,
             "aa": 0,
-            "risk_unit": .0008 ,
-            "model": "stdclsAGG",
-            "vc_level":"400",
-            "portfolio_cash": 100000,
-            "pos_limit": "noposlimit",
-            "volatility_threshold": 0.5,
-            "model_type": "cls",
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "oneD_vol": "return_vol_5D",
-            "dataset": "TL15RMLT",
-            "spread_length": 2,
-
-        },
-      {
-            "put_pct": 1, 
-            "spread_adjustment": 1,
-            "aa": 0,
-            "risk_unit": .00078 ,
-            "model": "stdclsAGG",
-            "vc_level":"400",
-            "portfolio_cash": 100000,
-            "pos_limit": "noposlimit",
-            "volatility_threshold": 1,
-            "model_type": "cls",
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "oneD_vol": "return_vol_5D",
-            "dataset": "TL15RMLT",
-            "spread_length": 2,
-
-        },
-{
-            "put_pct": 1, 
-            "spread_adjustment": 1,
-            "aa": 0,
-            "risk_unit": .00088 ,
+            "risk_unit": .00085,
             "model": "stdclsAGG",
             "vc_level":"400",
             "portfolio_cash": 100000,
@@ -195,9 +159,9 @@ if __name__ == "__main__":
             "put_pct": 1, 
             "spread_adjustment": 1,
             "aa": 0,
-            "risk_unit": .00093,
+            "risk_unit": .00087,
             "model": "stdclsAGG",
-            "vc_level":"400",
+            "vc_level":"275",
             "portfolio_cash": 100000,
             "pos_limit": "noposlimit",
             "volatility_threshold": 0.5,
@@ -205,7 +169,7 @@ if __name__ == "__main__":
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "TL15RMHT",
+            "dataset": "TL15RM",
             "spread_length": 2,
 
         },
@@ -213,9 +177,9 @@ if __name__ == "__main__":
             "put_pct": 1, 
             "spread_adjustment": 1,
             "aa": 0,
-            "risk_unit": .00087 ,
+            "risk_unit": .00084,
             "model": "stdclsAGG",
-            "vc_level":"400",
+            "vc_level":"275",
             "portfolio_cash": 100000,
             "pos_limit": "noposlimit",
             "volatility_threshold": 1,
@@ -223,7 +187,7 @@ if __name__ == "__main__":
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "TL15RMHT",
+            "dataset": "TL15RM",
             "spread_length": 2,
 
         },
@@ -242,7 +206,7 @@ if __name__ == "__main__":
     time_periods = [m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,m12
 ]
     # strategies = ["CDBFC:3","CDBFP:3","CDBFC_1D:1","CDBFP_1D:1"]
-    strategies = ["GAIN:3","GAINP:3","LOSERS:3","LOSERSC:3","MA:3","MAP:3""GAIN_1D:1","GAINP_1D:1","LOSERS_1D:1","LOSERSC_1D:1","MA_1D:1","MAP_1D:1"]
+    strategies = ["GAIN:3","GAINP:3","LOSERS:3","LOSERSC:3","MA:3","MAP:3","GAIN_1D:1","GAINP_1D:1","LOSERS_1D:1","LOSERSC_1D:1","MA_1D:1","MAP_1D:1"]
 
     for config in backtest_configs:
         trading_strat = f"{config['user']}-{nowstr}-modelVOLTRENDMA_dwnsdVOL:{config['model']}_{config['dataset']}_vol{config['volatility_threshold']}"
@@ -269,7 +233,7 @@ if __name__ == "__main__":
                 print(f"Error: {e} for {trading_strat}")
                 error_models.append(f"Error: {e} for {trading_strat}")
                 continue
-        models_tested.append(trading_strat)
+        models_tested.append(f'{trading_strat}${config["portfolio_cash"]}_{config["risk_unit"]}')
 
     print(f"Completed all models at {datetime.now()}!")
     print(models_tested)
