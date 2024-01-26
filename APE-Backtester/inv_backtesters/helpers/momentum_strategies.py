@@ -1181,7 +1181,7 @@ def tda_PUT_3D_CDVOL(polygon_df, simulation_date, quantity, config, target_pct, 
         sell_code = 0
         reason = ""
         if day_diff < 2:
-            if deriv_pct_change > Floor_pct:
+            if underlying_gain > Floor_pct:
                 sell_code = 2
                 reason = f"Breached floor pct, sell. {pct_change} {Floor_pct}"
         elif day_diff > 3:
@@ -1242,7 +1242,7 @@ def tda_CALL_3D_CDVOL(polygon_df, simulation_date, quantity, config, target_pct,
         sell_code = 0
         reason = ""
         if day_diff < 2:
-            if deriv_pct_change < Floor_pct:
+            if underlying_gain < Floor_pct:
                 sell_code = 2
                 reason = f"Breached floor pct, sell. {pct_change} {Floor_pct}"
         elif day_diff > 3:
@@ -1302,7 +1302,7 @@ def tda_PUT_1D_CDVOL(polygon_df, simulation_date, quantity, config, target_pct, 
         sell_code = 0
         reason = ""
         if day_diff < 2:
-            if deriv_pct_change > Floor_pct:
+            if underlying_gain > Floor_pct:
                 sell_code = 2
                 reason = f"Breached floor pct, sell. {pct_change} {Floor_pct}"
         elif day_diff > 3:
@@ -1362,7 +1362,7 @@ def tda_CALL_1D_CDVOL(polygon_df, simulation_date, quantity, config, target_pct,
         sell_code = 0
         reason = ""
         if day_diff < 1:
-            if deriv_pct_change < Floor_pct:
+            if underlying_gain < Floor_pct:
                 sell_code = 2
                 reason = f"Breached floor pct, sell. {pct_change} {Floor_pct}"
         elif day_diff > 1:
