@@ -205,10 +205,10 @@ if __name__ == "__main__":
     ## TREND STRATEGIES ONLY
     time_periods = [m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,m12]
     # strategies = ["CDGAIN:3","CDLOSE:3","CDGAIN_1D:1","CDLOSE_1D:1"]
-    strategies = ["GAIN:3","GAINP:3","LOSERS:3","LOSERSC:3","MA:3","MAP:3""GAIN_1D:1","GAINP_1D:1","LOSERS_1D:1","LOSERSC_1D:1","MA_1D:1","MAP_1D:1"]
+    strategies = ["GAIN:3","GAINP:3","LOSERS:3","LOSERSC:3","MA:3","MAP:3","GAIN_1D:1","GAINP_1D:1","LOSERS_1D:1","LOSERSC_1D:1","MA_1D:1","MAP_1D:1"]
 
     for config in backtest_configs:
-        trading_strat = f"{config['user']}-{nowstr}-modelVOLTRENDLT_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['dataset']}_vol{config['volatility_threshold']}_sp{config['spread_length']}_sa{config['spread_adjustment']}"
+        trading_strat = f"{config['user']}-{nowstr}-modelVOLTRENDMA_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['dataset']}_vol{config['volatility_threshold']}_sp{config['spread_length']}_sa{config['spread_adjustment']}"
         starting_cash = config['portfolio_cash']
         for time in time_periods:
             try:
