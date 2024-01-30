@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import concurrent.futures
 import pandas_market_calendars as mcal
 import numpy as np
+from helpers.constants import ONED_STRATEGIES, THREED_STRATEGIES
 
 s3 = boto3.client('s3')
 nyse = mcal.get_calendar('NYSE')
@@ -71,11 +72,11 @@ def s3_to_local(file_name):
 
 def generate_expiry_dates(date_str,symbol,strategy):
     if symbol in ['SPY','QQQ','IWM']:
-        if strategy in ["BFP_1d","LOSERS_1d",'VDIFFP_1d',"MAP_1d","GAINP_1d","BFC_1d","IDXC_1d","IDXP_1d","GAIN_1d",'VDIFFC_1d',"MA_1d","LOSERSC_1d","CDLOSE_1d","CDGAIN_1d"]:
+        if strategy in ONED_STRATEGIES:
             day_of = add_weekdays(date_str,1,symbol)
             next_day = add_weekdays(date_str,2,symbol)
             return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
-        elif strategy in ["BFP","LOSERS",'VDIFFP',"MAP","GAINP","BFC","IDXC","IDXP","GAIN",'VDIFFC',"MA","LOSERSC","CDLOSE","CDGAIN"]:
+        elif strategy in THREED_STRATEGIES:
             day_of = add_weekdays(date_str,3,symbol)
             next_day = add_weekdays(date_str,4,symbol)
             return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
@@ -112,11 +113,11 @@ def create_index_date(date):
 def generate_expiry_dates_row(row):
     date_str = row['date'].split(" ")[0]
     if row['symbol'] in ['SPY','QQQ','IWM']:
-        if row['strategy'] in ["BFP_1d","LOSERS_1d",'VDIFFP_1d',"MAP_1d","GAINP_1d","BFC_1d","IDXC_1d","IDXP_1d","GAIN_1d",'VDIFFC_1d',"MA_1d","LOSERSC_1d","CDLOSE_1d","CDGAIN_1d"]:
+        if row['strategy'] in ONED_STRATEGIES:
             day_of = add_weekdays(date_str,1,row['symbol'])
             next_day = add_weekdays(date_str,2,row['symbol'])
             return [day_of.strftime('%y%m%d'),next_day.strftime('%y%m%d')]
-        elif row['strategy'] in ["BFP","LOSERS",'VDIFFP',"MAP","GAINP","BFC","IDXC","IDXP","GAIN",'VDIFFC',"MA","LOSERSC","CDLOSE","CDGAIN"]:
+        elif row['strategy'] in THREED_STRATEGIES:
             day_of = add_weekdays(date_str,3,row['symbol'])  
             next_day = add_weekdays(date_str,4,row['symbol'])
             return [day_of.strftime('%y%m%d'),next_day.strftime('%y%m%d')]
@@ -277,22 +278,22 @@ if __name__ == "__main__":
         #       "time_span": 2,
         #       "side": "P"
         # "CDBFC": {
-        #       "file_path": 'DFLT_custHypTP0.5',
+        #       "file_path": 'TSSIM1_IDX_custHypTP0.55',
         #       "time_span": 4,
         #       "side": "C"
         #  },
         # "CDBFP": {
-        #       "file_path": 'DFLT_custHypTP0.5',
+        #       "file_path": 'TSSIM1_IDX_custHypTP0.47',
         #       "time_span": 4,
         #       "side": "P"
         #  },
         #   "CDBFC_1D": {
-        #       "file_path": 'DFLT_custHypTP0.5',
+        #       "file_path": 'TSSIM1_IDX_custHypTP0.55',
         #       "time_span": 2,
         #       "side": "C"
         #  },
         # "CDBFP_1D": {
-        #       "file_path": 'DFLT_custHypTP0.5',
+        #       "file_path": 'TSSIM1_IDX_custHypTP0.47',
         #       "time_span": 2,
         #       "side": "P"
         #  },
@@ -313,10 +314,10 @@ if __name__ == "__main__":
     # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')
     
     for strategy in strategy_info:
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
             # Submit the processing tasks to the ThreadPoolExecutor
             processed_weeks_futures = [executor.submit(add_contract_data_to_local,week,strategy_info[strategy],strategy,data_type) for week in file_names]
-        # add_contract_data_to_local(file_names,strategy_info[strategy],strategy,modeling_type)
+        # add_contract_data_to_local(file_names[0],strategy_info[strategy],strategy,data_type)
 
     # for week in file_names:
     #     for strategy in ['BFC','BFP','BFC_1D','BFP_1D']:

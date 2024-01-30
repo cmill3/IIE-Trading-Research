@@ -511,21 +511,21 @@ def extract_strike(row):
 #     return data
 
 def configure_trade_data(df,config):
-    index = df.loc[df['symbol'].isin(["IWM","SPY","QQQ"])]
-    stocks = df.loc[df['symbol'].isin(["IWM","SPY","QQQ"]) == False]
+    # index = df.loc[df['symbol'].isin(["IWM","SPY","QQQ"])]
+    # stocks = df.loc[df['symbol'].isin(["IWM","SPY","QQQ"]) == False]
 
 
-    one = stocks.loc[stocks['prediction_horizon'] == "1"]
-    three = stocks.loc[stocks['prediction_horizon'] == "3"]
-    one_idx = index.loc[index['prediction_horizon'] == "1"]
-    three_idx = index.loc[index['prediction_horizon'] == "3"]
+    one = df.loc[df['prediction_horizon'] == "1"]
+    three = df.loc[df['prediction_horizon'] == "3"]
+    # one_idx = index.loc[index['prediction_horizon'] == "1"]
+    # three_idx = index.loc[index['prediction_horizon'] == "3"]
 
     filt_one = one.loc[one['day_of_week'].isin([1,2,3])]
     filt_three = three.loc[three['day_of_week'].isin([0,1,2])]
 
-    one_idxF = one_idx.loc[one_idx['day_of_week'].isin([0,1,2,3])]
-    three_idxF = three_idx.loc[three_idx['day_of_week'].isin([0,1,2])]
+    # one_idxF = one_idx.loc[one_idx['day_of_week'].isin([0,1,2,3])]
+    # three_idxF = three_idx.loc[three_idx['day_of_week'].isin([0,1,2])]
 
-    trade_df = pd.concat([one_idxF,three_idxF,filt_one,filt_three])
+    trade_df = pd.concat([filt_one,filt_three])
     return trade_df
 
