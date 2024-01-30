@@ -196,67 +196,67 @@ if __name__ == "__main__":
         #       "time_span": 4,
         #       "side": "P"
         #  },
-        # "GAIN_1d": {
-        #       "file_path": 'GAIN_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.52',
-        #       "time_span": 2,
-        #       "side": "C"
-        #  },
-        # "LOSERS_1d": {
-        #       "file_path": 'LOSERS_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.48',
-        #       "time_span": 2,
-        #       "side": "P"
-        #  },
-        #  "GAIN": {
-        #       "file_path": 'GAIN:RM220_TSSIM1_TL15-EXP_custHypTP0.52',
-        #       "time_span": 4,
-        #    
-        #    "side": "C"
-        #  },
-        # "LOSERS": {
-        #       "file_path": 'LOSERS:RM220_TSSIM1_TL15-EXP_custHypTP0.48',
-        #       "time_span": 4,
-        #       "side": "P"
-        #  },
-        #  "GAINP_1d": {
-        #       "file_path": 'GAINP_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.48',
-        #       "time_span": 2,
-        #       "side": "P"
-        #  },
-        # "LOSERSC_1d": {
-        #       "file_path": 'LOSERSC_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.52',
-        #       "time_span": 2,
-        #       "side": "C"
-        #  },
-        #  "GAINP": {
-        #       "file_path": 'GAINP:RM220_TSSIM1_TL15-EXP_custHypTP0.48',
-        #       "time_span": 4,
-        #       "side": "P"
-        #  },
-        # "LOSERSC": {
-        #       "file_path": 'LOSERSC:RM220_TSSIM1_TL15-EXP_custHypTP0.52',
-        #       "time_span": 4,
-        #       "side": "C"
-        #  },
-        #  "MAP_1d": {
-        #       "file_path": 'MAP_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.48',
-        #       "time_span": 2,
-        #       "side": "P"
-        #  },
-        # "MA_1d": {
-        #       "file_path": 'MA_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.52',
-        #       "time_span": 2,
-        #       "side": "C"
-        #  },
-        #  "MAP": {
-        #       "file_path": 'MAP:RM220_TSSIM1_TL15-EXP_custHypTP0.48',
-        #       "time_span": 4,
-        #       "side": "P"
-        #  },
-        # "MA": {
-        #       "file_path": 'MA:RM220_TSSIM1_TL15-EXP_custHypTP0.52',
-        #       "time_span": 4,
-        #       "side": "C"
-        #  }
+        "GAIN_1d": {
+              "file_path": 'GAIN_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.52',
+              "time_span": 2,
+              "side": "C"
+         },
+        "LOSERS_1d": {
+              "file_path": 'LOSERS_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.48',
+              "time_span": 2,
+              "side": "P"
+         },
+         "GAIN": {
+              "file_path": 'GAIN:RM220_TSSIM1_TL15-EXP_custHypTP0.52',
+              "time_span": 4,
+           
+           "side": "C"
+         },
+        "LOSERS": {
+              "file_path": 'LOSERS:RM220_TSSIM1_TL15-EXP_custHypTP0.48',
+              "time_span": 4,
+              "side": "P"
+         },
+         "GAINP_1d": {
+              "file_path": 'GAINP_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.48',
+              "time_span": 2,
+              "side": "P"
+         },
+        "LOSERSC_1d": {
+              "file_path": 'LOSERSC_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.52',
+              "time_span": 2,
+              "side": "C"
+         },
+         "GAINP": {
+              "file_path": 'GAINP:RM220_TSSIM1_TL15-EXP_custHypTP0.48',
+              "time_span": 4,
+              "side": "P"
+         },
+        "LOSERSC": {
+              "file_path": 'LOSERSC:RM220_TSSIM1_TL15-EXP_custHypTP0.52',
+              "time_span": 4,
+              "side": "C"
+         },
+         "MAP_1d": {
+              "file_path": 'MAP_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.48',
+              "time_span": 2,
+              "side": "P"
+         },
+        "MA_1d": {
+              "file_path": 'MA_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.52',
+              "time_span": 2,
+              "side": "C"
+         },
+         "MAP": {
+              "file_path": 'MAP:RM220_TSSIM1_TL15-EXP_custHypTP0.48',
+              "time_span": 4,
+              "side": "P"
+         },
+        "MA": {
+              "file_path": 'MA:RM220_TSSIM1_TL15-EXP_custHypTP0.52',
+              "time_span": 4,
+              "side": "C"
+         }
         # "CDGAIN": {
         #       "file_path": 'TSSIM1:1_TL15-EXP_custHypTP0.45',
         #       "time_span": 4,
@@ -276,26 +276,26 @@ if __name__ == "__main__":
         #       "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
         #       "time_span": 2,
         #       "side": "P"
-        "CDBFC": {
-              "file_path": 'DFLT_custHypTP0.5',
-              "time_span": 4,
-              "side": "C"
-         },
-        "CDBFP": {
-              "file_path": 'DFLT_custHypTP0.5',
-              "time_span": 4,
-              "side": "P"
-         },
-          "CDBFC_1D": {
-              "file_path": 'DFLT_custHypTP0.5',
-              "time_span": 2,
-              "side": "C"
-         },
-        "CDBFP_1D": {
-              "file_path": 'DFLT_custHypTP0.5',
-              "time_span": 2,
-              "side": "P"
-         },
+        # "CDBFC": {
+        #       "file_path": 'DFLT_custHypTP0.5',
+        #       "time_span": 4,
+        #       "side": "C"
+        #  },
+        # "CDBFP": {
+        #       "file_path": 'DFLT_custHypTP0.5',
+        #       "time_span": 4,
+        #       "side": "P"
+        #  },
+        #   "CDBFC_1D": {
+        #       "file_path": 'DFLT_custHypTP0.5',
+        #       "time_span": 2,
+        #       "side": "C"
+        #  },
+        # "CDBFP_1D": {
+        #       "file_path": 'DFLT_custHypTP0.5',
+        #       "time_span": 2,
+        #       "side": "P"
+        #  },
     }
 
     file_names = [
@@ -308,7 +308,7 @@ if __name__ == "__main__":
      '2023-10-02', '2023-10-09', '2023-10-16', '2023-10-23', '2023-10-30',
      '2023-11-06', '2023-11-13', '2023-11-20', '2023-11-27', '2023-12-04', '2023-12-11', '2023-12-18'
      ]
-    data_type = 'CDVOL'
+    data_type = 'TL15RM'
     
     # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')
     

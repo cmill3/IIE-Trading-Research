@@ -161,7 +161,7 @@ if __name__ == "__main__":
             "aa": 0,
             "risk_unit": .00087 ,
             "model": "VCcls",
-            "vc_level":"300$2175$0.9",
+            "vc_level":"300$175$0.9",
             "portfolio_cash": 100000,
             "pos_limit": "noposlimit",
             "volatility_threshold": 0.5,
@@ -179,7 +179,7 @@ if __name__ == "__main__":
             "aa": 0,
             "risk_unit": .00084 ,
             "model": "VCcls",
-            "vc_level":"300$2175$0.9",
+            "vc_level":"300$175$0.9",
             "portfolio_cash": 100000,
             "pos_limit": "noposlimit",
             "volatility_threshold": 1,
@@ -208,7 +208,7 @@ if __name__ == "__main__":
     strategies = ["GAIN:3","GAINP:3","LOSERS:3","LOSERSC:3","MA:3","MAP:3","GAIN_1D:1","GAINP_1D:1","LOSERS_1D:1","LOSERSC_1D:1","MA_1D:1","MAP_1D:1"]
 
     for config in backtest_configs:
-        trading_strat = f"{config['user']}-{nowstr}-modelVOLTRENDMA_dwnsdVOL:{config['model']}_{config['dataset']}_vol{config['volatility_threshold']}"
+        trading_strat = f"{config['user']}-{nowstr}-modelVOLTRENDMA_dwnsdVOL:{config['model']}_{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}"
         starting_cash = config['portfolio_cash']
         for time in time_periods:
             try:
