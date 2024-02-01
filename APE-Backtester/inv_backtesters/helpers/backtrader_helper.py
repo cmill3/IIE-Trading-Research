@@ -520,7 +520,7 @@ def configure_trade_data(df,config):
     # one_idx = index.loc[index['prediction_horizon'] == "1"]
     # three_idx = index.loc[index['prediction_horizon'] == "3"]
 
-    filt_one = one.loc[one['day_of_week'].isin([1,2,3])]
+    filt_one = one.loc[one['day_of_week'].isin([0,1,2,3])]
     filt_three = three.loc[three['day_of_week'].isin([0,1,2])]
 
     # one_idxF = one_idx.loc[one_idx['day_of_week'].isin([0,1,2,3])]
