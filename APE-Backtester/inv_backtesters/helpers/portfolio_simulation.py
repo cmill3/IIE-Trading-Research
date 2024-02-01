@@ -26,7 +26,7 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit,
 
             if positions_dict.get(key) is not None:
                 for position in positions_dict[key]:
-                    if value['portfolio_cash'] > (0.5 * starting_cash):
+                    if value['portfolio_cash'] > (0):
                         sized_buys, sized_sells = build_trade(position,risk_unit,put_adjustment,starting_cash,config)
                         orders_taken = False
                         for index, order in enumerate(sized_buys):
@@ -85,7 +85,7 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit,
 
         if positions_dict.get(key) is not None:
                 for position in positions_dict[key]:
-                    if value['portfolio_cash'] > (0.5 * starting_cash):
+                    if value['portfolio_cash'] > (0):
                         sized_buys, sized_sells = build_trade(position,risk_unit,put_adjustment,starting_cash,config)
                         orders_taken = False
                         for index, order in enumerate(sized_buys):
