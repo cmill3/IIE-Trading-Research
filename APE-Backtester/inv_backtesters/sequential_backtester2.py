@@ -49,12 +49,12 @@ def build_backtest_data(file_name,strategies,config):
 
 def run_trades_simulation(full_positions_list,start_date,end_date,config,period_cash):
     full_date_list = helper.create_portfolio_date_list(start_date, end_date)
-    if config['pos_limit'] == "poslimit":
-        portfolio_df, passed_trades_df, positions_taken, positions_dict = portfolio_sim.simulate_portfolio_poslimit(
+    if config['scaling'] == "dynamicscale":
+        portfolio_df, passed_trades_df, positions_taken, positions_dict = portfolio_sim.simulate_portfolio_DS(
             full_positions_list, full_date_list,portfolio_cash=period_cash, risk_unit=config['risk_unit'],put_adjustment=config['put_pct'],
             config=config,results_dict_func=helper.extract_results_dict
             )
-    elif config['pos_limit'] == "noposlimit":
+    elif config['scaling'] == "steadyscale":
         portfolio_df, passed_trades_df, positions_taken, positions_dict = portfolio_sim.simulate_portfolio(
             full_positions_list, full_date_list,portfolio_cash=period_cash, risk_unit=config['risk_unit'],put_adjustment=config['put_pct'],
             config=config,results_dict_func=helper.extract_results_dict
@@ -119,51 +119,51 @@ if __name__ == "__main__":
 
 
     backtest_configs = [
-# {
-#             "put_pct": 1, 
-#             "spread_adjustment": 1,
-#             "aa": 0,
-#             "risk_unit": .001,
-#             "model": "simple",
-#             "vc_level": 400,
-#             "portfolio_cash": 100000,
-#             "pos_limit": "noposlimit",
-#             "volatility_threshold": 0.5,
-#             "model_type": "cls",
-#             "user": "cm3",
-#             "threeD_vol": "return_vol_10D",
-#             "oneD_vol": "return_vol_5D",
-#             "dataset": "TL15RM",
-#             "spread_length": 2,
+{
+            "put_pct": 1, 
+            "spread_adjustment": 1,
+            "aa": 0,
+            "risk_unit": .0017,
+            "model": "CDVOL",
+            "vc_level":400,
+            "portfolio_cash": 100000,
+            "scaling": "steadyscale",
+            "volatility_threshold": 1,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBF2",
+            "spread_length": 2,
 
-#         },
-        # {
-        #     "put_pct": 1, 
-        #     "spread_adjustment": 1,
-        #     "aa": 0,
-        #     "risk_unit": .001,
-        #     "model": "stdclsAGG",
-        #     "vc_level": 400,
-        #     "portfolio_cash": 100000,
-        #     "pos_limit": "noposlimit",
-        #     "volatility_threshold": 0.5,
-        #     "model_type": "cls",
-        #     "user": "cm3",
-        #     "threeD_vol": "threeD_stddev50",
-        #     "oneD_vol": "return_vol_5D",
-        #     "dataset": "TL15RM",
-        #     "spread_length": 2,
-
-        # },
+        },
 {
             "put_pct": 1, 
             "spread_adjustment": 1,
             "aa": 0,
             "risk_unit": .0019,
-            "model": "CDVOLAGG",
+            "model": "CDVOL",
             "vc_level":400,
             "portfolio_cash": 100000,
-            "pos_limit": "noposlimit",
+            "scaling": "steadyscale",
+            "volatility_threshold": 1,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBF2",
+            "spread_length": 2,
+
+        },
+{
+            "put_pct": 1, 
+            "spread_adjustment": 1,
+            "aa": 0,
+            "risk_unit": .0019,
+            "model": "CDVOL",
+            "vc_level":400,
+            "portfolio_cash": 100000,
+            "scaling": "steadyscale",
             "volatility_threshold": 1,
             "model_type": "cls",
             "user": "cm3",
@@ -177,12 +177,48 @@ if __name__ == "__main__":
             "put_pct": 1, 
             "spread_adjustment": 1,
             "aa": 0,
+            "risk_unit": .0017,
+            "model": "CDVOLAGG",
+            "vc_level":400,
+            "portfolio_cash": 100000,
+            "scaling": "steadyscale",
+            "volatility_threshold": 1,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBF2",
+            "spread_length": 2,
+
+        },
+{
+            "put_pct": 1, 
+            "spread_adjustment": 1,
+            "aa": 0,
             "risk_unit": .0019,
             "model": "CDVOLAGG",
             "vc_level":400,
             "portfolio_cash": 100000,
-            "pos_limit": "noposlimit",
-            "volatility_threshold": .5,
+            "scaling": "steadyscale",
+            "volatility_threshold": 1,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBF2",
+            "spread_length": 2,
+
+        },
+{
+            "put_pct": 1, 
+            "spread_adjustment": 1,
+            "aa": 0,
+            "risk_unit": .0019,
+            "model": "CDVOLAGG",
+            "vc_level":400,
+            "portfolio_cash": 100000,
+            "scaling": "steadyscale",
+            "volatility_threshold": 1,
             "model_type": "cls",
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
@@ -208,7 +244,7 @@ if __name__ == "__main__":
     # strategies = ["GAIN:3","GAINP:3","LOSERS:3","LOSERSC:3","MA:3","MAP:3","GAIN_1D:1","GAINP_1D:1","LOSERS_1D:1","LOSERSC_1D:1","MA_1D:1","MAP_1D:1"]
 
     for config in backtest_configs:
-        trading_strat = f"{config['user']}-{nowstr}-modelCDVOLNOLIM_dwnsdVOL:{config['model']}_{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}"
+        trading_strat = f"{config['user']}-{nowstr}-modelCDVOLNOLIM_dwnsdVOL:{config['model']}_{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_{config['scaling']}"
         starting_cash = config['portfolio_cash']
         for time in time_periods:
             try:
