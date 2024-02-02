@@ -133,7 +133,7 @@ def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit,
     print(diff2)
     return portfolio_df, passed_trades_df, positions_taken, positions_dict
 
-def simulate_portfolio_poslimit(positions_list, datetime_list, portfolio_cash, risk_unit,put_adjustment, config, results_dict_func):
+def simulate_portfolio_DS(positions_list, datetime_list, portfolio_cash, risk_unit,put_adjustment,config,results_dict_func):
     positions_taken = []
     contracts_bought = []
     contracts_sold = []
@@ -155,12 +155,9 @@ def simulate_portfolio_poslimit(positions_list, datetime_list, portfolio_cash, r
 
             if positions_dict.get(key) is not None:
                 for position in positions_dict[key]:
-                    orders_taken = False
-                    if value['portfolio_cash'] > (0.5 * starting_cash):
-                        sized_buys, sized_sells = build_trade(position,risk_unit,put_adjustment,starting_cash,config)
-                        if sized_buys == None:
-                            print(f"no buys for {position['position_id']}")
-                            continue
+                    if value['portfolio_cash'] > (.05 * starting_cash):
+                        sized_buys, sized_sells = build_trade(position,risk_unit,put_adjustment,value['portfolio_cash'],config)
+                        orders_taken = False
                         for index, order in enumerate(sized_buys):
                             if order != None:
                                 orders_taken = True
@@ -184,7 +181,7 @@ def simulate_portfolio_poslimit(positions_list, datetime_list, portfolio_cash, r
                             results_dicts = results_dict_func(position)
                             positions_taken.append({'position_id':position['position_id'],"results":results_dicts,"quantity":quantities})
                             value['period_net_returns'] = (value['sale_returns'] - value['purchase_costs'])
-                    else:
+                else:
                         if passed_trades_dict.get(key) is not None:
                             passed_trades_dict[key]['trades'].append(position)
                         else:
@@ -217,42 +214,38 @@ def simulate_portfolio_poslimit(positions_list, datetime_list, portfolio_cash, r
 
         if positions_dict.get(key) is not None:
                 for position in positions_dict[key]:
-                    orders_taken = False
-                    if approve_trade_poslimit(value['portfolio_cash'],(.5 * starting_cash),position['position_id'].split("-")[0] + position['position_id'].split("-")[1], current_positions):
-                        sized_buys, sized_sells = build_trade(position,risk_unit,put_adjustment,starting_cash,config)
-                        if sized_buys == None:
-                            print(position)
-                            continue
+                    if value['portfolio_cash'] > (0):
+                        sized_buys, sized_sells = build_trade(position,risk_unit,put_adjustment,value['portfolio_cash'],config)
+                        orders_taken = False
                         for index, order in enumerate(sized_buys):
-                            if order == None:
-                                print(sized_buys)
-                                print(sized_sells)
-                                continue
-                            else:
+                            if order != None:
                                 orders_taken = True
                                 value['contracts_purchased'].append(f"{order['option_symbol']}_{order['order_id']}")
                                 value['purchase_costs'] += (order['contract_cost'] * order['quantity'])
                                 value['portfolio_cash'] -= (order['contract_cost'] * order['quantity'])
                                 contracts_bought.append(f"{order['option_symbol']}_{order['order_id']}")
                                 quantities = order['quantity']
+                                ### CHASE
+                                # dt_str = sized_sells[index]['close_datetime'].strftime("%Y-%m-%d-%H-%M")
+                                # year, month, day, hour, minute = dt_str.split("-")
+                                # dt = datetime(int(year), int(month), int(day), int(hour), int(minute))
                                 sale_info = sized_sells[index]
                                 sale_dt = datetime.strptime(sale_info['close_trade_dt'], "%Y-%m-%d %H:%M")
                                 if sales_dict.get(sale_dt) is None:
                                     sales_dict[sale_dt] = [sale_info]
                                 else:
                                     sales_dict[sale_dt].append(sale_info)
-                            if (position['position_id'].split("-")[0] + position['position_id'].split("-")[1]) not in current_positions:
-                                current_positions.append((position['position_id'].split("-")[0] + position['position_id'].split("-")[1]))
                         if orders_taken:
+                            current_positions.append((position['position_id'].split("-")[0] + position['position_id'].split("-")[1]))
                             results_dicts = results_dict_func(position)
                             positions_taken.append({'position_id':position['position_id'],"results":results_dicts,"quantity":quantities})
+                else:
+                    if passed_trades_dict.get(key) is not None:
+                        passed_trades_dict[key]['trades'].append(position)
                     else:
-                        if passed_trades_dict.get(key) is not None:
-                            passed_trades_dict[key]['trades'].append(position)
-                        else:
-                            passed_trades_dict[key] = {
-                                "trades": [position]
-                            }
+                        passed_trades_dict[key] = {
+                            "trades": [position]
+                        }
         
         value['open_positions_end'].extend(current_positions)
         positions_end = current_positions

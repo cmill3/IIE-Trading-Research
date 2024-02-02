@@ -610,11 +610,8 @@ def tda_PUT_3D_simple(polygon_df, simulation_date, quantity, config, target_pct,
 
         sell_code = 0
         reason = ""
-        if day_diff < 2:
-            if pct_change >= Floor_pct:
-                sell_code = 2
-                reason = f"Breached floor pct, sell. {pct_change} {Floor_pct}"
-        elif day_diff > 3:
+
+        if day_diff > 3:
             sell_code = 3
             reason = "Held through confidence."
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,reason)  
@@ -680,11 +677,8 @@ def tda_CALL_3D_simple(polygon_df, simulation_date, quantity, config, target_pct
 
         sell_code = 0
         reason = ""
-        if day_diff < 2:
-            if pct_change <= Floor_pct:
-                sell_code = 2
-                reason = f"Breached floor pct, sell. {pct_change} {Floor_pct}"
-        elif day_diff > 3:
+
+        if day_diff > 3:
             sell_code = 3
             reason = "Held through confidence."
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,reason)  
@@ -750,11 +744,7 @@ def tda_PUT_1D_simple(polygon_df, simulation_date, quantity, config, target_pct,
 
         sell_code = 0
         reason = ""
-        if day_diff < 1:
-            if pct_change >= Floor_pct:
-                sell_code = 2
-                reason = f"Breached floor pct, sell. {pct_change} {Floor_pct}"
-        elif day_diff > 1:
+        if day_diff > 1:
             sell_code = 3
             reason = "Held through confidence."
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,reason)  
@@ -821,11 +811,7 @@ def tda_CALL_1D_simple(polygon_df, simulation_date, quantity, config, target_pct
 
         sell_code = 0
         reason = ""
-        if day_diff < 1:
-            if pct_change <= Floor_pct:
-                sell_code = 2
-                reason = f"Breached floor pct, sell. {pct_change} {Floor_pct}"
-        elif day_diff > 1:
+        if day_diff > 1:
             sell_code = 3
             reason = "Held through confidence."
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,reason)  
@@ -1960,6 +1946,7 @@ def tda_CALL_1D_CDVOLAGG(polygon_df, simulation_date, quantity, config, target_p
 def tda_PUT_3D_CDVOL(polygon_df, simulation_date, quantity, config, target_pct, vol):
     open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
+    isVC = False
     for index, row in polygon_df.iterrows():
         if index == 0:
             continue
@@ -1973,35 +1960,36 @@ def tda_PUT_3D_CDVOL(polygon_df, simulation_date, quantity, config, target_pct, 
         hour = row['date'].hour
         # Floor_pct = ((float(min_value) - float(open_price))/float(open_price)) + (standard_risk + (-1*config['risk_adjustment']))
 
+        # vc1,vc2,pct = config['vc_level'].split('+')
         if deriv_pct_change > config['vc_level']:
             reason = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,reason)  
             return sell_dict
+        # elif deriv_pct_change > float(vc2):
+        #     isVC = True
+        #     Floor_pct = underlying_gain * float(pct)
 
-        if pct_change < target_pct:
-            Floor_pct = (.95*underlying_gain)
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         day_diff, current_weekday = get_day_diff(simulation_date, row['date'])
 
         sell_code = 0
         reason = ""
-        if day_diff < 2:
-            if underlying_gain > Floor_pct:
-                sell_code = 2
-                reason = f"Breached floor pct, sell. {pct_change} {Floor_pct}"
-        elif day_diff > 3:
+        if day_diff > 3:
             sell_code = 3
             reason = "Held through confidence."
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,reason)  
             return sell_dict
-        elif day_diff >= 2:
+        elif day_diff == 3:
             if hour == 15 or (current_weekday == 4 and hour >= 12):
                 sell_code = 7
                 reason = "End of day, sell."
             elif pct_change > Floor_pct:
                 sell_code = 4
-                reason = "Hit point of no confidence, sell."
+                if isVC:
+                    reason = "VC Sell EOD"
+                else:
+                    reason = "Hit point of no confidence, sell."
             elif pct_change <= target_pct:
                 Floor_pct = (.95*underlying_gain)
                 if pct_change >= Floor_pct:
@@ -2021,6 +2009,7 @@ def tda_PUT_3D_CDVOL(polygon_df, simulation_date, quantity, config, target_pct, 
 def tda_CALL_3D_CDVOL(polygon_df, simulation_date, quantity, config, target_pct, vol):
     open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
+    isVC = False
     for index, row in polygon_df.iterrows():
         if index == 0:
             continue
@@ -2034,35 +2023,35 @@ def tda_CALL_3D_CDVOL(polygon_df, simulation_date, quantity, config, target_pct,
         hour = row['date'].hour
         # Floor_pct = ((float(max_value) - float(open_price))/float(open_price)) - (float(standard_risk) + (-1*config['risk_adjustment']))
 
+        # vc1,vc2,pct = config['vc_level'].split('+')
         if deriv_pct_change > config['vc_level']:
             reason = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,reason)  
             return sell_dict
-
-        if pct_change > target_pct:
-            Floor_pct = (.95*underlying_gain)
+        # elif deriv_pct_change > float(vc2):
+        #     isVC = True
+        #     Floor_pct = underlying_gain * float(pct)
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         day_diff, current_weekday = get_day_diff(simulation_date, row['date'])
 
         sell_code = 0
         reason = ""
-        if day_diff < 2:
-            if underlying_gain < Floor_pct:
-                sell_code = 2
-                reason = f"Breached floor pct, sell. {pct_change} {Floor_pct}"
-        elif day_diff > 3:
+        if day_diff > 3:
             sell_code = 3
             reason = "Held through confidence."
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,reason)  
             return sell_dict
-        elif day_diff >= 2:
+        elif day_diff == 3:
             if hour == 15 or (current_weekday == 4 and hour >= 12):
                 sell_code = 7
                 reason = "End of day, sell."
             elif pct_change < Floor_pct:
                 sell_code = 4
-                reason = "Hit point of no confidence, sell."
+                if isVC:
+                    reason = "VC Sell EOD"
+                else:
+                    reason = "Hit point of no confidence, sell."
             elif pct_change >= target_pct:
                 Floor_pct = (.95*underlying_gain)
                 if pct_change <= Floor_pct:
@@ -2082,6 +2071,7 @@ def tda_CALL_3D_CDVOL(polygon_df, simulation_date, quantity, config, target_pct,
 def tda_PUT_1D_CDVOL(polygon_df, simulation_date, quantity, config, target_pct, vol):
     open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
+    isVC = False
     for index, row in polygon_df.iterrows():
         if index == 0:
             continue
@@ -2090,39 +2080,35 @@ def tda_PUT_1D_CDVOL(polygon_df, simulation_date, quantity, config, target_pct, 
         min_value = polygon_df.iloc[:index]['underlying_price'].min()
         underlying_gain = ((float(min_value) - float(open_price))/float(open_price))
         pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
-        Floor_pct = (vol * config['volatility_threshold'])
+        Floor_pct = ((vol * config['volatility_threshold'])*.7)
         # Floor_pct -= underlying_gain
         hour = row['date'].hour
 
+        # vc1,vc2,pct = config['vc_level'].split('+')
         if deriv_pct_change > config['vc_level']:
             reason = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,reason)  
             return sell_dict
+        # elif deriv_pct_change > float(vc2):
+        #     isVC = True
+        #     Floor_pct = underlying_gain * float(pct)
 
-        if pct_change < (.75*target_pct):
-            Floor_pct = (.95*underlying_gain)
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         day_diff, current_weekday = get_day_diff(simulation_date, row['date'])
 
         sell_code = 0
         reason = ""
-        if day_diff < 1:
-            if underlying_gain > Floor_pct:
-                sell_code = 2
-                reason = f"Breached floor pct, sell. {pct_change} {Floor_pct}"
-        elif day_diff > 1:
-            sell_code = 3
-            reason = "Held through confidence."
-            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,reason)  
-            return sell_dict
-        elif day_diff == 1:
+        if day_diff == 1:
             if hour == 15 or (current_weekday == 4 and hour >= 12):
                 sell_code = 7
                 reason = "End of day, sell."
             elif pct_change > Floor_pct:
                 sell_code = 4
-                reason = "Hit point of no confidence, sell."
+                if isVC:
+                    reason = "VC Sell EOD"
+                else:
+                    reason = "Hit point of no confidence, sell."
             elif pct_change <= target_pct:
                 Floor_pct = (.95*underlying_gain)
                 if pct_change >= Floor_pct:
@@ -2142,6 +2128,7 @@ def tda_PUT_1D_CDVOL(polygon_df, simulation_date, quantity, config, target_pct, 
 def tda_CALL_1D_CDVOL(polygon_df, simulation_date, quantity, config, target_pct, vol):
     open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
+    isVC = False
     for index, row in polygon_df.iterrows():
         if index == 0:
             continue
@@ -2151,38 +2138,40 @@ def tda_CALL_1D_CDVOL(polygon_df, simulation_date, quantity, config, target_pct,
         underlying_gain = ((float(max_value) - float(open_price))/float(open_price))
         pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
         hour = row['date'].hour
-        Floor_pct = (-vol * config['volatility_threshold'])
+        Floor_pct = ((-vol * config['volatility_threshold'])*.7)
         # Floor_pct += underlying_gain
 
+        # vc1,vc2,pct = config['vc_level'].split('+')
         if deriv_pct_change > config['vc_level']:
             reason = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,reason)  
             return sell_dict
+        # elif deriv_pct_change > float(vc2):
+        #     isVC = True
+        #     Floor_pct = underlying_gain * float(pct)
 
-        if pct_change > (.75*target_pct):
-            Floor_pct = (.95*underlying_gain)
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         day_diff, current_weekday = get_day_diff(simulation_date, row['date'])
 
         sell_code = 0
         reason = ""
-        if day_diff < 1:
-            if underlying_gain < Floor_pct:
-                sell_code = 2
-                reason = f"Breached floor pct, sell. {pct_change} {Floor_pct}"
-        elif day_diff > 1:
+
+        if day_diff > 1:
             sell_code = 3
             reason = "Held through confidence."
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,reason)  
             return sell_dict
-        elif day_diff ==1 :
+        elif day_diff == 1 :
             if hour == 15 or (current_weekday == 4 and hour >= 12):
                 sell_code = 7
                 reason = "End of day, sell."
             elif pct_change < Floor_pct:
                 sell_code = 4
-                reason = "Hit point of no confidence, sell."
+                if isVC:
+                    reason = "VC Sell EOD"
+                else:
+                    reason = "Hit point of no confidence, sell."
             elif pct_change >= target_pct:
                 Floor_pct = (.95*underlying_gain)
                 if pct_change <= Floor_pct:

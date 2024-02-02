@@ -283,7 +283,7 @@ if __name__ == "__main__":
               "side": "C"
          },
         "CDBFP": {
-              "file_path": 'TSSIM1_IDXBF3_custHypTP0.52',
+              "file_path": 'TSSIM1_IDXBF3_custHypTP0.5',
               "time_span": 4,
               "side": "P"
          },
@@ -293,7 +293,7 @@ if __name__ == "__main__":
               "side": "C"
          },
         "CDBFP_1D": {
-              "file_path": 'TSSIM1_IDXBF3_custHypTP0.52',
+              "file_path": 'TSSIM1_IDXBF3_custHypTP0.5',
               "time_span": 2,
               "side": "P"
          },
@@ -329,7 +329,7 @@ if __name__ == "__main__":
      '2023-10-02', '2023-10-09', '2023-10-16', '2023-10-23', '2023-10-30',
      '2023-11-06', '2023-11-13', '2023-11-20', '2023-11-27', '2023-12-04', '2023-12-11', '2023-12-18'
      ]
-    data_type = 'CDVOL'
+    data_type = 'CDVOLBF3'
     
     # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')
     
