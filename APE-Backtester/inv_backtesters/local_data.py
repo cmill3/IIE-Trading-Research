@@ -16,7 +16,7 @@ def add_contract_data_to_local(week,strategy_info,strategy,data_type):
         try:
             data, _ = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key=f"backtesting_data/inv_alerts/{strategy_info['file_path']}", 
                                                     file_name = f"{week}.csv",prefixes=[strategy],time_span=strategy_info['time_span'])
-            data.drop(columns=['Unnamed: 0.2','Unnamed: 0.1','Unnamed: 0'],inplace=True)
+            # data.drop(columns=['Unnamed: 0.2','Unnamed: 0.1','Unnamed: 0'],inplace=True)
             data['side'] = strategy_info['side']
             data['contracts']= data.apply(lambda x: pull_contract_data(x),axis=1)
             data['expiries'] = data.apply(lambda x: generate_expiry_dates_row(x),axis=1)
@@ -156,88 +156,48 @@ def add_weekdays(date,days,symbol):
     return date
 
 if __name__ == "__main__":
-    strategy_info = {
-        #  "IDXC_1d": {
-        #       "file_path": 'TSSIM1PCR2_custHypP09',
-        #       "time_span": 2,
-        #       "side": "C"
-        #  },
-        # "IDXP_1d": {
-        #       "file_path": 'TSSIM1PCR1_custHypP079_2018',
-        #       "time_span": 2,
-        #       "side": "P"
-        #  },
-        #  "IDXP": {
-        #       "file_path": 'TSSIMPCR2_custHypP115_2018',
-        #       "time_span": 4,
-        #       "side": "P"
-        #  },
-        # "IDXC": {
-        #       "file_path": 'TSSIM1PCR1_custHypP14_2018',
-        #       "time_span": 4,
-        #       "side": "C"
-        #  },
-        #  "VDIFFC_1d": {
-        #       "file_path": 'TSSIM1_TL15_custHypP16',
-        #       "time_span": 2,
-        #       "side": "C"
-        #  },
-        # "VDIFFP_1d": {
-        #       "file_path": 'TSSIM1_TL15_custHypP16',
-        #       "time_span": 2,
-        #       "side": "P"
-        #  },
-        #  "VDIFFC": {
-        #       "file_path": 'TSSIM1_TL15_custHypP25',
-        #       "time_span": 4,
-        #       "side": "C"
-        #  },
-        # "VDIFFP": {
-        #       "file_path": 'TSSIM1_TL15_custHypP24',
-        #       "time_span": 4,
-        #       "side": "P"
-        #  },
-        # "GAIN_1d": {
-        #       "file_path": 'GAIN_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.52',
-        #       "time_span": 2,
-        #       "side": "C"
-        #  },
-        # "LOSERS_1d": {
-        #       "file_path": 'LOSERS_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.48',
-        #       "time_span": 2,
-        #       "side": "P"
-        #  },
-        #  "GAIN": {
-        #       "file_path": 'GAIN:RM220_TSSIM1_TL15-EXP_custHypTP0.52',
-        #       "time_span": 4,
-        #    
-        #    "side": "C"
-        #  },
-        # "LOSERS": {
-        #       "file_path": 'LOSERS:RM220_TSSIM1_TL15-EXP_custHypTP0.48',
-        #       "time_span": 4,
-        #       "side": "P"
-        #  },
-        #  "GAINP_1d": {
-        #       "file_path": 'GAINP_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.48',
-        #       "time_span": 2,
-        #       "side": "P"
-        #  },
-        # "LOSERSC_1d": {
-        #       "file_path": 'LOSERSC_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.52',
-        #       "time_span": 2,
-        #       "side": "C"
-        #  },
-        #  "GAINP": {
-        #       "file_path": 'GAINP:RM220_TSSIM1_TL15-EXP_custHypTP0.48',
-        #       "time_span": 4,
-        #       "side": "P"
-        #  },
-        # "LOSERSC": {
-        #       "file_path": 'LOSERSC:RM220_TSSIM1_TL15-EXP_custHypTP0.52',
-        #       "time_span": 4,
-        #       "side": "C"
-        #  },
+    strategy_info = { 
+        "GAIN_1d": {
+              "file_path": 'GAIN_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.6',
+              "time_span": 2,
+              "side": "C"
+         },
+        "LOSERS_1d": {
+              "file_path": 'LOSERS_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.4',
+              "time_span": 2,
+              "side": "P"
+         },
+         "GAIN": {
+              "file_path": 'GAIN:RM220_TSSIM1_TL15-EXP_custHypTP0.6',
+              "time_span": 4,
+           
+           "side": "C"
+         },
+        "LOSERS": {
+              "file_path": 'LOSERS:RM220_TSSIM1_TL15-EXP_custHypTP0.4',
+              "time_span": 4,
+              "side": "P"
+         },
+         "GAINP_1d": {
+              "file_path": 'GAINP_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.4',
+              "time_span": 2,
+              "side": "P"
+         },
+        "LOSERSC_1d": {
+              "file_path": 'LOSERSC_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.6',
+              "time_span": 2,
+              "side": "C"
+         },
+         "GAINP": {
+              "file_path": 'GAINP:RM220_TSSIM1_TL15-EXP_custHypTP0.4',
+              "time_span": 4,
+              "side": "P"
+         },
+        "LOSERSC": {
+              "file_path": 'LOSERSC:RM220_TSSIM1_TL15-EXP_custHypTP0.6',
+              "time_span": 4,
+              "side": "C"
+         },
         #  "MAP_1d": {
         #       "file_path": 'MAP_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.48',
         #       "time_span": 2,
@@ -278,25 +238,25 @@ if __name__ == "__main__":
         #       "time_span": 2,
         #       "side": "P"
         "CDBFC": {
-              "file_path": 'TSSIM1_IDXBF3_custHypTP0.5',
+              "file_path": 'TSSIM1_IDXBFGODS_custHypTP0.55',
               "time_span": 4,
               "side": "C"
          },
-        "CDBFP": {
-              "file_path": 'TSSIM1_IDXBF3_custHypTP0.5',
-              "time_span": 4,
-              "side": "P"
-         },
-          "CDBFC_1D": {
-              "file_path": 'TSSIM1_IDXBF3_custHypTP0.5',
-              "time_span": 2,
-              "side": "C"
-         },
-        "CDBFP_1D": {
-              "file_path": 'TSSIM1_IDXBF3_custHypTP0.5',
-              "time_span": 2,
-              "side": "P"
-         },
+        # "CDBFP": {
+        #       "file_path": 'TSSIM1_IDXBFGODS_custHypTP0.5',
+        #       "time_span": 4,
+        #       "side": "P"
+        #  },
+        #   "CDBFC_1D": {
+        #       "file_path": 'TSSIM1_IDXBFGODS_custHypTP0.5',
+        #       "time_span": 2,
+        #       "side": "C"
+        #  },
+        # "CDBFP_1D": {
+        #       "file_path": 'TSSIM1_IDXBFGODS_custHypTP0.5',
+        #       "time_span": 2,
+        #       "side": "P"
+        #  },
         # "CDHVC": {
         #       "file_path": 'TSSIM1_EXP_custHypTP0.5',
         #       "time_span": 4,
@@ -329,7 +289,7 @@ if __name__ == "__main__":
      '2023-10-02', '2023-10-09', '2023-10-16', '2023-10-23', '2023-10-30',
      '2023-11-06', '2023-11-13', '2023-11-20', '2023-11-27', '2023-12-04', '2023-12-11', '2023-12-18'
      ]
-    data_type = 'CDVOLBF3'
+    data_type = 'TL15RMHT'
     
     # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')
     
