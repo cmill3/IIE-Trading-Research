@@ -119,13 +119,49 @@ if __name__ == "__main__":
 
 
     backtest_configs = [
+#         {
+#             "put_pct": 1, 
+#             "spread_adjustment": 1,
+#             "aa": 0,
+#             "risk_unit": .0021,
+#             "model": "CDVOLAGG",
+#             "vc_level":400,
+#             "portfolio_cash": 20000,
+#             "scaling": "dynamicscale",
+#             "volatility_threshold": 1,
+#             "model_type": "cls",
+#             "user": "cm3",
+#             "threeD_vol": "return_vol_10D",
+#             "oneD_vol": "return_vol_5D",
+#             "dataset": "CDVOLBF3",
+#             "spread_length": 2,
+
+#         },
+# {
+#             "put_pct": 1, 
+#             "spread_adjustment": 1,
+#             "aa": 0,
+#             "risk_unit": .0021,
+#             "model": "CDVOLAGG",
+#             "vc_level":400,
+#             "portfolio_cash": 20000,
+#             "scaling": "dynamicscale",
+#             "volatility_threshold": 1,
+#             "model_type": "cls",
+#             "user": "cm3",
+#             "threeD_vol": "return_vol_10D",
+#             "oneD_vol": "return_vol_5D",
+#             "dataset": "CDVOLBF2",
+#             "spread_length": 2,
+
+#         },
 {
             "put_pct": 1, 
-            "spread_adjustment": 1,
+            "spread_adjustment": 3,
             "aa": 0,
-            "risk_unit": .0044,
+            "risk_unit": .005,
             "model": "CDVOLAGG",
-            "vc_level":400,
+            "vc_level":750,
             "portfolio_cash": 10000,
             "scaling": "dynamicscale",
             "volatility_threshold": 1,
@@ -139,11 +175,11 @@ if __name__ == "__main__":
         },
         {
             "put_pct": 1, 
-            "spread_adjustment": 1,
+            "spread_adjustment": 3,
             "aa": 0,
-            "risk_unit": .0048,
+            "risk_unit": .006,
             "model": "CDVOLAGG",
-            "vc_level":400,
+            "vc_level":750,
             "portfolio_cash": 10000,
             "scaling": "dynamicscale",
             "volatility_threshold": 1,
@@ -155,6 +191,24 @@ if __name__ == "__main__":
             "spread_length": 2,
 
         },
+# {
+#             "put_pct": 1, 
+#             "spread_adjustment": 1,
+#             "aa": 0,
+#             "risk_unit": .0019,
+#             "model": "CDVOLAGG",
+#             "vc_level":400,
+#             "portfolio_cash": 100000,
+#             "scaling": "dynamicscale",
+#             "volatility_threshold": 1,
+#             "model_type": "cls",
+#             "user": "cm3",
+#             "threeD_vol": "return_vol_10D",
+#             "oneD_vol": "return_vol_5D",
+#             "dataset": "CDVOLBF3",
+#             "spread_length": 2,
+
+#         },
 ]
     
     # time_periods = [q1,q2,q3,q4]

@@ -258,22 +258,22 @@ if __name__ == "__main__":
         #       "side": "P"
         #  },
         # "CDHVC": {
-        #       "file_path": 'TSSIM1_EXP_custHypTP0.5',
+        #       "file_path": 'TSSIM1_HV2_custHypTP0.5',
         #       "time_span": 4,
         #       "side": "C"
         #  },
         # "CDHVP": {
-        #       "file_path": 'TSSIM1_EXP_custHypTP0.5',
+        #       "file_path": 'TSSIM1_HV2_custHypTP0.5',
         #       "time_span": 4,
         #       "side": "P"
         #  },
         #   "CDHVC_1D": {
-        #       "file_path": 'TSSIM1_EXP_custHypTP0.5',
+        #       "file_path": 'TSSIM1_HV2_custHypTP0.5',
         #       "time_span": 2,
         #       "side": "C"
         #  },
         # "CDHVP_1D": {
-        #       "file_path": 'TSSIM1_EXP_custHypTP0.5',
+        #       "file_path": 'TSSIM1_HV2_custHypTP0.5',
         #       "time_span": 2,
         #       "side": "P"
         #  },
