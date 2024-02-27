@@ -1,21 +1,18 @@
 from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
-# import holidays
+from helpers.constants import YEAR_CONFIG
 import boto3
 import helpers.backtest_functions as back_tester
 import helpers.backtrader_helper as helper
 import helpers.portfolio_simulation as portfolio_sim
-from helpers.constants import YEAR_CONFIG
 import warnings
 import concurrent.futures
 import os
-# from pandas._libs.mode_warnings import SettingWithCopyWarning
 
 
-warnings.filterwarnings("ignore", category=FutureWarning)
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-# warnings.filterwarnings("ignore", category=SettingWithCopyWarning)
+warnings.filterwarnings("ignore")
+bucket_name = 'icarus-research-data'  #s3 bucket name
 
 
 bucket_name = 'icarus-research-data'  #s3 bucket name
@@ -174,6 +171,60 @@ if __name__ == "__main__":
 #             "put_pct": 1, 
 #             "spread_adjustment": 1,
 #             "aa": 0,
+#             "risk_unit": .0021,
+#             "model": "CDVOLAGG",
+#             "vc_level":400,
+#             "portfolio_cash": 20000,
+#             "scaling": "dynamicscale",
+#             "volatility_threshold": 1,
+#             "model_type": "cls",
+#             "user": "cm3",
+#             "threeD_vol": "return_vol_10D",
+#             "oneD_vol": "return_vol_5D",
+#             "dataset": "CDVOLBF2",
+#             "spread_length": 2,
+
+#         },
+{
+            "put_pct": 1, 
+            "spread_adjustment": 3,
+            "aa": 0,
+            "risk_unit": .005,
+            "model": "CDVOLAGG",
+            "vc_level":750,
+            "portfolio_cash": 10000,
+            "scaling": "dynamicscale",
+            "volatility_threshold": 1,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBFGHT",
+            "spread_length": 2,
+
+        },
+        {
+            "put_pct": 1, 
+            "spread_adjustment": 3,
+            "aa": 0,
+            "risk_unit": .006,
+            "model": "CDVOLAGG",
+            "vc_level":750,
+            "portfolio_cash": 10000,
+            "scaling": "dynamicscale",
+            "volatility_threshold": 1,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBFGHT",
+            "spread_length": 2,
+
+        },
+# {
+#             "put_pct": 1, 
+#             "spread_adjustment": 1,
+#             "aa": 0,
 #             "risk_unit": .0019,
 #             "model": "CDVOLAGG",
 #             "vc_level":400,
@@ -194,7 +245,7 @@ if __name__ == "__main__":
     error_models = []
     nowstr = datetime.now().strftime("%Y%m%d")
 
-    strategies = ["GAIN:3","GAINP:3","LOSERS:3","LOSERSC:3","GAIN_1D:1","GAINP_1D:1","LOSERS_1D:1","LOSERSC_1D:1"]
+    strategies = ["CDBFC:3","CDBFP:3","CDBFC_1D:1","CDBFP_1D:1"]    
     years = ['twenty1','twenty2','twenty3']
 
     for config in backtest_configs:
