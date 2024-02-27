@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
-# import holidays
+from helpers.constants import YEAR_CONFIG
 import boto3
 import helpers.backtest_functions as back_tester
 import helpers.backtrader_helper as helper
@@ -9,16 +9,10 @@ import helpers.portfolio_simulation as portfolio_sim
 import warnings
 import concurrent.futures
 import os
-# from pandas._libs.mode_warnings import SettingWithCopyWarning
 
 
-warnings.filterwarnings("ignore", category=FutureWarning)
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-# warnings.filterwarnings("ignore", category=SettingWithCopyWarning)
-
-
+warnings.filterwarnings("ignore")
 bucket_name = 'icarus-research-data'  #s3 bucket name
-object_keybase = 'training_datasets/expanded_1d_datasets/' #s3 key not including date, date is added in pullcsv func
 
 def build_backtest_data(file_name,strategies,config):
     full_purchases_list = []
@@ -235,39 +229,41 @@ if __name__ == "__main__":
 
 
     ## TREND STRATEGIES ONLY
-    time_periods = [m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,m12]
-    strategies = ["CDBFC:3","CDBFP:3","CDBFC_1D:1","CDBFP_1D:1"]
+    strategies = ["CDBFC:3","CDBFP:3","CDBFC_1D:1","CDBFP_1D:1"]    
+    years = ['twenty1','twenty2','twenty3']
 
     for config in backtest_configs:
-        trading_strat = f"{config['user']}-{nowstr}-modelCDVOLNOLIM_dwnsdVOL:{config['model']}_{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_{config['scaling']}_sa{config['spread_adjustment']}"
         starting_cash = config['portfolio_cash']
-        for time in time_periods:
-            try:
-                start_dt = time[0]
-                end_date = time[-1]
+        for year in years:
+            year_data = YEAR_CONFIG[year]
+            trading_strat = f"{config['user']}-{nowstr}-{year_data['year']}-modelCDVOLNOLIM_dwnsdVOL:{config['model']}_{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_{config['scaling']}_sasl{config['spread_adjustment']}:{config['spread_length']}"
+            for month in year_data['months']:
+                try:
+                    start_dt = month[0]
+                    end_date = month[-1]
 
-                start_date = start_dt.replace("-","/")
-                end_dt = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=7)
-                end_date = end_dt.strftime("%Y/%m/%d")
-                start_str = start_date.split("/")[1] + start_date.split("/")[2]
-                end_str = end_date.split("/")[1] + end_date.split("/")[2]
+                    start_date = start_dt.replace("-","/")
+                    end_dt = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=7)
+                    end_date = end_dt.strftime("%Y/%m/%d")
+                    start_str = start_date.split("/")[1] + start_date.split("/")[2]
+                    end_str = end_date.split("/")[1] + end_date.split("/")[2]
 
-                print(f"Starting {trading_strat} at {datetime.now()} for {start_date} to {end_date} with ${starting_cash}")
-                portfolio_df, positions_df, full_df = backtest_orchestrator(start_date, end_date,file_names=time,strategies=strategies,local_data=False, config=config, period_cash=starting_cash)
-                starting_cash = portfolio_df['portfolio_cash'].iloc[-1]
-                s3.put_object(Body=portfolio_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/portfolio_report.csv')
-                s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/positions_report.csv')
-                s3.put_object(Body=full_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/all_positions.csv')
-                print(f"Done with {trading_strat} at {datetime.now()}!")
-            except Exception as e:
-                print(f"Error: {e} for {trading_strat}")
-                error_models.append(f"Error: {e} for {trading_strat}")
-                continue
-        models_tested.append(f'{trading_strat}${config["portfolio_cash"]}_{config["risk_unit"]}')
+                    print(f"Starting {trading_strat} at {datetime.now()} for {start_date} to {end_date} with ${starting_cash}")
+                    portfolio_df, positions_df, full_df = backtest_orchestrator(start_date, end_date,file_names=time,strategies=strategies,local_data=False, config=config, period_cash=starting_cash)
+                    starting_cash = portfolio_df['portfolio_cash'].iloc[-1]
+                    s3.put_object(Body=portfolio_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/portfolio_report.csv')
+                    s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/positions_report.csv')
+                    s3.put_object(Body=full_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/all_positions.csv')
+                    print(f"Done with {trading_strat} at {datetime.now()}!")
+                except Exception as e:
+                    print(f"Error: {e} for {trading_strat}")
+                    error_models.append(f"Error: {e} for {trading_strat}")
+                    continue
+            models_tested.append(f'{trading_strat}${config["portfolio_cash"]}_{config["risk_unit"]}')
 
-    print(f"Completed all models at {datetime.now()}!")
-    print(models_tested)
-    print("Errors:")
-    print(error_models)
+        print(f"Completed all models at {datetime.now()}!")
+        print(models_tested)
+        print("Errors:")
+        print(error_models)
 
 
