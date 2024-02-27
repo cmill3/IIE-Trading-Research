@@ -14,13 +14,13 @@ starting_capital = 100000
 # }
 
 trend_strategy = {
-    "name": "cm3-20240201-modelTRENDNOLIM_dwnsdVOL:simple_TL15RM_vol1_vc400_dynamicscale$100000_0.0017",
-    "results": [2.47,.18,.61,-.32,.47,-.12,3.65,-.50,.79,2.25,.95,1.62]
+    "name": "cm3-20240207-modelTRENDNOLIM_dwnsdVOL:stdclsAGG_TL15RMHT_vol1_vc600_dynamicscale_sa1$10000_0.005",
+    "results": [4.78,.18,.67,-.34,.21,.32,1.45,-.42,1.43,3.05,.44,1.56]
 }
 
 cdvol_strategy = {
-    "name": "cm3-20240204-modelCDVOLNOLIM_dwnsdVOL:CDVOLAGG_CDVOLBF2_vol1_vc400_dynamicscale$10000_0.004",
-    "results": [.39,.35,3.13,-.32,8.50,-.35,2.28,.06,.24,.61,.03,.47]
+    "name": "cm3-20240208-modelCDVOLNOLIM_dwnsdVOL:CDVOLAGG_CDVOLBF3HT_vol1_vc500_dynamicscale_sasl1:2$10000_0.006",
+    "results": [1.3,.45,3.21,-.15,5.65,-.06,1.54,-.26,.96,1.13,.39,-.08]
 }
 
 portfolio_config = {

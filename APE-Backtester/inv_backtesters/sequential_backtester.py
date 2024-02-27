@@ -92,7 +92,7 @@ def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,c
 if __name__ == "__main__":
     s3 = boto3.client('s3')
     strategy_theme = "invALERTS_cls" 
-    file_names = [
+    twenty3 = [
      '2023-01-02', '2023-01-09', '2023-01-16', '2023-01-23', 
      '2023-01-30', '2023-02-06', '2023-02-13', '2023-02-20', '2023-02-27', '2023-03-06', '2023-03-13', '2023-03-20', 
      '2023-03-27', '2023-04-03', '2023-04-10', '2023-04-17', '2023-04-24', '2023-05-01', '2023-05-08', '2023-05-15', 
@@ -117,98 +117,106 @@ if __name__ == "__main__":
     m11 = ['2023-11-06', '2023-11-13', '2023-11-20', '2023-11-27']
     m12 = ['2023-12-04', '2023-12-11', '2023-12-18']
 
+    # twenty2 = ['2022-01-03', '2022-01-10', '2022-01-17', '2022-01-24', '2022-01-31', 
+    #               '2022-02-07', '2022-02-14', '2022-02-21', '2022-02-28', 
+    #               '2022-03-07', '2022-03-14', '2022-03-21', '2022-03-28', 
+    #               '2022-04-04', '2022-04-11', '2022-04-18', '2022-04-25', 
+    #               '2022-05-02', '2022-05-09', '2022-05-16', '2022-05-23', '2022-05-30', 
+    #               '2022-06-06', '2022-06-13', '2022-06-20', '2022-06-27', 
+    #               '2022-07-04', '2022-07-11', '2022-07-18', '2022-07-25', 
+    #               '2022-08-01', '2022-08-08', '2022-08-15', '2022-08-22', '2022-08-29', 
+    #               '2022-09-05', '2022-09-12', '2022-09-19', '2022-09-26', 
+    #               '2022-10-03', '2022-10-10', '2022-10-17', '2022-10-24', '2022-10-31', 
+    #               '2022-11-07', '2022-11-14', '2022-11-21', '2022-11-28',
+    #             '2022-12-05', '2022-12-12', '2022-12-19', '2022-12-26']
+    
+    # m1 = ['2022-01-03', '2022-01-10', '2022-01-17', '2022-01-24', '2022-01-31']
+    # m2 = ['2022-02-07', '2022-02-14', '2022-02-21', '2022-02-28']
+    # m3 = ['2022-03-07', '2022-03-14', '2022-03-21', '2022-03-28']
+    # m4 = ['2022-04-04', '2022-04-11', '2022-04-18', '2022-04-25']
+    # m5 = [ '2022-05-02', '2022-05-09', '2022-05-16', '2022-05-23', '2022-05-30']
+    # m6 = ['2022-06-06', '2022-06-13', '2022-06-20', '2022-06-27']
+    # m7 = ['2022-07-04', '2022-07-11', '2022-07-18', '2022-07-25']
+    # m8 = ['2022-08-01', '2022-08-08', '2022-08-15', '2022-08-22', '2022-08-29']
+    # m9 = ['2022-09-05', '2022-09-12', '2022-09-19', '2022-09-26']
+    # m10 = ['2022-10-03', '2022-10-10', '2022-10-17', '2022-10-24', '2022-10-31']
+    # m11 = ['2022-11-07', '2022-11-14', '2022-11-21', '2022-11-28']
+    # m12 = ['2022-12-05', '2022-12-12', '2022-12-19', '2022-12-26']
+
 
     backtest_configs = [
-#         {
-#             "put_pct": 1, 
-#             "spread_adjustment": 1,
-#             "aa": 0,
-#             "risk_unit": .0021,
-#             "model": "CDVOLAGG",
-#             "vc_level":400,
-#             "portfolio_cash": 20000,
-#             "scaling": "dynamicscale",
-#             "volatility_threshold": 1,
-#             "model_type": "cls",
-#             "user": "cm3",
-#             "threeD_vol": "return_vol_10D",
-#             "oneD_vol": "return_vol_5D",
-#             "dataset": "CDVOLBF3",
-#             "spread_length": 2,
-
-#         },
-# {
-#             "put_pct": 1, 
-#             "spread_adjustment": 1,
-#             "aa": 0,
-#             "risk_unit": .0021,
-#             "model": "CDVOLAGG",
-#             "vc_level":400,
-#             "portfolio_cash": 20000,
-#             "scaling": "dynamicscale",
-#             "volatility_threshold": 1,
-#             "model_type": "cls",
-#             "user": "cm3",
-#             "threeD_vol": "return_vol_10D",
-#             "oneD_vol": "return_vol_5D",
-#             "dataset": "CDVOLBF2",
-#             "spread_length": 2,
-
-#         },
 {
             "put_pct": 1, 
-            "spread_adjustment": 3,
+            "spread_adjustment": 1,
             "aa": 0,
             "risk_unit": .005,
             "model": "CDVOLAGG",
-            "vc_level":750,
+            "vc_level":500,
             "portfolio_cash": 10000,
             "scaling": "dynamicscale",
-            "volatility_threshold": 1,
+            "volatility_threshold": 0.5,
             "model_type": "cls",
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBFGHT",
-            "spread_length": 2,
+            "dataset": "CDVOLBF3HT",
+            "spread_length": 3,
 
         },
-        {
+{
             "put_pct": 1, 
-            "spread_adjustment": 3,
+            "spread_adjustment": 2,
             "aa": 0,
-            "risk_unit": .006,
+            "risk_unit": .005,
             "model": "CDVOLAGG",
-            "vc_level":750,
+            "vc_level":500,
             "portfolio_cash": 10000,
             "scaling": "dynamicscale",
-            "volatility_threshold": 1,
+            "volatility_threshold": 0.5,
             "model_type": "cls",
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBFGHT",
+            "dataset": "CDVOLBF3HT",
             "spread_length": 2,
 
         },
-# {
-#             "put_pct": 1, 
-#             "spread_adjustment": 1,
-#             "aa": 0,
-#             "risk_unit": .0019,
-#             "model": "CDVOLAGG",
-#             "vc_level":400,
-#             "portfolio_cash": 100000,
-#             "scaling": "dynamicscale",
-#             "volatility_threshold": 1,
-#             "model_type": "cls",
-#             "user": "cm3",
-#             "threeD_vol": "return_vol_10D",
-#             "oneD_vol": "return_vol_5D",
-#             "dataset": "CDVOLBF3",
-#             "spread_length": 2,
+        # {
+        #     "put_pct": 1, 
+        #     "spread_adjustment": 1,
+        #     "aa": 0,
+        #     "risk_unit": .005,
+        #     "model": "CDVOL",
+        #     "vc_level":500,
+        #     "portfolio_cash": 10000,
+        #     "scaling": "dynamicscale",
+        #     "volatility_threshold": 0.4,
+        #     "model_type": "cls",
+        #     "user": "cm3",
+        #     "threeD_vol": "return_vol_10D",
+        #     "oneD_vol": "return_vol_5D",
+        #     "dataset": "CDVOLBF3HT",
+        #     "spread_length": 2,
 
-#         },
+        # },
+        # {
+        #     "put_pct": 1, 
+        #     "spread_adjustment": 1,
+        #     "aa": 0,
+        #     "risk_unit": .005,
+        #     "model": "CDVOLAGG",
+        #     "vc_level":300,
+        #     "portfolio_cash": 10000,
+        #     "scaling": "dynamicscale",
+        #     "volatility_threshold": 0.5,
+        #     "model_type": "cls",
+        #     "user": "cm3",
+        #     "threeD_vol": "return_vol_10D",
+        #     "oneD_vol": "return_vol_5D",
+        #     "dataset": "CDVOLBF3HT",
+        #     "spread_length": 2,
+
+        # },
 ]
     
     # time_periods = [q1,q2,q3,q4]
@@ -226,7 +234,7 @@ if __name__ == "__main__":
     # strategies = ["GAIN:3","GAINP:3","LOSERS:3","LOSERSC:3","GAIN_1D:1","GAINP_1D:1","LOSERS_1D:1","LOSERSC_1D:1"]
 
     for config in backtest_configs:
-        trading_strat = f"{config['user']}-{nowstr}-modelCDVOL_dwnsdVOL:{config['model']}_{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_{config['scaling']}"
+        trading_strat = f"{config['user']}-{nowstr}-modelCDVOL-23_dwnsdVOL:{config['model']}_{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_{config['scaling']}_sa{config['spread_adjustment']}"
         starting_cash = config['portfolio_cash']
         for time in time_periods:
             try:

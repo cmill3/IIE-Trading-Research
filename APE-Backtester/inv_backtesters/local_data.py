@@ -157,47 +157,46 @@ def add_weekdays(date,days,symbol):
 
 if __name__ == "__main__":
     strategy_info = { 
-        "GAIN_1d": {
-              "file_path": 'GAIN_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.6',
-              "time_span": 2,
-              "side": "C"
-         },
-        "LOSERS_1d": {
-              "file_path": 'LOSERS_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.4',
-              "time_span": 2,
-              "side": "P"
-         },
-         "GAIN": {
-              "file_path": 'GAIN:RM220_TSSIM1_TL15-EXP_custHypTP0.6',
-              "time_span": 4,
-           
-           "side": "C"
-         },
-        "LOSERS": {
-              "file_path": 'LOSERS:RM220_TSSIM1_TL15-EXP_custHypTP0.4',
-              "time_span": 4,
-              "side": "P"
-         },
-         "GAINP_1d": {
-              "file_path": 'GAINP_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.4',
-              "time_span": 2,
-              "side": "P"
-         },
-        "LOSERSC_1d": {
-              "file_path": 'LOSERSC_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.6',
-              "time_span": 2,
-              "side": "C"
-         },
-         "GAINP": {
-              "file_path": 'GAINP:RM220_TSSIM1_TL15-EXP_custHypTP0.4',
-              "time_span": 4,
-              "side": "P"
-         },
-        "LOSERSC": {
-              "file_path": 'LOSERSC:RM220_TSSIM1_TL15-EXP_custHypTP0.6',
-              "time_span": 4,
-              "side": "C"
-         },
+        # "GAIN_1d": {
+        #       "file_path": 'GAIN_1d:TSSIM1_CDVOLTL15_custHypTP0.5',
+        #       "time_span": 2,
+        #       "side": "C"
+        #  },
+        # "LOSERS_1d": {
+        #       "file_path": 'LOSERS_1d:TSSIM1_CDVOLTL15_custHypTP0.5',
+        #       "time_span": 2,
+        #       "side": "P"
+        #  },
+        #  "GAIN": {
+        #       "file_path": 'GAIN:TSSIM1_CDVOLTL15_custHypTP0.5',
+        #       "time_span": 4,
+        #       "side": "C"
+        #  },
+        # "LOSERS": {
+        #       "file_path": 'LOSERS:TSSIM1_CDVOLTL15_custHypTP0.5',
+        #       "time_span": 4,
+        #       "side": "P"
+        #  },
+        #  "GAINP_1d": {
+        #       "file_path": 'GAINP_1d:TSSIM1_CDVOLTL15_custHypTP0.5',
+        #       "time_span": 2,
+        #       "side": "P"
+        #  },
+        # # "LOSERSC_1d": {
+        # #       "file_path": 'LOSERSC_1d:TSSIM1_CDVOLTL15_custHypTP0.5',
+        # #       "time_span": 2,
+        # #       "side": "C"
+        # #  },
+        #  "GAINP": {
+        #       "file_path": 'GAINP:TSSIM1_CDVOLTL15_custHypTP0.5',
+        #       "time_span": 4,
+        #       "side": "P"
+        #  },
+        # "LOSERSC": {
+        #       "file_path": 'LOSERSC:TSSIM1_CDVOLTL15_custHypTP0.5',
+        #       "time_span": 4,
+        #       "side": "C"
+        #  },
         #  "MAP_1d": {
         #       "file_path": 'MAP_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.48',
         #       "time_span": 2,
@@ -238,25 +237,25 @@ if __name__ == "__main__":
         #       "time_span": 2,
         #       "side": "P"
         "CDBFC": {
-              "file_path": 'TSSIM1_IDXBFGODS_custHypTP0.55',
+              "file_path": 'TSSIM1_BF3_custHypTP0.55',
               "time_span": 4,
               "side": "C"
          },
-        # "CDBFP": {
-        #       "file_path": 'TSSIM1_IDXBFGODS_custHypTP0.5',
-        #       "time_span": 4,
-        #       "side": "P"
-        #  },
-        #   "CDBFC_1D": {
-        #       "file_path": 'TSSIM1_IDXBFGODS_custHypTP0.5',
-        #       "time_span": 2,
-        #       "side": "C"
-        #  },
-        # "CDBFP_1D": {
-        #       "file_path": 'TSSIM1_IDXBFGODS_custHypTP0.5',
-        #       "time_span": 2,
-        #       "side": "P"
-        #  },
+        "CDBFP": {
+              "file_path": 'TSSIM1_BF3_custHypTP0.45',
+              "time_span": 4,
+              "side": "P"
+         },
+          "CDBFC_1D": {
+              "file_path": 'TSSIM1_BF3_custHypTP0.55',
+              "time_span": 2,
+              "side": "C"
+         },
+        "CDBFP_1D": {
+              "file_path": 'TSSIM1_BF3_custHypTP0.45',
+              "time_span": 2,
+              "side": "P"
+         },
         # "CDHVC": {
         #       "file_path": 'TSSIM1_HV2_custHypTP0.5',
         #       "time_span": 4,
@@ -279,7 +278,7 @@ if __name__ == "__main__":
         #  },
     }
 
-    file_names = [
+    twenty3 = [
      '2023-01-02', '2023-01-09', '2023-01-16', '2023-01-23', 
      '2023-01-30', '2023-02-06', '2023-02-13', '2023-02-20', '2023-02-27', '2023-03-06', '2023-03-13', '2023-03-20', 
      '2023-03-27', '2023-04-03', '2023-04-10', '2023-04-17', '2023-04-24', '2023-05-01', '2023-05-08', '2023-05-15', 
@@ -289,14 +288,21 @@ if __name__ == "__main__":
      '2023-10-02', '2023-10-09', '2023-10-16', '2023-10-23', '2023-10-30',
      '2023-11-06', '2023-11-13', '2023-11-20', '2023-11-27', '2023-12-04', '2023-12-11', '2023-12-18'
      ]
-    data_type = 'TL15RMHT'
+    twenty2 = ['2022-01-03', '2022-01-10', '2022-01-17', '2022-01-24', '2022-01-31', '2022-02-07', '2022-02-14', '2022-02-21', '2022-02-28', '2022-03-07', 
+               '2022-03-14', '2022-03-21', '2022-03-28', '2022-04-04', '2022-04-11', '2022-04-18', '2022-04-25', '2022-05-02', '2022-05-09', '2022-05-16', 
+               '2022-05-23', '2022-05-30', '2022-06-06', '2022-06-13', '2022-06-20', '2022-06-27', '2022-07-04', '2022-07-11', '2022-07-18', '2022-07-25', 
+               '2022-08-01', '2022-08-08', '2022-08-15', '2022-08-22', '2022-08-29', '2022-09-05', '2022-09-12', '2022-09-19', '2022-09-26', '2022-10-03', 
+               '2022-10-10', '2022-10-17', '2022-10-24', '2022-10-31', '2022-11-07', '2022-11-14', '2022-11-21', '2022-11-28', '2022-12-05', '2022-12-12', 
+               '2022-12-19', '2022-12-26']
+    
+    data_type = 'CDVOLBF3HT'
     
     # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')
     
     for strategy in strategy_info:
         with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
             # Submit the processing tasks to the ThreadPoolExecutor
-            processed_weeks_futures = [executor.submit(add_contract_data_to_local,week,strategy_info[strategy],strategy,data_type) for week in file_names]
+            processed_weeks_futures = [executor.submit(add_contract_data_to_local,week,strategy_info[strategy],strategy,data_type) for week in twenty2]
         # add_contract_data_to_local(file_names[0],strategy_info[strategy],strategy,data_type)
 
     # for week in file_names:

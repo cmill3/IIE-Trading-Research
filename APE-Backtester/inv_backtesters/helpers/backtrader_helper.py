@@ -12,6 +12,7 @@ import warnings
 # import helpers.helper as helper
 import helpers.polygon_helper as ph
 import pytz
+from helpers.constants import THREED_STRATEGIES, ONED_STRATEGIES
 
 
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -104,22 +105,24 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
     enriched_options_aggregates = []
     expiries = ast.literal_eval(row['expiries'])
 
-    ## ASSIGNMENT ADJUSTMENT
+    # ASSIGNMENT ADJUSTMENT
     # threeD_cutoff, oneD_cutoff = map_assignment_adjustment(config['aa'])
-    # if row['strategy'] in ["BFP","IDXP","LOSERS",'VDIFFP',"MAP","GAINP","BFC","IDXC","GAIN",'VDIFFC',"MA","LOSERSC"]:
-    #     if start_date.weekday() > threeD_cutoff:
-    #         expiry = expiries[0]
+    # if row['strategy'] in THREED_STRATEGIES:
+    #         if start_date.weekday() > 2:
+    #             expiry = expiries[1]
+    #         else:
+    #             expiry = expiries[0]
+    # elif row['strategy'] in ONED_STRATEGIES:
+    #     if start_date.weekday() > 4:
+    #             expiry = expiries[0]
     #     else:
     #         expiry = expiries[1]
-    # else:
-    #     if start_date.weekday() > oneD_cutoff:
-    #         expiry = expiries[0]
-    #     else:
-    #         expiry = expiries[1]
-    if row['strategy'] in ["IDXC_1D","IDXP","IDXC","IDXP_1D"]:
-        expiry = expiries[config['aa']]
-    else:
-        expiry = expiries[0]
+    # # if row['strategy'] in ["IDXC_1D","IDXP","IDXC","IDXP_1D"]:
+    # #     expiry = expiries[config['aa']]
+    # # else:
+    # #     expiry = expiries[0]
+
+    expiry = expiries[0]
     
     strike = row['symbol'] + expiry
     try:
@@ -511,21 +514,22 @@ def extract_strike(row):
 #     return data
 
 def configure_trade_data(df,config):
-    # index = df.loc[df['symbol'].isin(["IWM","SPY","QQQ"])]
-    # stocks = df.loc[df['symbol'].isin(["IWM","SPY","QQQ"]) == False]
+    index = df.loc[df['symbol'].isin(["IWM","SPY","QQQ"])]
+    stocks = df.loc[df['symbol'].isin(["IWM","SPY","QQQ"]) == False]
 
 
-    one = df.loc[df['prediction_horizon'] == "1"]
-    three = df.loc[df['prediction_horizon'] == "3"]
-    # one_idx = index.loc[index['prediction_horizon'] == "1"]
-    # three_idx = index.loc[index['prediction_horizon'] == "3"]
+    one = stocks.loc[stocks['prediction_horizon'] == "1"]
+    three = stocks.loc[stocks['prediction_horizon'] == "3"]
+    one_idx = index.loc[index['prediction_horizon'] == "1"]
+    three_idx = index.loc[index['prediction_horizon'] == "3"]
 
     filt_one = one.loc[one['day_of_week'].isin([0,1,2,3])]
     filt_three = three.loc[three['day_of_week'].isin([0,1,2])]
 
-    # one_idxF = one_idx.loc[one_idx['day_of_week'].isin([0,1,2,3])]
-    # three_idxF = three_idx.loc[three_idx['day_of_week'].isin([0,1,2])]
+    one_idxF = one_idx.loc[one_idx['day_of_week'].isin([0,1,2,3])]
+    three_idxF = three_idx.loc[three_idx['day_of_week'].isin([0,1,2])]
 
-    trade_df = pd.concat([filt_one,filt_three])
+    trade_df = pd.concat([filt_one,filt_three,one_idxF,three_idxF])
+    # trade_df = pd.concat([stocks,index])
     return trade_df
 
