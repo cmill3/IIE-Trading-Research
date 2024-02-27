@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import concurrent.futures
 import pandas_market_calendars as mcal
 import numpy as np
-from helpers.constants import ONED_STRATEGIES, THREED_STRATEGIES
+from helpers.constants import ONED_STRATEGIES, THREED_STRATEGIES, YEAR_CONFIG
 
 s3 = boto3.client('s3')
 nyse = mcal.get_calendar('NYSE')
@@ -157,170 +157,40 @@ def add_weekdays(date,days,symbol):
     return date
 
 if __name__ == "__main__":
-    strategy_info = { 
-        # "GAIN_1d": {
-        #       "file_path": 'GAIN_1d:TSSIM1_CDVOLTL15_custHypTP0.5',
-        #       "time_span": 2,
-        #       "side": "C"
-        #  },
-        # "LOSERS_1d": {
-        #       "file_path": 'LOSERS_1d:TSSIM1_CDVOLTL15_custHypTP0.5',
-        #       "time_span": 2,
-        #       "side": "P"
-        #  },
-        #  "GAIN": {
-        #       "file_path": 'GAIN:TSSIM1_CDVOLTL15_custHypTP0.5',
-        #       "time_span": 4,
-        #       "side": "C"
-        #  },
-        # "LOSERS": {
-        #       "file_path": 'LOSERS:TSSIM1_CDVOLTL15_custHypTP0.5',
-        #       "time_span": 4,
-        #       "side": "P"
-        #  },
-        #  "GAINP_1d": {
-        #       "file_path": 'GAINP_1d:TSSIM1_CDVOLTL15_custHypTP0.5',
-        #       "time_span": 2,
-        #       "side": "P"
-        #  },
-        # # "LOSERSC_1d": {
-        # #       "file_path": 'LOSERSC_1d:TSSIM1_CDVOLTL15_custHypTP0.5',
-        # #       "time_span": 2,
-        # #       "side": "C"
-        # #  },
-        #  "GAINP": {
-        #       "file_path": 'GAINP:TSSIM1_CDVOLTL15_custHypTP0.5',
-        #       "time_span": 4,
-        #       "side": "P"
-        #  },
-        # "LOSERSC": {
-        #       "file_path": 'LOSERSC:TSSIM1_CDVOLTL15_custHypTP0.5',
-        #       "time_span": 4,
-        #       "side": "C"
-        #  },
-        #  "MAP_1d": {
-        #       "file_path": 'MAP_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.48',
-        #       "time_span": 2,
-        #       "side": "P"
-        #  },
-        # "MA_1d": {
-        #       "file_path": 'MA_1d:RM220_TSSIM1_TL15-EXP_custHypTP0.52',
-        #       "time_span": 2,
-        #       "side": "C"
-        #  },
-        #  "MAP": {
-        #       "file_path": 'MAP:RM220_TSSIM1_TL15-EXP_custHypTP0.48',
-        #       "time_span": 4,
-        #       "side": "P"
-        #  },
-        # "MA": {
-        #       "file_path": 'MA:RM220_TSSIM1_TL15-EXP_custHypTP0.52',
-        #       "time_span": 4,
-        #       "side": "C"
-        #  }
-        # "CDGAIN": {
-        #       "file_path": 'TSSIM1:1_TL15-EXP_custHypTP0.45',
-        #       "time_span": 4,
-        #       "side": "C"
-        #  },
-        # "CDLOSE": {
-        #       "file_path": 'TSSIM1:1_TL15-EXP_custHypTP0.55',
-        #       "time_span": 4,
-        #       "side": "P"
-        #  },
-        #   "CDGAIN_1d": {
-        #       "file_path": 'TSSIM1:1_TL15-EXP_custHypTP0.45',
-        #       "time_span": 2,
-        #       "side": "C"
-        #  },
-        # "CDLOSE_1d": {
-        #       "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
-        #       "time_span": 2,
-        #       "side": "P"
-        "CDBFC": {
-              "file_path": 'TSSIM1_BF3_custHypTP0.55',
-              "time_span": 4,
-              "side": "C"
-         },
-        "CDBFP": {
-              "file_path": 'TSSIM1_BF3_custHypTP0.45',
-              "time_span": 4,
-              "side": "P"
-         },
-          "CDBFC_1D": {
-              "file_path": 'TSSIM1_BF3_custHypTP0.55',
-              "time_span": 2,
-              "side": "C"
-         },
-        "CDBFP_1D": {
-              "file_path": 'TSSIM1_BF3_custHypTP0.45',
-              "time_span": 2,
-              "side": "P"
-         },
-        # "CDHVC": {
-        #       "file_path": 'TSSIM1_HV2_custHypTP0.5',
-        #       "time_span": 4,
-        #       "side": "C"
-        #  },
-        # "CDPRICEDIFFP": {
-        #       "file_path": 'BF3_custHypTP0.5',
-        #       "time_span": 4,
-        #       "side": "P"
-        #  },
-        #   "CDPRICEDIFFC_1D": {
-        #       "file_path": 'BF3_custHypTP0.5',
-        #       "time_span": 2,
-        #       "side": "C"
-        #  },
-        # "CDPRICEDIFFP_1D": {
-        #       "file_path": 'BF3_custHypTP0.5',
-        #       "time_span": 2,
-        #       "side": "P"
-        #  },
-        # "CDVOLDIFFC": {
-        #       "file_path": 'BF3_HVDATA_custHypTP0.45',
-        #       "time_span": 4,
-        #       "side": "C"
-        #  },
-        # "CDVOLDIFFP": {
-        #       "file_path": 'BF3_HVDATA_custHypTP0.55',
-        #       "time_span": 4,
-        #       "side": "P"
-        #  },
-        #   "CDVOLDIFFC_1D": {
-        #       "file_path": 'BF3_HVDATA_custHypTP0.45',
-        #       "time_span": 2,
-        #       "side": "C"
-        #  },
-        # "CDVOLDIFFP_1D": {
-        #       "file_path": 'BF3_HVDATA_custHypTP0.55',
-        #       "time_span": 2,
-        #       "side": "P"
-        #  },
-    }
+    for year in ["twenty1","twenty2","twenty3"]:
+        strategy_info = { 
+            "CDBFC": {
+                "file_path": 'TSSIM1_BF3_custHypTP0.55',
+                "time_span": 4,
+                "side": "C"
+            },
+            "CDBFP": {
+                "file_path": 'TSSIM1_BF3_custHypTP0.45',
+                "time_span": 4,
+                "side": "P"
+            },
+            "CDBFC_1D": {
+                "file_path": 'TSSIM1_BF3_custHypTP0.55',
+                "time_span": 2,
+                "side": "C"
+            },
+            "CDBFP_1D": {
+                "file_path": 'TSSIM1_BF3_custHypTP0.45',
+                "time_span": 2,
+                "side": "P"
+            },
+        }
 
-    twenty3 = [
-     '2023-01-02', '2023-01-09', '2023-01-16', '2023-01-23', 
-     '2023-01-30', '2023-02-06', '2023-02-13', '2023-02-20', '2023-02-27', '2023-03-06', '2023-03-13', '2023-03-20', 
-     '2023-03-27', '2023-04-03', 
-     '2023-04-10', '2023-04-17', '2023-04-24', '2023-05-01', '2023-05-08', '2023-05-15', 
-     '2023-05-22', '2023-05-29', '2023-06-05', '2023-06-12', '2023-06-19', '2023-06-26', '2023-07-03', '2023-07-10', 
-     '2023-07-17', '2023-07-24', '2023-07-31', '2023-08-07', '2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
-     '2023-09-11', '2023-09-18', '2023-09-25', 
-     '2023-10-02', '2023-10-09', '2023-10-16', '2023-10-23', 
-     '2023-10-30',
-     '2023-11-06', '2023-11-13', '2023-11-20', '2023-11-27', '2023-12-04', '2023-12-11', '2023-12-18'
-     ]
-
-    data_type = 'CDVOLBF3HT'
-    
-    # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')
-    
-    for strategy in strategy_info:
-        with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
-            # Submit the processing tasks to the ThreadPoolExecutor
-            processed_weeks_futures = [executor.submit(add_contract_data_to_local,week,strategy_info[strategy],strategy,data_type) for week in twenty2]
-        # add_contract_data_to_local(file_names[0],strategy_info[strategy],strategy,data_type)
+        data_type = 'CDVOLBF3HT'
+        file_names = YEAR_CONFIG[year]['all_files']
+        
+        # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')
+        
+        for strategy in strategy_info:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
+                # Submit the processing tasks to the ThreadPoolExecutor
+                processed_weeks_futures = [executor.submit(add_contract_data_to_local,week,strategy_info[strategy],strategy,data_type) for week in file_names]
+            # add_contract_data_to_local(file_names[0],strategy_info[strategy],strategy,data_type)
 
     # for week in file_names:
     #     for strategy in ['BFC','BFP','BFC_1D','BFP_1D']:
