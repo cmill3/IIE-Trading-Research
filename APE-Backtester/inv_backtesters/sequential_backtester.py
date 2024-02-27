@@ -70,7 +70,7 @@ def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,c
     if not local_data:
         cpu_count = os.cpu_count()
         # build_backtest_data(file_names[0],strategies,config)
-        with concurrent.futures.ProcessPoolExecutor(max_workers=6) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=5) as executor:
             # Submit the processing tasks to the ThreadPoolExecutor
             processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies,config) for file_name in file_names]
 
@@ -104,7 +104,7 @@ if __name__ == "__main__":
             "vc_level":500,
             "portfolio_cash": 10000,
             "scaling": "dynamicscale",
-            "volatility_threshold": 0.5,
+            "volatility_threshold": 0.6,
             "model_type": "cls",
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
@@ -131,42 +131,6 @@ if __name__ == "__main__":
             "spread_length": 2,
 
         },
-        # {
-        #     "put_pct": 1, 
-        #     "spread_adjustment": 1,
-        #     "aa": 0,
-        #     "risk_unit": .005,
-        #     "model": "CDVOL",
-        #     "vc_level":500,
-        #     "portfolio_cash": 10000,
-        #     "scaling": "dynamicscale",
-        #     "volatility_threshold": 0.4,
-        #     "model_type": "cls",
-        #     "user": "cm3",
-        #     "threeD_vol": "return_vol_10D",
-        #     "oneD_vol": "return_vol_5D",
-        #     "dataset": "CDVOLBF3HT",
-        #     "spread_length": 2,
-
-        # },
-        # {
-        #     "put_pct": 1, 
-        #     "spread_adjustment": 1,
-        #     "aa": 0,
-        #     "risk_unit": .005,
-        #     "model": "CDVOLAGG",
-        #     "vc_level":300,
-        #     "portfolio_cash": 10000,
-        #     "scaling": "dynamicscale",
-        #     "volatility_threshold": 0.5,
-        #     "model_type": "cls",
-        #     "user": "cm3",
-        #     "threeD_vol": "return_vol_10D",
-        #     "oneD_vol": "return_vol_5D",
-        #     "dataset": "CDVOLBF3HT",
-        #     "spread_length": 2,
-
-        # },
     ]
     
     models_tested = []
@@ -193,7 +157,7 @@ if __name__ == "__main__":
                     end_str = end_date.split("/")[1] + end_date.split("/")[2]
 
                     print(f"Starting {trading_strat} at {datetime.now()} for {start_date} to {end_date} with ${starting_cash}")
-                    portfolio_df, positions_df, full_df = backtest_orchestrator(start_date, end_date,file_names=time,strategies=strategies,local_data=False, config=config, period_cash=starting_cash)
+                    portfolio_df, positions_df, full_df = backtest_orchestrator(start_date, end_date,file_names=month,strategies=strategies,local_data=False, config=config, period_cash=starting_cash)
                     starting_cash = portfolio_df['portfolio_cash'].iloc[-1]
                     s3.put_object(Body=portfolio_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/portfolio_report.csv')
                     s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/positions_report.csv')
