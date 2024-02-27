@@ -16,7 +16,7 @@ def add_contract_data_to_local(week,strategy_info,strategy,data_type):
         try:
             data, _ = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key=f"backtesting_data/inv_alerts/{strategy_info['file_path']}", 
                                                     file_name = f"{week}.csv",prefixes=[strategy],time_span=strategy_info['time_span'])
-            data.drop(columns=['Unnamed: 0.2','Unnamed: 0.1','Unnamed: 0'],inplace=True)
+            # data.drop(columns=['Unnamed: 0.2','Unnamed: 0.1','Unnamed: 0'],inplace=True)
             data['side'] = strategy_info['side']
             data['contracts']= data.apply(lambda x: pull_contract_data(x),axis=1)
             data['expiries'] = data.apply(lambda x: generate_expiry_dates_row(x),axis=1)
@@ -77,6 +77,7 @@ def generate_expiry_dates(date_str,symbol,strategy):
             next_day = add_weekdays(date_str,2,symbol)
             return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
         elif strategy in THREED_STRATEGIES:
+            print('3d')
             day_of = add_weekdays(date_str,3,symbol)
             next_day = add_weekdays(date_str,4,symbol)
             return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
@@ -277,43 +278,63 @@ if __name__ == "__main__":
         #       "file_path": 'TSSIM1_TL15-EXP_custHypTP0.55',
         #       "time_span": 2,
         #       "side": "P"
-        "CDBFC": {
-              "file_path": 'TSSIM1_IDXBFGODS_custHypTP0.55',
-              "time_span": 4,
-              "side": "C"
-         },
-        "CDBFP": {
-              "file_path": 'TSSIM1_IDXBFGODS_custHypTP0.45',
-              "time_span": 4,
-              "side": "P"
-         },
-          "CDBFC_1D": {
-              "file_path": 'TSSIM1_IDXBFGODS_custHypTP0.55',
-              "time_span": 2,
-              "side": "C"
-         },
-        "CDBFP_1D": {
-              "file_path": 'TSSIM1_IDXBFGODS_custHypTP0.45',
-              "time_span": 2,
-              "side": "P"
-         },
-        # "CDHVC": {
-        #       "file_path": 'TSSIM1_HV2_custHypTP0.5',
+        # "CDBFC": {
+        #       "file_path": 'TSSIM1_BF3_custHypTP0.55',
         #       "time_span": 4,
         #       "side": "C"
         #  },
-        # "CDHVP": {
-        #       "file_path": 'TSSIM1_HV2_custHypTP0.5',
+        # "CDBFP": {
+        #       "file_path": 'TSSIM1_BF3_custHypTP0.45',
         #       "time_span": 4,
         #       "side": "P"
         #  },
-        #   "CDHVC_1D": {
-        #       "file_path": 'TSSIM1_HV2_custHypTP0.5',
+        #   "CDBFC_1D": {
+        #       "file_path": 'TSSIM1_BF3_custHypTP0.55',
         #       "time_span": 2,
         #       "side": "C"
         #  },
-        # "CDHVP_1D": {
-        #       "file_path": 'TSSIM1_HV2_custHypTP0.5',
+        # "CDBFP_1D": {
+        #       "file_path": 'TSSIM1_BF3_custHypTP0.45',
+        #       "time_span": 2,
+        #       "side": "P"
+        #  },
+        # "CDPRICEDIFFC": {
+        #       "file_path": 'BF3_custHypTP0.5',
+        #       "time_span": 4,
+        #       "side": "C"
+        #  },
+        # "CDPRICEDIFFP": {
+        #       "file_path": 'BF3_custHypTP0.5',
+        #       "time_span": 4,
+        #       "side": "P"
+        #  },
+        #   "CDPRICEDIFFC_1D": {
+        #       "file_path": 'BF3_custHypTP0.5',
+        #       "time_span": 2,
+        #       "side": "C"
+        #  },
+        # "CDPRICEDIFFP_1D": {
+        #       "file_path": 'BF3_custHypTP0.5',
+        #       "time_span": 2,
+        #       "side": "P"
+        #  },
+        # "CDVOLDIFFC": {
+        #       "file_path": 'BF3_HVDATA_custHypTP0.45',
+        #       "time_span": 4,
+        #       "side": "C"
+        #  },
+        # "CDVOLDIFFP": {
+        #       "file_path": 'BF3_HVDATA_custHypTP0.55',
+        #       "time_span": 4,
+        #       "side": "P"
+        #  },
+        #   "CDVOLDIFFC_1D": {
+        #       "file_path": 'BF3_HVDATA_custHypTP0.45',
+        #       "time_span": 2,
+        #       "side": "C"
+        #  },
+        # "CDVOLDIFFP_1D": {
+        #       "file_path": 'BF3_HVDATA_custHypTP0.55',
         #       "time_span": 2,
         #       "side": "P"
         #  },
@@ -322,14 +343,16 @@ if __name__ == "__main__":
     file_names = [
      '2023-01-02', '2023-01-09', '2023-01-16', '2023-01-23', 
      '2023-01-30', '2023-02-06', '2023-02-13', '2023-02-20', '2023-02-27', '2023-03-06', '2023-03-13', '2023-03-20', 
-     '2023-03-27', '2023-04-03', '2023-04-10', '2023-04-17', '2023-04-24', '2023-05-01', '2023-05-08', '2023-05-15', 
+     '2023-03-27', '2023-04-03', 
+     '2023-04-10', '2023-04-17', '2023-04-24', '2023-05-01', '2023-05-08', '2023-05-15', 
      '2023-05-22', '2023-05-29', '2023-06-05', '2023-06-12', '2023-06-19', '2023-06-26', '2023-07-03', '2023-07-10', 
      '2023-07-17', '2023-07-24', '2023-07-31', '2023-08-07', '2023-08-14', '2023-08-21', '2023-08-28', '2023-09-04', 
      '2023-09-11', '2023-09-18', '2023-09-25', 
-     '2023-10-02', '2023-10-09', '2023-10-16', '2023-10-23', '2023-10-30',
+     '2023-10-02', '2023-10-09', '2023-10-16', '2023-10-23', 
+     '2023-10-30',
      '2023-11-06', '2023-11-13', '2023-11-20', '2023-11-27', '2023-12-04', '2023-12-11', '2023-12-18'
      ]
-    data_type = 'CDVOLBFGHT'
+    data_type = 'CDVOLDIFFHVDATA'
     
     # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')
     
@@ -337,7 +360,7 @@ if __name__ == "__main__":
         with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
             # Submit the processing tasks to the ThreadPoolExecutor
             processed_weeks_futures = [executor.submit(add_contract_data_to_local,week,strategy_info[strategy],strategy,data_type) for week in file_names]
-        # add_contract_data_to_local(file_names[0],strategy_info[strategy],strategy,data_type)
+        # add_contract_data_to_local(file_names[6],strategy_info[strategy],strategy,data_type)
 
     # for week in file_names:
     #     for strategy in ['BFC','BFP','BFC_1D','BFP_1D']:
