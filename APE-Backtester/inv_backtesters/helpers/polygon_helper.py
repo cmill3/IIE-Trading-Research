@@ -57,7 +57,7 @@ def polygon_optiondata(options_ticker, from_date, to_date):
     from_stamp = int(from_date.timestamp() * 1000)
     to_stamp = int(to_date.timestamp() * 1000)
 
-    url = f"https://api.polygon.io/v2/aggs/ticker/{options_ticker}/range/15/minute/{from_stamp}/{to_stamp}?adjusted=true&sort=asc&limit=50000&apiKey={KEY}"
+    url = f"https://api.polygon.io/v2/aggs/ticker/{options_ticker}/range/15/minute/{from_stamp}/{to_stamp}?adjusted=false&sort=asc&limit=50000&apiKey={KEY}"
     response = execute_polygon_call(url)
     response_data = json.loads(response.text)
 
@@ -76,7 +76,7 @@ def polygon_stockdata_inv(symbol, from_date, to_date):
     from_stamp = int(from_date.timestamp() * 1000)
     to_stamp = int(to_date.timestamp() * 1000)
 
-    url = f"https://api.polygon.io/v2/aggs/ticker/{symbol}/range/15/minute/{from_stamp}/{to_stamp}?adjusted=true&sort=asc&limit=50000&apiKey={KEY}"
+    url = f"https://api.polygon.io/v2/aggs/ticker/{symbol}/range/15/minute/{from_stamp}/{to_stamp}?adjusted=false&sort=asc&limit=50000&apiKey={KEY}"
     response = execute_polygon_call(url)
 
     response_data = json.loads(response.text)
@@ -91,3 +91,27 @@ def polygon_stockdata_inv(symbol, from_date, to_date):
     stock_df = stock_df[stock_df['hour'] < 16]
     stock_df = stock_df.loc[stock_df['time'] >= datetime.strptime("09:30:00", "%H:%M:%S").time()]
     return stock_df
+
+def stock_aggs(symbol,from_date, to_date):
+    url = f"https://api.polygon.io/v2/aggs/ticker/{symbol}/range/15/minute/{from_date}/{to_date}?adjusted=false&sort=asc&limit=50000&apiKey={KEY}"
+    response = execute_polygon_call(url)
+
+    response_data = json.loads(response.text)
+    stock_df = pd.DataFrame(response_data['results'])
+    stock_df['t'] = stock_df['t'].apply(lambda x: int(x/1000))
+    stock_df['date'] = stock_df['t'].apply(lambda x: helper.convert_timestamp_est(x))
+    stock_df['time'] = stock_df['date'].apply(lambda x: x.time())
+    stock_df['hour'] = stock_df['date'].apply(lambda x: x.hour)
+    stock_df['minute'] = stock_df['date'].apply(lambda x: x.minute)
+    stock_df['ticker'] = symbol
+
+    stock_df = stock_df[stock_df['hour'] < 16]
+    stock_df = stock_df.loc[stock_df['time'] >= datetime.strptime("09:30:00", "%H:%M:%S").time()]
+    return stock_df
+
+
+def get_last_price(row):
+    aggs = stock_aggs(row['symbol'], row['date'], row['date'])
+    agg = aggs.loc[aggs['hour'] == row['hour']]
+    agg = agg.loc[agg['minute'] == 0]   
+    return agg['o'].values[0]

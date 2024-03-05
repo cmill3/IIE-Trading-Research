@@ -110,12 +110,12 @@ if __name__ == "__main__":
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
             "dataset": "CDVOLBF3HT",
-            "spread_length": 3,
+            "spread_length": 2,
 
         },
 {
             "put_pct": 1, 
-            "spread_adjustment": 2,
+            "spread_adjustment": 1,
             "aa": 0,
             "risk_unit": .005,
             "model": "CDVOLAGG",
@@ -141,11 +141,17 @@ if __name__ == "__main__":
     years = ['twenty1','twenty2','twenty3']
 
     for config in backtest_configs:
-        starting_cash = config['portfolio_cash']
         for year in years:
+            starting_cash = config['portfolio_cash']
             year_data = YEAR_CONFIG[year]
             trading_strat = f"{config['user']}-{nowstr}-{year_data['year']}-modelCDVOL_dwnsdVOL:{config['model']}_{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_{config['scaling']}_sasl{config['spread_adjustment']}:{config['spread_length']}"
             for month in year_data['months']:
+                if year_data['year'] == '21':
+                    config['risk_unit'] = .006
+                elif year_data['year'] == '22':
+                    config['risk_unit'] = .0055
+                elif year_data['year'] == '23':
+                    config['risk_unit'] = .005
                 try:
                     start_dt = month[0]
                     end_date = month[-1]

@@ -32,6 +32,15 @@ def pull_contract_data(row):
         date = row['date'].split(" ")[0]
         file_date = create_index_date(row['date'])
         year, month, day = file_date.strftime('%Y-%m-%d').split("-")
+    elif row['symbol'] in ['NVDA','GOOG','GOOGL','AMZN']:
+        date = row['date'].split(" ")[0]
+        year, month, day = date.split("-")
+        if year in ['2021','2022']:
+            dt = datetime(int(year),int(month),int(day))
+            weekday = dt.weekday()
+            monday_dt = dt - timedelta(days=weekday)
+            monday_str = monday_dt.strftime('%Y-%m-%d')
+            year, month, day = monday_str.split("-")
     else:
         date = row['date'].split(" ")[0]
         year, month, day = date.split("-")
@@ -77,7 +86,6 @@ def generate_expiry_dates(date_str,symbol,strategy):
             next_day = add_weekdays(date_str,2,symbol)
             return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
         elif strategy in THREED_STRATEGIES:
-            print('3d')
             day_of = add_weekdays(date_str,3,symbol)
             next_day = add_weekdays(date_str,4,symbol)
             return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
