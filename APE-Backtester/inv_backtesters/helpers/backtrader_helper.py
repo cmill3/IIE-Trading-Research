@@ -145,17 +145,36 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
     except Exception as e:
         print(f"Error: {e} in evaluating contracts for {row['symbol']} of {row['strategy']}")
         return [], []
-    
+    print("PROCESSING")
+    print(contracts)
+    print(strike)
     filtered_contracts = [k for k in contracts if strike in k]
     if len(filtered_contracts) == 0:
         print(f"No contracts for {row['symbol']} of {row['strategy']}")
-        print(contracts)
-        print(strike)
-        print(start_date)
-        return [], []
+        try:
+            strike2 = row['symbol'] + contracts[0][-15:-9]
+            filtered_contracts = [k for k in contracts if strike2 in k]
+            if len(filtered_contracts) == 0:
+                print(f"No contracts 2nd try for {row['symbol']} of {row['strategy']}")
+                print(contracts)
+                print(strike)
+                print(start_date)
+                return [], []
+        except Exception as e:
+            print(f"Error: {e} in 2nd try for {row['symbol']} of {row['strategy']}")
+            print(contracts)
+            print(strike)
+            print(start_date)
+            return [], []
+    print(filtered_contracts)
     options_df = build_options_df(filtered_contracts, row)
+    print("DF1")
+    print(options_df)
     ## SPREAD ADJUSTMENT
     options_df = options_df.iloc[config['spread_adjustment']:]
+    print("DF2")
+    print(options_df)
+    print()
     for index,contract in options_df.iterrows():
         try:
             options_agg_data = ph.polygon_optiondata(contract['contract_symbol'], start_date, end_date)
@@ -464,6 +483,9 @@ def approve_trade_poslimit(portfolio_cash, threshold_cash, position_id, current_
         return False
     
 def build_options_df(contracts, row):
+    if row['symbol'] in ["GOOG","GOOGL","NVDA","AMZN","TSLA"]:
+        last_price = ph.get_last_price(row)
+        row['o'] = last_price
     df = pd.DataFrame(contracts, columns=['contract_symbol'])
     df['underlying_symbol'] = row['symbol']
     df['option_type'] = row['side']

@@ -86,7 +86,6 @@ def generate_expiry_dates(date_str,symbol,strategy):
             next_day = add_weekdays(date_str,2,symbol)
             return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
         elif strategy in THREED_STRATEGIES:
-            print('3d')
             day_of = add_weekdays(date_str,3,symbol)
             next_day = add_weekdays(date_str,4,symbol)
             return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
