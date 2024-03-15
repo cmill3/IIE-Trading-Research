@@ -228,7 +228,7 @@ if __name__ == "__main__":
         trading_strat = f"{config['user']}-{nowstr}-modelVOLTREND_dwnsdVOL:{config['model']}_{config['pos_limit']}_{config['dataset']}_vol{config['volatility_threshold']}"
         starting_cash = config['portfolio_cash']
         for time in time_periods:
-            try:
+            # try:
                 start_dt = time[0]
                 end_date = time[-1]
 
@@ -244,10 +244,10 @@ if __name__ == "__main__":
                 s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/positions_report.csv')
                 s3.put_object(Body=full_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/all_positions.csv')
                 print(f"Done with {trading_strat} at {datetime.now()}!")
-            except Exception as e:
-                print(f"Error: {e} for {trading_strat}")
-                error_models.append(f"Error: {e} for {trading_strat}")
-                continue
+            # except Exception as e:
+            #     print(f"Error: {e} for {trading_strat}")
+            #     error_models.append(f"Error: {e} for {trading_strat}")
+            #     continue
         models_tested.append(trading_strat)
 
     print(f"Completed all models at {datetime.now()}!")

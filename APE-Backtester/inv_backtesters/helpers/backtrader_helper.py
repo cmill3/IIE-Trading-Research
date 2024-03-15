@@ -349,36 +349,41 @@ def extract_results_dict(positions_list):
     results_dicts = []
     transactions = positions_list['transactions']
     for transaction in transactions:
-        sell_dict = transaction['sell_info']
-        results_dicts.append(
-        {
-            "price_change": transaction['price_change'], "pct_gain": transaction['pct_gain'],
-            "total_gain": transaction['total_gain'], "open_trade_dt": transaction['open_trade_dt'], 
-            "close_trade_dt": transaction['close_trade_dt'],"max_gain_before": sell_dict['max_value_before_pct_change'],
-            "max_gain_after": sell_dict['max_value_after_pct_change'],"option_symbol": sell_dict['option_symbol'],
-            "max_value_before_date": sell_dict['max_value_before_date'], "max_value_after_date": sell_dict['max_value_after_date'],
-            "max_value_before_idx": sell_dict['max_value_before_idx'], "max_value_after_idx": sell_dict['max_value_after_idx'],
-            "sell_code": sell_dict['sell_code']
-        })
+        try:
+            sell_dict = transaction['sell_info']
+            results_dicts.append(
+            {
+                "price_change": transaction['price_change'], "pct_gain": transaction['pct_gain'],
+                "total_gain": transaction['total_gain'], "open_trade_dt": transaction['open_trade_dt'], 
+                "close_trade_dt": transaction['close_trade_dt'],"max_gain_before": sell_dict['max_value_before_pct_change'],
+                "max_gain_after": sell_dict['max_value_after_pct_change'],"option_symbol": sell_dict['option_symbol'],
+                "max_value_before_date": sell_dict['max_value_before_date'], "max_value_after_date": sell_dict['max_value_after_date'],
+                "max_value_before_idx": sell_dict['max_value_before_idx'], "max_value_after_idx": sell_dict['max_value_after_idx'],
+                "sell_code": sell_dict['sell_code']
+            })
+        except Exception as e:
+            print(f"Error: {e} in extracting results dict")
+            print(transaction)
+            continue
     return results_dicts
 
-def extract_results_dict_RMF(positions_list):
-    results_dicts = []
-    transactions = positions_list['transactions']
-    for transaction in transactions:
-        sell_dict = transaction['sell_info']
-        results_dicts.append(
-        {
-            "price_change": transaction['price_change'], "pct_gain": transaction['pct_gain'],
-            "total_gain": transaction['total_gain'], "open_trade_dt": transaction['open_trade_dt'], 
-            "close_trade_dt": transaction['close_trade_dt'],"max_gain_before": sell_dict['max_value_before_pct_change'],
-            "max_gain_after": sell_dict['max_value_after_pct_change'],"option_symbol": sell_dict['option_symbol'],
-            "max_value_before_date": sell_dict['max_value_before_date'], "max_value_after_date": sell_dict['max_value_after_date'],
-            "max_value_before_idx": sell_dict['max_value_before_idx'], "max_value_after_idx": sell_dict['max_value_after_idx'],
-            "sell_code": sell_dict['sell_code'], "aggregate_classification": sell_dict['aggregate_classification'],
-            "hilo_score": sell_dict['hilo_score']
-        })
-    return results_dicts
+# def extract_results_dict_RMF(positions_list):
+#     results_dicts = []
+#     transactions = positions_list['transactions']
+#     for transaction in transactions:
+#         sell_dict = transaction['sell_info']
+#         results_dicts.append(
+#         {
+#             "price_change": transaction['price_change'], "pct_gain": transaction['pct_gain'],
+#             "total_gain": transaction['total_gain'], "open_trade_dt": transaction['open_trade_dt'], 
+#             "close_trade_dt": transaction['close_trade_dt'],"max_gain_before": sell_dict['max_value_before_pct_change'],
+#             "max_gain_after": sell_dict['max_value_after_pct_change'],"option_symbol": sell_dict['option_symbol'],
+#             "max_value_before_date": sell_dict['max_value_before_date'], "max_value_after_date": sell_dict['max_value_after_date'],
+#             "max_value_before_idx": sell_dict['max_value_before_idx'], "max_value_after_idx": sell_dict['max_value_after_idx'],
+#             "sell_code": sell_dict['sell_code'], "aggregate_classification": sell_dict['aggregate_classification'],
+#             "hilo_score": sell_dict['hilo_score']
+#         })
+#     return results_dicts
 
 
 def create_datetime_index(start_date, end_date):

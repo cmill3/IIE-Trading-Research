@@ -90,11 +90,11 @@ if __name__ == "__main__":
     backtest_configs = [
 {
             "put_pct": 1, 
-            "spread_adjustment": 2,
+            "spread_adjustment": 1,
             "aa": 0,
-            "risk_unit": .005,
-            "model": "CDVOLAGG",
-            "vc_level":500,
+            "risk_unit": .009,
+            "model": "CDVOLVARVC",
+            "vc_level":"150/300/450",
             "portfolio_cash": 10000,
             "scaling": "dynamicscale",
             "volatility_threshold": 0.5,
@@ -102,10 +102,28 @@ if __name__ == "__main__":
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3HT",
+            "dataset": "CDVOLBF3-6",
             "spread_length": 2,
 
         },
+# {
+#             "put_pct": 1, 
+#             "spread_adjustment": 0,
+#             "aa": 0,
+#             "risk_unit": .005,
+#             "model": "CDVOLVARVC",
+#             "vc_level":"150/300/450",
+#             "portfolio_cash": 10000,
+#             "scaling": "dynamicscale",
+#             "volatility_threshold": 0.5,
+#             "model_type": "cls",
+#             "user": "cm3",
+#             "threeD_vol": "return_vol_10D",
+#             "oneD_vol": "return_vol_5D",
+#             "dataset": "CDVOLBF3-55",
+#             "spread_length": 3,
+
+#         },
 ]
     
     models_tested = []
@@ -118,9 +136,9 @@ if __name__ == "__main__":
     years = ['twenty1','twenty2','twenty3']
 
     for config in backtest_configs:
-        starting_cash = config['portfolio_cash']
         for year in years:
             year_data = YEAR_CONFIG[year]
+            starting_cash = config['portfolio_cash']
             trading_strat = f"{config['user']}-{nowstr}-{year_data['year']}-modelCDVOL_dwnsdVOL:{config['model']}_{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_{config['scaling']}_sasl{config['spread_adjustment']}:{config['spread_length']}"
             for month in year_data['months']:
                 try:
@@ -134,7 +152,7 @@ if __name__ == "__main__":
                     end_str = end_date.split("/")[1] + end_date.split("/")[2]
 
                     print(f"Starting {trading_strat} at {datetime.now()} for {start_date} to {end_date} with ${starting_cash}")
-                    portfolio_df, positions_df, full_df = backtest_orchestrator(start_date, end_date,file_names=time,strategies=strategies,local_data=False, config=config, period_cash=starting_cash)
+                    portfolio_df, positions_df, full_df = backtest_orchestrator(start_date, end_date,file_names=month,strategies=strategies,local_data=False, config=config, period_cash=starting_cash)
                     starting_cash = portfolio_df['portfolio_cash'].iloc[-1]
                     s3.put_object(Body=portfolio_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/portfolio_report.csv')
                     s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/positions_report.csv')

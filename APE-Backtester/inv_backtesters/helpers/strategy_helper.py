@@ -12,11 +12,18 @@ def build_trade(position, risk_unit,put_adjustment,portfolio_cash,config):
         # print(type(trade_info))
         # print(position_id)
         # print(trade_info[0])
-        transaction['sell_info']['close_trade_dt'] = transaction['close_trade_dt']
-        buy_orders.append(transaction['buy_info'])
-        sell_orders.append(transaction['sell_info'])
-        contract_costs.append(transaction['buy_info']['contract_cost'])
-        contract_type = transaction['buy_info']['contract_type']
+        try:
+            transaction['sell_info']['close_trade_dt'] = transaction['close_trade_dt']
+            buy_orders.append(transaction['buy_info'])
+            sell_orders.append(transaction['sell_info'])
+            contract_costs.append(transaction['buy_info']['contract_cost'])
+            contract_type = transaction['buy_info']['contract_type']
+        except Exception as e:
+            print(f"ERROR in build_trade f{e}")
+            print(e)
+            print(transaction)
+            print(position)
+            return [], []
     
     sized_buys, sized_sells = bet_sizer(contract_costs, buy_orders, sell_orders, risk_unit, contract_type,put_adjustment,portfolio_cash,config)
     if sized_buys == None:

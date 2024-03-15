@@ -14,10 +14,6 @@ import os
 warnings.filterwarnings("ignore")
 bucket_name = 'icarus-research-data'  #s3 bucket name
 
-
-bucket_name = 'icarus-research-data'  #s3 bucket name
-object_keybase = 'training_datasets/expanded_1d_datasets/' #s3 key not including date, date is added in pullcsv func
-
 def build_backtest_data(file_name,strategies,config):
     full_purchases_list = []
     full_positions_list = []
@@ -25,14 +21,10 @@ def build_backtest_data(file_name,strategies,config):
 
     dfs = []
     for strategy in strategies:
-        try: 
-            name, prediction_horizon = strategy.split(":")
-            data = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/{config["dataset"]}/{name}/{file_name}.csv')
-            data['prediction_horizon'] = prediction_horizon
-            dfs.append(data)
-        except Exception as e:
-            print(f"Error: {e} for {strategy} on {file_name}")
-            continue
+        name, prediction_horizon = strategy.split(":")
+        data = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/{config["dataset"]}/{name}/{file_name}.csv')
+        data['prediction_horizon'] = prediction_horizon
+        dfs.append(data)
     
     backtest_data = pd.concat(dfs,ignore_index=True)
     # backtest_data = backtest_data[backtest_data['probabilities'] > config['probability']]
@@ -94,32 +86,15 @@ def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,c
 if __name__ == "__main__":
     s3 = boto3.client('s3')
     strategy_theme = "invALERTS_cls" 
-    backtest_configs = [
-# {
-#             "put_pct": 1, 
-#             "spread_adjustment": 1,
-#             "aa": 0,
-#             "risk_unit": .009,
-#             "model": "CDVOLAGG",
-#             "vc_level":500,
-#             "portfolio_cash": 10000,
-#             "scaling": "dynamicscale",
-#             "volatility_threshold": 0.5,
-#             "model_type": "cls",
-#             "user": "cm3",
-#             "threeD_vol": "return_vol_10D",
-#             "oneD_vol": "return_vol_5D",
-#             "dataset": "CDVOLBF3-6",
-#             "spread_length": 2,
 
-#         },
+    backtest_configs = [
 {
             "put_pct": 1, 
-            "spread_adjustment": 0,
+            "spread_adjustment": 1,
             "aa": 0,
             "risk_unit": .009,
-            "model": "CDVOLVARVC",
-            "vc_level":"100/300/450",
+            "model": "CDVOLAGG",
+            "vc_level":350,
             "portfolio_cash": 10000,
             "scaling": "dynamicscale",
             "volatility_threshold": 0.5,
@@ -128,46 +103,28 @@ if __name__ == "__main__":
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
             "dataset": "CDVOLBF3-6",
-            "spread_length": 3,
+            "spread_length": 2,
 
         },
-        # {
-        #     "put_pct": 1, 
-        #     "spread_adjustment": 1,
-        #     "aa": 0,
-        #     "risk_unit": .005,
-        #     "model": "CDVOL",
-        #     "vc_level":500,
-        #     "portfolio_cash": 10000,
-        #     "scaling": "dynamicscale",
-        #     "volatility_threshold": 0.4,
-        #     "model_type": "cls",
-        #     "user": "cm3",
-        #     "threeD_vol": "return_vol_10D",
-        #     "oneD_vol": "return_vol_5D",
-        #     "dataset": "CDVOLBF3HT",
-        #     "spread_length": 2,
+# {
+#             "put_pct": 1, 
+#             "spread_adjustment": 1,
+#             "aa": 0,
+#             "risk_unit": .011,
+#             "model": "CDVOLVARVC",
+#             "vc_level":"150/300/450",
+#             "portfolio_cash": 10000,
+#             "scaling": "dynamicscale",
+#             "volatility_threshold": 0.5,
+#             "model_type": "cls",
+#             "user": "cm3",
+#             "threeD_vol": "return_vol_10D",
+#             "oneD_vol": "return_vol_5D",
+#             "dataset": "CDVOLBF3-6",
+#             "spread_length": 3,
 
-        # },
-        # {
-        #     "put_pct": 1, 
-        #     "spread_adjustment": 1,
-        #     "aa": 0,
-        #     "risk_unit": .005,
-        #     "model": "CDVOLAGG",
-        #     "vc_level":300,
-        #     "portfolio_cash": 10000,
-        #     "scaling": "dynamicscale",
-        #     "volatility_threshold": 0.5,
-        #     "model_type": "cls",
-        #     "user": "cm3",
-        #     "threeD_vol": "return_vol_10D",
-        #     "oneD_vol": "return_vol_5D",
-        #     "dataset": "CDVOLBF3HT",
-        #     "spread_length": 2,
-
-        # },
-    ]
+#         },
+]
     
     models_tested = []
     error_models = []
@@ -180,8 +137,8 @@ if __name__ == "__main__":
 
     for config in backtest_configs:
         for year in years:
-            year_data = YEAR_CONFIG[year]
             starting_cash = config['portfolio_cash']
+            year_data = YEAR_CONFIG[year]
             trading_strat = f"{config['user']}-{nowstr}-{year_data['year']}-modelCDVOL_dwnsdVOL:{config['model']}_{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_{config['scaling']}_sasl{config['spread_adjustment']}:{config['spread_length']}"
             for month in year_data['months']:
                 try:

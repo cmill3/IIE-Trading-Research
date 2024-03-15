@@ -43,7 +43,7 @@ def create_simulation_data_inv(row,config):
     trading_aggregates, option_symbols = backtrader_helper.create_options_aggs_inv(row,start_date,end_date=end_date,spread_length=config['spread_length'],config=config)
     return start_date, end_date, row['symbol'], row['o'], row['strategy'], option_symbols, trading_aggregates
 
-def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, polygon_df, position_id, trading_date, alert_hour,order_id,config,row):
+def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, polygon_df, position_id, trading_date, alert_hour,order_id,config,row,order_num):
     open_price = open_prices[0]
     open_datetime = datetime(int(trading_date.split("-")[0]),int(trading_date.split("-")[1]),int(trading_date.split("-")[2]),int(alert_hour),0,0,tzinfo=pytz.timezone('US/Eastern'))
     contract_cost = round(open_price * 100,2)
@@ -141,17 +141,16 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
             print(f"Error {e} in sell_dict for {symbol} in {strategy} CDVOLAGG")
             print(polygon_df)
             return {}
-    elif config['model'] == "CDVOLSFE":
+    elif config['model'] == "CDVOLVARVC":
         try:
- 
             if strategy in THREED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_3D_CDVOLSFE(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["return_vol_10D"]))
+                sell_dict = trade.tda_CALL_3D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["return_vol_10D"]),order_num=order_num)
             elif strategy in THREED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict = trade.tda_PUT_3D_CDVOLSFE(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["return_vol_10D"]))
+                sell_dict = trade.tda_PUT_3D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["return_vol_10D"]),order_num=order_num)
             elif strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_1D_CDVOLSFE(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["return_vol_10D"]))
+                sell_dict = trade.tda_CALL_1D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["return_vol_10D"]),order_num=order_num)
             elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict = trade.tda_PUT_1D_CDVOLSFE(polygon_df,open_datetime,1,config,target_pct=-row['target_pct'],vol=float(row["return_vol_10D"]))
+                sell_dict = trade.tda_PUT_1D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=-row['target_pct'],vol=float(row["return_vol_10D"]),order_num=order_num)
         except Exception as e:
             print(f"Error {e} in sell_dict for {symbol} in {strategy} CDVOLSFE")
             print(polygon_df)
@@ -211,8 +210,8 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
 
 def simulate_trades_invalerts(data,config):
     positions_list = []
-    order_num = 1
     for i, row in data.iterrows():
+        order_num = 1
         ## These variables are crucial for controlling the buy/sell flow of the simulation.
         alert_hour = row['hour']
         trading_date = row['date']
@@ -223,12 +222,14 @@ def simulate_trades_invalerts(data,config):
         position_id = f"{row['symbol']}-{(row['strategy'].replace('_',''))}-{pos_dt}"
 
         results = []
+
         for df in enriched_options_aggregates:
             try:
                 open_prices = df['o'].values
                 ticker = df.iloc[0]['ticker']
                 order_id = f"{order_num}_{order_dt}"
-                results_dict = buy_iterate_sellV2_invalerts(symbol, ticker, open_prices, strategy, df, position_id, trading_date, alert_hour, order_id,config,row)
+                results_dict = buy_iterate_sellV2_invalerts(symbol, ticker, open_prices, strategy, df, position_id, trading_date, alert_hour, order_id,config,row,order_num)
+                results_dict['order_num'] = order_num
                 print(f"results_dict for {symbol} and {ticker}")
                 print(results_dict)
                 print()

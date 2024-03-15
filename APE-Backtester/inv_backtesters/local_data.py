@@ -32,6 +32,15 @@ def pull_contract_data(row):
         date = row['date'].split(" ")[0]
         file_date = create_index_date(row['date'])
         year, month, day = file_date.strftime('%Y-%m-%d').split("-")
+    elif row['symbol'] in ['NVDA','GOOG','GOOGL','AMZN']:
+        date = row['date'].split(" ")[0]
+        year, month, day = date.split("-")
+        if year in ['2021','2022']:
+            dt = datetime(int(year),int(month),int(day))
+            weekday = dt.weekday()
+            monday_dt = dt - timedelta(days=weekday)
+            monday_str = monday_dt.strftime('%Y-%m-%d')
+            year, month, day = monday_str.split("-")
     else:
         date = row['date'].split(" ")[0]
         year, month, day = date.split("-")
@@ -157,31 +166,31 @@ def add_weekdays(date,days,symbol):
     return date
 
 if __name__ == "__main__":
-    for year in ["twenty1","twenty2","twenty3"]:
+    for year in ["twenty2"]:
         strategy_info = { 
             "CDBFC": {
-                "file_path": 'TSSIM1_BF3_custHypTP0.55',
+                "file_path": 'TSSIM1_BF3CHP2015_custHypTP0.6',
                 "time_span": 4,
                 "side": "C"
             },
             "CDBFP": {
-                "file_path": 'TSSIM1_BF3_custHypTP0.45',
+                "file_path": 'TSSIM1_BF3CHP2015_custHypTP0.4',
                 "time_span": 4,
                 "side": "P"
             },
             "CDBFC_1D": {
-                "file_path": 'TSSIM1_BF3_custHypTP0.55',
+                "file_path": 'TSSIM1_BF3CHP2015_custHypTP0.6',
                 "time_span": 2,
                 "side": "C"
             },
             "CDBFP_1D": {
-                "file_path": 'TSSIM1_BF3_custHypTP0.45',
+                "file_path": 'TSSIM1_BF3CHP2015_custHypTP0.4',
                 "time_span": 2,
                 "side": "P"
             },
         }
 
-        data_type = 'CDVOLBF3HT'
+        data_type = 'CDVOLBF3-6'
         file_names = YEAR_CONFIG[year]['all_files']
         
         # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')
