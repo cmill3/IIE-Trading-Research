@@ -32,7 +32,7 @@ def pull_contract_data(row):
         date = row['date'].split(" ")[0]
         file_date = create_index_date(row['date'])
         year, month, day = file_date.strftime('%Y-%m-%d').split("-")
-    elif row['symbol'] in ['NVDA','GOOG','GOOGL','AMZN']:
+    elif row['symbol'] in ['NVDA','GOOG','GOOGL','AMZN','TSLA']:
         date = row['date'].split(" ")[0]
         year, month, day = date.split("-")
         if year in ['2021','2022']:
@@ -165,7 +165,7 @@ def add_weekdays(date,days,symbol):
     return date
 
 if __name__ == "__main__":
-    for year in ["twenty2"]:
+    for year in ["twenty1","twenty2","twenty3"]:
         strategy_info = { 
             "CDBFC": {
                 "file_path": 'TSSIM1_BF3CHP2015_custHypTP0.6',

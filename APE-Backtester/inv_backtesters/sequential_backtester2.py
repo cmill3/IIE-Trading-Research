@@ -61,10 +61,10 @@ def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,c
 
     if not local_data:
         cpu_count = os.cpu_count()
-        build_backtest_data(file_names[0],strategies,config)
-        # with concurrent.futures.ProcessPoolExecutor(max_workers=5) as executor:
-        #     # Submit the processing tasks to the ThreadPoolExecutor
-        #     processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies,config) for file_name in file_names]
+        # build_backtest_data(file_names[0],strategies,config)
+        with concurrent.futures.ProcessPoolExecutor(max_workers=5) as executor:
+            # Submit the processing tasks to the ThreadPoolExecutor
+            processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies,config) for file_name in file_names]
 
         # Step 4: Retrieve the results from the futures
         processed_weeks_results = [future.result() for future in processed_weeks_futures]
@@ -88,16 +88,34 @@ if __name__ == "__main__":
     strategy_theme = "invALERTS_cls" 
 
     backtest_configs = [
-{
+        # {
+        #     "put_pct": 1, 
+        #     "spread_adjustment": 0,
+        #     "aa": 0,
+        #     "risk_unit": .006,
+        #     "model": "CDVOLVARVC",
+        #     "vc_level":"150/300/450",
+        #     "portfolio_cash": 100000,
+        #     "scaling": "dynamicscale",
+        #     "volatility_threshold": 0.5,
+        #     "model_type": "cls",
+        #     "user": "cm3",
+        #     "threeD_vol": "return_vol_10D",
+        #     "oneD_vol": "return_vol_5D",
+        #     "dataset": "CDVOLBF3-6",
+        #     "spread_length": 3,
+
+        # },
+        {
             "put_pct": 1, 
             "spread_adjustment": 1,
             "aa": 0,
-            "risk_unit": .009,
+            "risk_unit": .004,
             "model": "CDVOLVARVC",
             "vc_level":"150/300/450",
-            "portfolio_cash": 10000,
+            "portfolio_cash": 100000,
             "scaling": "dynamicscale",
-            "volatility_threshold": 0.4,
+            "volatility_threshold": 0.5,
             "model_type": "cls",
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
@@ -106,6 +124,24 @@ if __name__ == "__main__":
             "spread_length": 2,
 
         },
+# {
+#             "put_pct": 1, 
+#             "spread_adjustment": 1,
+#             "aa": 0,
+#             "risk_unit": .009,
+#             "model": "CDVOLAGG",
+#             "vc_level":350,
+#             "portfolio_cash": 10000,
+#             "scaling": "dynamicscale",
+#             "volatility_threshold": 0.5,
+#             "model_type": "cls",
+#             "user": "cm3",
+#             "threeD_vol": "return_vol_10D",
+#             "oneD_vol": "return_vol_5D",
+#             "dataset": "CDVOLBF3-6",
+#             "spread_length": 2,
+
+#         },
 # {
 #             "put_pct": 1, 
 #             "spread_adjustment": 0,
@@ -137,17 +173,10 @@ if __name__ == "__main__":
 
     for config in backtest_configs:
         for year in years:
-            starting_cash = config['portfolio_cash']
             year_data = YEAR_CONFIG[year]
-            starting_cash = config['portfolio_cash']
-            trading_strat = f"{config['user']}-{nowstr}-{year_data['year']}-modelCDVOL_dwnsdVOL:{config['model']}_{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_{config['scaling']}_sasl{config['spread_adjustment']}:{config['spread_length']}"
+            trading_strat = f"{config['user']}-{nowstr}-{year_data['year']}-modelCDVOL_dwnsdVOLOG:{config['model']}_{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_{config['scaling']}_sasl{config['spread_adjustment']}:{config['spread_length']}"
             for month in year_data['months']:
-                if year_data['year'] == '21':
-                    config['risk_unit'] = .006
-                elif year_data['year'] == '22':
-                    config['risk_unit'] = .0055
-                elif year_data['year'] == '23':
-                    config['risk_unit'] = .005
+                starting_cash = config['portfolio_cash']
                 try:
                     start_dt = month[0]
                     end_date = month[-1]

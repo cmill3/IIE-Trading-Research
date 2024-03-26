@@ -145,9 +145,6 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
     except Exception as e:
         print(f"Error: {e} in evaluating contracts for {row['symbol']} of {row['strategy']}")
         return [], []
-    print("PROCESSING")
-    print(contracts)
-    print(strike)
     filtered_contracts = [k for k in contracts if strike in k]
     if len(filtered_contracts) == 0:
         print(f"No contracts for {row['symbol']} of {row['strategy']}")
@@ -166,15 +163,9 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
             print(strike)
             print(start_date)
             return [], []
-    print(filtered_contracts)
     options_df = build_options_df(filtered_contracts, row)
-    print("DF1")
-    print(options_df)
     ## SPREAD ADJUSTMENT
     options_df = options_df.iloc[config['spread_adjustment']:]
-    print("DF2")
-    print(options_df)
-    print()
     for index,contract in options_df.iterrows():
         try:
             options_agg_data = ph.polygon_optiondata(contract['contract_symbol'], start_date, end_date)
