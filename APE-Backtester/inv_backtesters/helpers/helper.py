@@ -7,9 +7,6 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 import pytz
 
-# warnings.filterwarnings("ignore", category=FutureWarning)
-# warnings.filterwarnings("ignore", category=DeprecationWarning)
-# warnings.filterwarnings("ignore", category=pd.core.common.SettingWithCopyWarning)
 
 def get_business_days(transaction_date, current_date):
     """

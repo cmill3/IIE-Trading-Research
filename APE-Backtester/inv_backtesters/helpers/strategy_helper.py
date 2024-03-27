@@ -1,4 +1,5 @@
 import math
+import pandas as pd
 
 
 ### BET SIZING FUNCTIONS ###
@@ -16,8 +17,7 @@ def build_trade(position, risk_unit,put_adjustment,portfolio_cash,config):
             transaction['sell_info']['close_trade_dt'] = transaction['close_trade_dt']
             buy_orders.append(transaction['buy_info'])
             sell_orders.append(transaction['sell_info'])
-            contract_costs.append(transaction['buy_info']['contract_cost'])
-            contract_type = transaction['buy_info']['contract_type']
+            contract_costs.append({"option_symbol":transaction['buy_info']['option_symbol'],"contract_cost":transaction['buy_info']['contract_cost']})
         except Exception as e:
             print(f"ERROR in build_trade f{e}")
             print(e)
@@ -25,49 +25,45 @@ def build_trade(position, risk_unit,put_adjustment,portfolio_cash,config):
             print(position)
             return [], []
     
-    sized_buys, sized_sells = bet_sizer(contract_costs, buy_orders, sell_orders, risk_unit, contract_type,put_adjustment,portfolio_cash,config)
+    sized_buys, sized_sells = bet_sizer(contract_costs, buy_orders, sell_orders, risk_unit,portfolio_cash,config)
     if sized_buys == None:
         print("ERROR in build_trade, no trades")
-        print(position)
+        print(position['position_id'])
+        return [], []
     return sized_buys, sized_sells
 
-def bet_sizer(contract_costs,buy_orders,sell_orders,risk_unit,contract_type,put_adjustment,portfolio_cash,config):
+def bet_sizer(contract_costs,buy_orders,sell_orders,risk_unit,portfolio_cash,config):
     ## FUNDS ADJUSTMENT
     available_funds = portfolio_cash
     ## PUT ADJUSTMENT
-    if contract_type == "calls":
-        target_cost = (risk_unit * available_funds)
-    elif contract_type == "puts":
-        target_cost = ((risk_unit * available_funds)*put_adjustment)
-    else:
-        target_cost = (risk_unit * available_funds)
-        print("ERROR")
-        print(buy_orders)
-        print(contract_type)
-    spread_cost = sum(contract_costs[0:config['spread_length']])
-    quantities = finalize_trade(buy_orders, spread_cost, target_cost)
+    target_cost = (risk_unit * available_funds)
 
-    if quantities == [0,0,0]:
-        if len(contract_costs) > 3:
-            spread_cost = contract_costs[3] * 100
-            if spread_cost < target_cost:
-                quantities = [0,0,0,1]
+
+    quantities = size_spread_quantities(contract_costs, target_cost, config)
+    # quantities = finalize_trade(buy_orders, spread_cost, target_cost)
+
+    buy_df = pd.DataFrame.from_dict(buy_orders)
+    sell_df = pd.DataFrame.from_dict(sell_orders)
+    buy_df['quantity'] = 0
+    sell_df['quantity'] = 0
+
 
     if len(quantities) == 0:
         return None, None
-    for i, value in enumerate(quantities):
+    for index, row in quantities.iterrows():
         try:
-            if value == 0:
-                buy_orders[i] = None
-                sell_orders[i] = None
+            if row['quantity'] == 0:
+                continue
             else:
                 try:
-                    buy_orders[i]['quantity'] = value
-                    sell_orders[i]['quantity'] = value
+                    buy_df.loc[buy_df['option_symbol'] == row['option_symbol'], 'quantity'] = row['quantity']
+                    sell_df.loc[sell_df['option_symbol'] == row['option_symbol'], 'quantity'] = row['quantity']
                 except Exception as e:
-                    print(f"Error {e} in size_trade {i} {value}")
+                    print(f"Error {e} in size_trade {row}")
                     print(e)
-                    print(buy_orders)
+                    print(buy_df)
+                    print(sell_df)
+                    print()
                     return [], []
         except Exception as e:
             print("size_trade 2")
@@ -75,7 +71,87 @@ def bet_sizer(contract_costs,buy_orders,sell_orders,risk_unit,contract_type,put_
             print(buy_orders)
             return [], []
 
+    buy_df = buy_df.loc[buy_df['quantity'] > 0]
+    sell_df = sell_df.loc[sell_df['quantity'] > 0]
+    buy_orders = buy_df.to_dict('records')
+    sell_orders = sell_df.to_dict('records')
+    print(f"BUY ORDERS: {len(buy_orders)}")
+    print(f"SELL ORDERS: {len(sell_orders)}")
     return buy_orders, sell_orders
+
+def size_spread_quantities(contracts_details, target_cost, config):
+    spread_start, spread_end = config['spread_search'].split(":")
+    adjusted_target_cost = target_cost
+    spread_length = config['spread_length']
+    adjusted_contracts = contracts_details[int(spread_start):int(spread_end)]
+
+    quantities = []
+    contract_quantity = 0
+    spread_candidates = configure_contracts_for_trade_pct_based(adjusted_contracts, adjusted_target_cost, spread_length)
+    # spread_candidates, spread_cost = configure_contracts_for_trade(adjusted_contracts, adjusted_target_cost, spread_length)
+    # total_cost = 0
+
+    if len(spread_candidates) == 0:
+        return []
+    # else:
+    #     while total_cost < adjusted_target_cost:
+    #         if (spread_cost + total_cost) < adjusted_target_cost:
+    #             total_cost += spread_cost
+    #             contract_quantity += 1
+    #         else:
+    #             break
+            
+    # formatted_spread_cost = 0
+    # for candidate in spread_candidates:
+    #         quantities.append({"option_symbol": candidate['option_symbol'], "quantity": contract_quantity,"contract_cost": candidate['contract_cost']})
+    #         formatted_spread_cost += (candidate['contract_cost'] * contract_quantity)
+
+    # cost_remaining = adjusted_target_cost - formatted_spread_cost
+    # # adjusted_quantities = []
+    # if cost_remaining > 0:
+    #     for quantity in quantities:
+    #         if quantity["contract_cost"] < cost_remaining:
+    #             cost_remaining -= quantity['contract_cost']
+    #             quantity['quantity'] += 1
+
+
+    details_df = pd.DataFrame(spread_candidates)
+    details_df = details_df.loc[details_df['quantity'] > 0]
+    details_df.reset_index(drop=True, inplace=True)
+    details_df['spread_position'] = details_df.index
+    return details_df
+
+# def size_next_contract(contracts_details, target_cost):
+     #Size the trades iteratively so there is flexibility in the length of the spread
+def configure_contracts_for_trade(contracts_details, target_cost, spread_length):
+    spread_candidates = []
+    total_cost = 0
+    cost_remaining = target_cost
+    for contract in contracts_details:
+        if contract['contract_cost'] < cost_remaining:
+            spread_candidates.append(contract)
+            cost_remaining -= contract['contract_cost']
+            total_cost += contract['contract_cost']
+        if len(spread_candidates) == spread_length:
+            return spread_candidates, total_cost
+    return spread_candidates, total_cost
+
+def configure_contracts_for_trade_pct_based(contracts_details, target_cost, spread_length):
+    spread_candidates = []
+    cost_remaining = target_cost
+    split_cost = target_cost / spread_length
+    for contract in contracts_details:
+        contract_quantity = 0
+        split_cost_remaining = split_cost
+        while split_cost_remaining > 0:
+            if (split_cost_remaining - contract['contract_cost']) > 0:
+                split_cost_remaining -= contract['contract_cost']
+                contract_quantity += 1
+            else:
+                break
+
+        spread_candidates.append({"option_symbol": contract['option_symbol'], "quantity": contract_quantity,"contract_cost": contract['contract_cost']})
+    return spread_candidates
     
 
 def calculate_spread_cost(contracts_details):

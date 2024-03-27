@@ -145,9 +145,6 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
     except Exception as e:
         print(f"Error: {e} in evaluating contracts for {row['symbol']} of {row['strategy']}")
         return [], []
-    print("PROCESSING")
-    print(contracts)
-    print(strike)
     filtered_contracts = [k for k in contracts if strike in k]
     if len(filtered_contracts) == 0:
         print(f"No contracts for {row['symbol']} of {row['strategy']}")
@@ -166,15 +163,10 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
             print(strike)
             print(start_date)
             return [], []
-    print(filtered_contracts)
     options_df = build_options_df(filtered_contracts, row)
-    print("DF1")
-    print(options_df)
     ## SPREAD ADJUSTMENT
-    options_df = options_df.iloc[config['spread_adjustment']:]
-    print("DF2")
-    print(options_df)
-    print()
+    # options_df = options_df.iloc[config['spread_adjustment']:]
+    options_df = options_df.iloc[:4]
     for index,contract in options_df.iterrows():
         try:
             options_agg_data = ph.polygon_optiondata(contract['contract_symbol'], start_date, end_date)
@@ -370,6 +362,7 @@ def extract_results_dict(positions_list):
     for transaction in transactions:
         try:
             sell_dict = transaction['sell_info']
+            buy_dict = transaction['buy_info']
             results_dicts.append(
             {
                 "price_change": transaction['price_change'], "pct_gain": transaction['pct_gain'],
@@ -378,7 +371,7 @@ def extract_results_dict(positions_list):
                 "max_gain_after": sell_dict['max_value_after_pct_change'],"option_symbol": sell_dict['option_symbol'],
                 "max_value_before_date": sell_dict['max_value_before_date'], "max_value_after_date": sell_dict['max_value_after_date'],
                 "max_value_before_idx": sell_dict['max_value_before_idx'], "max_value_after_idx": sell_dict['max_value_after_idx'],
-                "sell_code": sell_dict['sell_code']
+                "sell_code": sell_dict['sell_code'], "buy_quantity": buy_dict['quantity'], "sell_quantity": sell_dict['quantity'],
             })
         except Exception as e:
             print(f"Error: {e} in extracting results dict")
