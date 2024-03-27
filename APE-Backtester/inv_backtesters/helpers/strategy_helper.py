@@ -75,8 +75,6 @@ def bet_sizer(contract_costs,buy_orders,sell_orders,risk_unit,portfolio_cash,con
     sell_df = sell_df.loc[sell_df['quantity'] > 0]
     buy_orders = buy_df.to_dict('records')
     sell_orders = sell_df.to_dict('records')
-    print(f"BUY ORDERS: {len(buy_orders)}")
-    print(f"SELL ORDERS: {len(sell_orders)}")
     return buy_orders, sell_orders
 
 def size_spread_quantities(contracts_details, target_cost, config):

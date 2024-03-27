@@ -356,10 +356,10 @@ def build_positions_df(positions_list):
     positions_df = pd.DataFrame.from_dict(positions_dict, orient='index')
     return positions_df, positions_dict
 
-def extract_results_dict(positions_list):
+def extract_results_dict(positions_list, config):
     results_dicts = []
     transactions = positions_list['transactions']
-    for transaction in transactions:
+    for transaction in transactions[:config['spread_length']]:
         try:
             sell_dict = transaction['sell_info']
             buy_dict = transaction['buy_info']
