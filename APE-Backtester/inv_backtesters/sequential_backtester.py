@@ -24,7 +24,7 @@ def build_backtest_data(file_name,strategies,config):
         name, prediction_horizon = strategy.split(":")
         data = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/{config["dataset"]}/{name}/{file_name}.csv')
         data['prediction_horizon'] = prediction_horizon
-        dfs.append(data.sample(10))
+        dfs.append(data)
     
     backtest_data = pd.concat(dfs,ignore_index=True)
     # backtest_data = backtest_data[backtest_data['probabilities'] > config['probability']]
