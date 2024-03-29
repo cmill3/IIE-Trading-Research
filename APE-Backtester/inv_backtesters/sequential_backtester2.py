@@ -138,7 +138,7 @@ if __name__ == "__main__":
     for config in backtest_configs:
         for year in years:
             year_data = YEAR_CONFIG[year]
-            trading_strat = f"{config['user']}-{nowstr}-{year_data['year']}-modelCDVOL_dwnsdVOL_BT2:{config['model']}1DLOW_{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_{config['scaling']}_sssl{config['spread_search']}:{config['spread_length']}"
+            trading_strat = f"{config['user']}-{nowstr}-{year_data['year']}-modelCDVOL_dwnsdVOL_WK2:{config['model']}1DLOW_{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_{config['scaling']}_sssl{config['spread_search']}:{config['spread_length']}"
             for month in year_data['months']:
                 starting_cash = config['portfolio_cash']
                 try:

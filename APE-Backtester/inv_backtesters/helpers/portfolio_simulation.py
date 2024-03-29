@@ -160,6 +160,7 @@ def simulate_portfolio_DS(positions_list, datetime_list, portfolio_cash, risk_un
                         if len(sized_buys) == 0:
                             continue
                         orders_taken = False
+                        quantities = {}
                         for index, order in enumerate(sized_buys):
                             if order != None:
                                 orders_taken = True
@@ -167,6 +168,7 @@ def simulate_portfolio_DS(positions_list, datetime_list, portfolio_cash, risk_un
                                 value['purchase_costs'] += (order['contract_cost'] * order['quantity'])
                                 value['portfolio_cash'] -= (order['contract_cost'] * order['quantity'])
                                 contracts_bought.append(f"{order['option_symbol']}_{order['order_id']}")
+                                quantities[order['option_symbol']] = order['quantity']
                                 ### CHASE
                                 # dt_str = sized_sells[index]['close_datetime'].strftime("%Y-%m-%d-%H-%M")
                                 # year, month, day, hour, minute = dt_str.split("-")
@@ -179,7 +181,7 @@ def simulate_portfolio_DS(positions_list, datetime_list, portfolio_cash, risk_un
                                     sales_dict[sale_dt].append(sale_info)
                         if orders_taken:
                             current_positions.append((position['position_id'].split("-")[0] + position['position_id'].split("-")[1]))
-                            results_dicts = extract_results_dict(position,config)
+                            results_dicts = extract_results_dict(position,config,quantities)
                             positions_taken.append({'position_id':position['position_id'],"results":results_dicts})
                             value['period_net_returns'] = (value['sale_returns'] - value['purchase_costs'])
                 else:
@@ -220,6 +222,7 @@ def simulate_portfolio_DS(positions_list, datetime_list, portfolio_cash, risk_un
                         if len(sized_buys) == 0:
                             continue
                         orders_taken = False
+                        quantities = {}
                         for index, order in enumerate(sized_buys):
                             print(f"ORDER INDEX: {index}")
                             if order != None:
@@ -228,6 +231,7 @@ def simulate_portfolio_DS(positions_list, datetime_list, portfolio_cash, risk_un
                                 value['purchase_costs'] += (order['contract_cost'] * order['quantity'])
                                 value['portfolio_cash'] -= (order['contract_cost'] * order['quantity'])
                                 contracts_bought.append(f"{order['option_symbol']}_{order['order_id']}")
+                                quantities[order['option_symbol']] = order['quantity']
                                 ### CHASE
                                 # dt_str = sized_sells[index]['close_datetime'].strftime("%Y-%m-%d-%H-%M")
                                 # year, month, day, hour, minute = dt_str.split("-")
@@ -240,7 +244,7 @@ def simulate_portfolio_DS(positions_list, datetime_list, portfolio_cash, risk_un
                                     sales_dict[sale_dt].append(sale_info)
                         if orders_taken:
                             current_positions.append((position['position_id'].split("-")[0] + position['position_id'].split("-")[1]))
-                            results_dicts = extract_results_dict(position,config)
+                            results_dicts = extract_results_dict(position,config,quantities)
                             positions_taken.append({'position_id':position['position_id'],"results":results_dicts})
                 else:
                     if passed_trades_dict.get(key) is not None:

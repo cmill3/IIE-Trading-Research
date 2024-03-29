@@ -1845,9 +1845,9 @@ def tda_PUT_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target_
     if order_num > 4:
         order_num = 4
     vc_config = {
-        1: 75,
-        2: 200,
-        3: 300,
+        1: 100,
+        2: 300,
+        3: 500,
         4: 500
     }
     for index, row in polygon_df.iterrows():
@@ -1918,9 +1918,9 @@ def tda_CALL_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target
     if order_num > 4:
         order_num = 4
     vc_config = {
-        1: 75,
-        2: 200,
-        3: 400,
+        1: 100,
+        2: 300,
+        3: 500,
         4: 500
     }
     for index, row in polygon_df.iterrows():

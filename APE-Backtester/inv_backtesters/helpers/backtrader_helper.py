@@ -122,7 +122,7 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
     # # else:
     # #     expiry = expiries[0]
 
-    expiry = expiries[0]
+    expiry = expiries[1]
     
     strike = row['symbol'] + expiry
     try:
@@ -356,13 +356,18 @@ def build_positions_df(positions_list):
     positions_df = pd.DataFrame.from_dict(positions_dict, orient='index')
     return positions_df, positions_dict
 
-def extract_results_dict(positions_list, config):
+def extract_results_dict(positions_list, config, quantities):
     results_dicts = []
     transactions = positions_list['transactions']
-    for transaction in transactions[:config['spread_length']]:
+    for transaction in transactions:
         try:
             sell_dict = transaction['sell_info']
             buy_dict = transaction['buy_info']
+            symbol = sell_dict['option_symbol']
+            try:
+                option_quantity = quantities[symbol]
+            except KeyError as e:
+                continue
             results_dicts.append(
             {
                 "price_change": transaction['price_change'], "pct_gain": transaction['pct_gain'],
@@ -371,7 +376,7 @@ def extract_results_dict(positions_list, config):
                 "max_gain_after": sell_dict['max_value_after_pct_change'],"option_symbol": sell_dict['option_symbol'],
                 "max_value_before_date": sell_dict['max_value_before_date'], "max_value_after_date": sell_dict['max_value_after_date'],
                 "max_value_before_idx": sell_dict['max_value_before_idx'], "max_value_after_idx": sell_dict['max_value_after_idx'],
-                "sell_code": sell_dict['sell_code'], "buy_quantity": buy_dict['quantity'], "sell_quantity": sell_dict['quantity'],
+                "sell_code": sell_dict['sell_code'], "quantity": option_quantity,
             })
         except Exception as e:
             print(f"Error: {e} in extracting results dict")
