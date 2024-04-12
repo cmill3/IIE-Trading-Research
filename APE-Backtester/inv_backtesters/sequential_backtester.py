@@ -122,7 +122,6 @@ if __name__ == "__main__":
             "spread_length": 3,
 
         },
-]
     
     models_tested = []
     error_models = []

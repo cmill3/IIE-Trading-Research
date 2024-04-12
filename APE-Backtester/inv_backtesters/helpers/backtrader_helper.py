@@ -188,7 +188,6 @@ def generate_datetime_range(start_date, end_date):
     datetime_range = []
 
     while current_date <= end_date:
-        print("2")
         datetime_range.append(current_date.strftime("%Y-%m-%dT%H:%M"))
         current_date += delta
 

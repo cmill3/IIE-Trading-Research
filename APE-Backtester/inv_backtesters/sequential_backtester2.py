@@ -88,7 +88,25 @@ if __name__ == "__main__":
     strategy_theme = "invALERTS_cls" 
 
     backtest_configs = [
-{
+        # {
+        #     "put_pct": 1, 
+        #     "spread_adjustment": 0,
+        #     "aa": 0,
+        #     "risk_unit": .006,
+        #     "model": "CDVOLVARVC",
+        #     "vc_level":"150/300/450",
+        #     "portfolio_cash": 100000,
+        #     "scaling": "dynamicscale",
+        #     "volatility_threshold": 0.5,
+        #     "model_type": "cls",
+        #     "user": "cm3",
+        #     "threeD_vol": "return_vol_10D",
+        #     "oneD_vol": "return_vol_5D",
+        #     "dataset": "CDVOLBF3-6",
+        #     "spread_length": 3,
+
+        # },
+        {
             "put_pct": 1, 
             "spread_search": "1:3",
             "aa": 0,
@@ -97,7 +115,7 @@ if __name__ == "__main__":
             "vc_level":"100+300+500",
             "portfolio_cash": 100000,
             "scaling": "dynamicscale",
-            "volatility_threshold": 0.4,
+            "volatility_threshold": 0.5,
             "model_type": "cls",
             "user": "cm3",
             "threeD_vol": "return_vol_10D",

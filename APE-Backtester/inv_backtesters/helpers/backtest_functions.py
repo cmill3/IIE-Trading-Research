@@ -150,7 +150,7 @@ def simulate_trades_invalerts(data,config):
             # print("TEST")
             # print(position_trades)
         except Exception as e:
-            print(f"Error in position_trades for {position_id}")
+            print(f"Error in position_trades for {position_id} {e}")
             print(results)
             print()
             continue
