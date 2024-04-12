@@ -1699,7 +1699,7 @@ def tda_PUT_3D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target_
     vc_config = {
         1: 100,
         2: 300,
-        3: 450,
+        3: 500,
         4: 500
     }
     for index, row in polygon_df.iterrows():
@@ -1773,7 +1773,7 @@ def tda_CALL_3D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target
     vc_config = {
         1: 100,
         2: 300,
-        3: 450,
+        3: 500,
         4: 500
     }
     for index, row in polygon_df.iterrows():
