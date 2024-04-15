@@ -361,6 +361,7 @@ def extract_results_dict(positions_list):
     for transaction in transactions:
         try:
             sell_dict = transaction['sell_info']
+            buy_dict = transaction['buy_info']  
             results_dicts.append(
             {
                 "price_change": transaction['price_change'], "pct_gain": transaction['pct_gain'],
@@ -369,7 +370,7 @@ def extract_results_dict(positions_list):
                 "max_gain_after": sell_dict['max_value_after_pct_change'],"option_symbol": sell_dict['option_symbol'],
                 "max_value_before_date": sell_dict['max_value_before_date'], "max_value_after_date": sell_dict['max_value_after_date'],
                 "max_value_before_idx": sell_dict['max_value_before_idx'], "max_value_after_idx": sell_dict['max_value_after_idx'],
-                "sell_code": sell_dict['sell_code']
+                "sell_code": sell_dict['sell_code'], "sell_quantity": sell_dict['quantity'], "buy_quantity": buy_dict['quantity'],
             })
         except Exception as e:
             print(f"Error: {e} in extracting results dict")

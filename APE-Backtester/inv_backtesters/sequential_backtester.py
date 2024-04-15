@@ -29,7 +29,7 @@ def build_backtest_data(file_name,strategies,config):
             name, prediction_horizon = strategy.split(":")
             data = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/{config["dataset"]}/{name}/{file_name}.csv')
             data['prediction_horizon'] = prediction_horizon
-            dfs.append(data)
+            dfs.append(data.sample(10))
         except Exception as e:
             print(f"Error: {e} for {strategy} on {file_name}")
             continue
@@ -199,5 +199,4 @@ if __name__ == "__main__":
         print(models_tested)
         print("Errors:")
         print(error_models)
-
 

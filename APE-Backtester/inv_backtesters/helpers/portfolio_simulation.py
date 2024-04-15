@@ -165,7 +165,6 @@ def simulate_portfolio_DS(positions_list, datetime_list, portfolio_cash, risk_un
                                 value['purchase_costs'] += (order['contract_cost'] * order['quantity'])
                                 value['portfolio_cash'] -= (order['contract_cost'] * order['quantity'])
                                 contracts_bought.append(f"{order['option_symbol']}_{order['order_id']}")
-                                quantities = order['quantity']
                                 ### CHASE
                                 # dt_str = sized_sells[index]['close_datetime'].strftime("%Y-%m-%d-%H-%M")
                                 # year, month, day, hour, minute = dt_str.split("-")
@@ -179,7 +178,7 @@ def simulate_portfolio_DS(positions_list, datetime_list, portfolio_cash, risk_un
                         if orders_taken:
                             current_positions.append((position['position_id'].split("-")[0] + position['position_id'].split("-")[1]))
                             results_dicts = results_dict_func(position)
-                            positions_taken.append({'position_id':position['position_id'],"results":results_dicts,"quantity":quantities})
+                            positions_taken.append({'position_id':position['position_id'],"results":results_dicts})
                             value['period_net_returns'] = (value['sale_returns'] - value['purchase_costs'])
                 else:
                         if passed_trades_dict.get(key) is not None:
