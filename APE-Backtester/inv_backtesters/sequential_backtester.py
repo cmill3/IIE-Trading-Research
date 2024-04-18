@@ -90,7 +90,7 @@ if __name__ == "__main__":
             "put_pct": 1, 
             "spread_search": "1:3",
             "aa": 0,
-            "risk_unit": .00825,
+            "risk_unit": .022,
             "model": "CDVOLVARVC",
             "vc_level":"100+300+500",
             "portfolio_cash": 100000,
@@ -100,7 +100,7 @@ if __name__ == "__main__":
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6TRIM",
+            "dataset": "CDVOLBF3-6t11",
             "spread_length": 2,
 
         },
@@ -108,7 +108,7 @@ if __name__ == "__main__":
             "put_pct": 1, 
             "spread_search": "0:3",
             "aa": 0,
-            "risk_unit": .00825,
+            "risk_unit": .022,
             "model": "CDVOLVARVC",
             "vc_level":"100+300+500",
             "portfolio_cash": 100000,
@@ -118,7 +118,79 @@ if __name__ == "__main__":
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6TRIM",
+            "dataset": "CDVOLBF3-6t11",
+            "spread_length": 3,
+
+        },
+        {
+            "put_pct": 1, 
+            "spread_search": "1:3",
+            "aa": 0,
+            "risk_unit": .022,
+            "model": "CDVOLVARVC",
+            "vc_level":"100+300+500",
+            "portfolio_cash": 100000,
+            "scaling": "dynamicscale",
+            "volatility_threshold": 0.5,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBF3-6t11",
+            "spread_length": 2,
+
+        },
+{
+            "put_pct": 1, 
+            "spread_search": "0:3",
+            "aa": 0,
+            "risk_unit": .022,
+            "model": "CDVOLVARVC",
+            "vc_level":"100+300+500",
+            "portfolio_cash": 100000,
+            "scaling": "dynamicscale",
+            "volatility_threshold": 0.5,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBF3-6t11",
+            "spread_length": 3,
+
+        },
+        {
+            "put_pct": 1, 
+            "spread_search": "1:3",
+            "aa": 0,
+            "risk_unit": .022,
+            "model": "CDVOLVARVC",
+            "vc_level":"100+300+500",
+            "portfolio_cash": 100000,
+            "scaling": "dynamicscale",
+            "volatility_threshold": 0.6,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBF3-6t11",
+            "spread_length": 2,
+
+        },
+{
+            "put_pct": 1, 
+            "spread_search": "0:3",
+            "aa": 0,
+            "risk_unit": .022,
+            "model": "CDVOLVARVC",
+            "vc_level":"100+300+500",
+            "portfolio_cash": 100000,
+            "scaling": "dynamicscale",
+            "volatility_threshold": 0.6,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBF3-6t11",
             "spread_length": 3,
 
         },
@@ -138,7 +210,7 @@ if __name__ == "__main__":
     for config in backtest_configs:
         for year in years:
             year_data = YEAR_CONFIG[year]
-            trading_strat = f"{config['user']}-{nowstr}-{year_data['year']}-modelCDVOL_dwnsdVOL:{config['model']}_1D=23_{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_{config['scaling']}_sssl{config['spread_search']}:{config['spread_length']}"
+            trading_strat = f"{config['user']}-{nowstr}-{year_data['year']}-modelCDVOL_dwnsdVOL:{config['model']}_{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_{config['scaling']}_sssl{config['spread_search']}:{config['spread_length']}"
             for month in year_data['months']:
                 starting_cash = config['portfolio_cash']
                 try:
