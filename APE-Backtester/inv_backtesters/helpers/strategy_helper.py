@@ -7,7 +7,8 @@ def build_trade(position, risk_unit,put_adjustment,portfolio_cash,config):
     buy_orders = []
     sell_orders = []
     contract_costs = []
-    transactions = position['transactions']
+    spread_start, spread_end = config['spread_search'].split(":")
+    transactions = position['transactions'][int(spread_start):int(spread_end)]
     contract_type = ""
     for transaction in transactions:
         # print(type(trade_info))
@@ -24,12 +25,17 @@ def build_trade(position, risk_unit,put_adjustment,portfolio_cash,config):
             print(transaction)
             print(position)
             return [], []
-    
+
     sized_buys, sized_sells = bet_sizer(contract_costs, buy_orders, sell_orders, risk_unit,portfolio_cash,config)
     if sized_buys == None:
-        print("ERROR in build_trade, no trades")
-        print(position['position_id'])
-        return [], []
+        sized_buys,sized_sells = add_extra_contracts(position['transactions'][int(spread_end):],risk_unit,portfolio_cash,config)
+        if sized_buys == None:
+            print("ERROR in build_trade, no trades")
+            print(position['position_id'])
+            return [], []
+        else:
+            return [sized_buys], [sized_sells]
+    
     return sized_buys, sized_sells
 
 def bet_sizer(contract_costs,buy_orders,sell_orders,risk_unit,portfolio_cash,config):
@@ -76,6 +82,19 @@ def bet_sizer(contract_costs,buy_orders,sell_orders,risk_unit,portfolio_cash,con
     buy_orders = buy_df.to_dict('records')
     sell_orders = sell_df.to_dict('records')
     return buy_orders, sell_orders
+
+def add_extra_contracts(positions, risk_unit,portfolio_cash,config):
+    target_cost = (risk_unit * portfolio_cash)
+    for position in positions:
+        print(position)
+        if position['buy_info']['contract_cost'] <= target_cost:
+            position['buy_info']['quantity'] = 1
+            position['sell_info']['quantity'] = 1
+            position['sell_info']['close_trade_dt'] = position['close_trade_dt']
+            return position['buy_info'], position['sell_info']
+        else:
+            continue
+    return None, None
 
 def size_spread_quantities(contracts_details, target_cost, config):
     spread_start, spread_end = config['spread_search'].split(":")

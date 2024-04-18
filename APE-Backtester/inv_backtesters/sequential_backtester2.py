@@ -92,7 +92,7 @@ if __name__ == "__main__":
             "put_pct": 1, 
             "spread_search": "1:3",
             "aa": 0,
-            "risk_unit": .022,
+            "risk_unit": .011,
             "model": "CDVOLVARVC",
             "vc_level":"100+300+500",
             "portfolio_cash": 100000,
@@ -102,7 +102,7 @@ if __name__ == "__main__":
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6t11",
+            "dataset": "CDVOLBF3-6t23",
             "spread_length": 2,
 
         },
@@ -110,7 +110,7 @@ if __name__ == "__main__":
             "put_pct": 1, 
             "spread_search": "0:3",
             "aa": 0,
-            "risk_unit": .022,
+            "risk_unit": .011,
             "model": "CDVOLVARVC",
             "vc_level":"100+300+500",
             "portfolio_cash": 100000,
@@ -120,7 +120,7 @@ if __name__ == "__main__":
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6t11",
+            "dataset": "CDVOLBF3-6t23",
             "spread_length": 3,
 
         },
@@ -128,7 +128,7 @@ if __name__ == "__main__":
             "put_pct": 1, 
             "spread_search": "1:3",
             "aa": 0,
-            "risk_unit": .022,
+            "risk_unit": .011,
             "model": "CDVOLVARVC",
             "vc_level":"100+300+500",
             "portfolio_cash": 100000,
@@ -138,7 +138,7 @@ if __name__ == "__main__":
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6t11",
+            "dataset": "CDVOLBF3-6t23",
             "spread_length": 2,
 
         },
@@ -146,7 +146,7 @@ if __name__ == "__main__":
             "put_pct": 1, 
             "spread_search": "0:3",
             "aa": 0,
-            "risk_unit": .022,
+            "risk_unit": .011,
             "model": "CDVOLVARVC",
             "vc_level":"100+300+500",
             "portfolio_cash": 100000,
@@ -156,7 +156,7 @@ if __name__ == "__main__":
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6t11",
+            "dataset": "CDVOLBF3-6t23",
             "spread_length": 3,
 
         },
@@ -164,7 +164,7 @@ if __name__ == "__main__":
             "put_pct": 1, 
             "spread_search": "1:3",
             "aa": 0,
-            "risk_unit": .022,
+            "risk_unit": .011,
             "model": "CDVOLVARVC",
             "vc_level":"100+300+500",
             "portfolio_cash": 100000,
@@ -174,7 +174,7 @@ if __name__ == "__main__":
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6t11",
+            "dataset": "CDVOLBF3-6t23",
             "spread_length": 2,
 
         },
@@ -182,7 +182,7 @@ if __name__ == "__main__":
             "put_pct": 1, 
             "spread_search": "0:3",
             "aa": 0,
-            "risk_unit": .022,
+            "risk_unit": .011,
             "model": "CDVOLVARVC",
             "vc_level":"100+300+500",
             "portfolio_cash": 100000,
@@ -192,11 +192,12 @@ if __name__ == "__main__":
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6t11",
+            "dataset": "CDVOLBF3-6t23",
             "spread_length": 3,
 
         },
-]
+
+    ]
     
     models_tested = []
     error_models = []
