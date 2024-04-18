@@ -140,6 +140,7 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
                 return [], []
             
     underlying_agg_data.rename(columns={'o':'underlying_price'}, inplace=True)
+    open_price = underlying_agg_data['underlying_price'].values[0]
     try:
         contracts = ast.literal_eval(row['contracts'])
     except Exception as e:
@@ -166,7 +167,7 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
     options_df = build_options_df(filtered_contracts, row)
     ## SPREAD ADJUSTMENT
     # options_df = options_df.iloc[config['spread_adjustment']:]
-    options_df = options_df.iloc[:4]
+    options_df = options_df.iloc[:5]
     for index,contract in options_df.iterrows():
         try:
             options_agg_data = ph.polygon_optiondata(contract['contract_symbol'], start_date, end_date)
@@ -174,7 +175,7 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
             enriched_df.dropna(inplace=True)
             enriched_options_aggregates.append(enriched_df)
             options.append(contract)
-            if len(options) >= (spread_length+1):
+            if len(options) > 5:
                 break
         except Exception as e:
             print(f"Error: {e} in options agg for {row['symbol']} of {row['strategy']}")
@@ -494,14 +495,17 @@ def build_options_df(contracts, row):
         print(contracts)
         return df
 
+    df['strike_diff'] = abs((df['strike'] - row['o'])/row['o'])
     if row['side'] == "P":
         df = df.loc[df['strike']< row['o']].reset_index(drop=True)
         df = df.sort_values('strike', ascending=False)
+        df  = df.loc[df['strike_diff'] < 0.075].reset_index(drop=True)
         # print(df)
         # breakkk
     elif row['side'] == "C":
         df = df.loc[df['strike'] > row['o']].reset_index(drop=True)
         df = df.sort_values('strike', ascending=True)
+        df  = df.loc[df['strike_diff'] < 0.075].reset_index(drop=True)
         # print(df)
         # breakkk
     
@@ -547,7 +551,7 @@ def configure_trade_data(df,config):
     one_idx = index.loc[index['prediction_horizon'] == "1"]
     three_idx = index.loc[index['prediction_horizon'] == "3"]
 
-    filt_one = one.loc[one['day_of_week'].isin([2,3])]
+    filt_one = one.loc[one['day_of_week'].isin([0,1,2,3])]
     filt_three = three.loc[three['day_of_week'].isin([0,1,2])]
 
     one_idxF = one_idx.loc[one_idx['day_of_week'].isin([0,1,2,3])]
