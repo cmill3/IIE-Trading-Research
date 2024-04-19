@@ -161,7 +161,7 @@ def add_weekdays(date,days,symbol):
     return date
 
 if __name__ == "__main__":
-    for year in ["twenty1","twenty2","twenty3"]:
+    for year in ["twenty3","twenty2","twenty1"]:
         strategy_info = { 
             "CDBFC": {
                 "file_path": 'TSSIM1_BF3TRIM_RD_custHypTP0.6',
