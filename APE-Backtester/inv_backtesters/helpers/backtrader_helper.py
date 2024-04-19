@@ -167,7 +167,8 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
     options_df = build_options_df(filtered_contracts, row)
     ## SPREAD ADJUSTMENT
     # options_df = options_df.iloc[config['spread_adjustment']:]
-    options_df = options_df.iloc[:5]
+    # spread_start, spread_end = config['spread_search'].split(':')
+    # options_df = options_df.iloc[int(spread_start):int(spread_end)]
     for index,contract in options_df.iterrows():
         try:
             options_agg_data = ph.polygon_optiondata(contract['contract_symbol'], start_date, end_date)
@@ -175,7 +176,7 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
             enriched_df.dropna(inplace=True)
             enriched_options_aggregates.append(enriched_df)
             options.append(contract)
-            if len(options) > 5:
+            if len(options) > (spread_length+1):
                 break
         except Exception as e:
             print(f"Error: {e} in options agg for {row['symbol']} of {row['strategy']}")
@@ -499,13 +500,13 @@ def build_options_df(contracts, row):
     if row['side'] == "P":
         df = df.loc[df['strike']< row['o']].reset_index(drop=True)
         df = df.sort_values('strike', ascending=False)
-        df  = df.loc[df['strike_diff'] < 0.075].reset_index(drop=True)
+        # df  = df.loc[df['strike_diff'] < 0.075].reset_index(drop=True)
         # print(df)
         # breakkk
     elif row['side'] == "C":
         df = df.loc[df['strike'] > row['o']].reset_index(drop=True)
         df = df.sort_values('strike', ascending=True)
-        df  = df.loc[df['strike_diff'] < 0.075].reset_index(drop=True)
+        # df  = df.loc[df['strike_diff'] < 0.075].reset_index(drop=True)
         # print(df)
         # breakkk
     
