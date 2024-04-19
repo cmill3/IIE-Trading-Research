@@ -55,88 +55,17 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
         
     buy_dict = {"open_price": open_price, "open_datetime": open_datetime, "quantity": 1, "contract_cost": contract_cost, "option_symbol": option_symbol, "position_id": position_id, "contract_type": contract_type}
 
-    if config['model'] == "stdcls":
-        try:
-            if strategy in THREED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_3D_stdcls(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["threeD_stddev50"]))
-            elif strategy in THREED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict = trade.tda_PUT_3D_stdcls(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["threeD_stddev50"]))
-            elif strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_1D_stdcls(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["oneD_stddev50"]))
-            elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict = trade.tda_PUT_1D_stdcls(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["oneD_stddev50"]))
-        except Exception as e:
-            print(f"Error {e} in sell_dict for {symbol} in {strategy} stdcls")
-            print(polygon_df)
-            return {}
-    elif config['model'] == "VCcls":
-        try:
-            if strategy in THREED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_3D_VCcls(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["threeD_stddev50"]))
-            elif strategy in THREED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict = trade.tda_PUT_3D_VCcls(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["threeD_stddev50"]))
-            elif strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_1D_VCcls(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["oneD_stddev50"]))
-            elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict= trade.tda_PUT_1D_VCcls(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["oneD_stddev50"]))
-        except Exception as e:
-            print(f"Error {e} in sell_dict for {symbol} in {strategy} VCcls")
-            print(polygon_df)
-            return {}
-    elif config['model'] == "stdclsAGG":
-        try:
-            if strategy in THREED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["return_vol_10D"]))
-            elif strategy in THREED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict = trade.tda_PUT_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["return_vol_10D"]))
-            elif strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["return_vol_10D"]))
-            elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict= trade.tda_PUT_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["return_vol_10D"]))
-        except Exception as e:
-            print(f"Error {e} in sell_dict for {symbol} in {strategy} stdClassAgg")
-            print(polygon_df)
-            return {}
-    elif config['model'] == "simple":
-        try:
-            if strategy in THREED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_3D_simple(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["threeD_stddev50"]))
-            elif strategy in THREED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict = trade.tda_PUT_3D_simple(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["threeD_stddev50"]))
-            elif strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_1D_simple(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["oneD_stddev50"]))
-            elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict= trade.tda_PUT_1D_simple(polygon_df,open_datetime,1,config,target_pct=row['target_value'],vol=float(row["oneD_stddev50"]))
-        except Exception as e:
-            print(f"Error {e} in sell_dict for {symbol} in {strategy} stdClassAgg")
-            print(polygon_df)
-            return {}
-    elif config['model'] == "CDVOL":
+    if config['model'] == "CDVOLAGG":
         try:
  
             if strategy in THREED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_3D_CDVOLAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(abs(row["target_pct"])))
+                sell_dict = trade.tda_CALL_3D_CDVOLAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]))
             elif strategy in THREED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict = trade.tda_PUT_3D_CDVOLAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(abs(row["target_pct"])))
+                sell_dict = trade.tda_PUT_3D_CDVOLAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]))
             elif strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_1D_CDVOLAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(abs(row["target_pct"])))
+                sell_dict = trade.tda_CALL_1D_CDVOLAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]))
             elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict = trade.tda_PUT_1D_CDVOLAGG(polygon_df,open_datetime,1,config,target_pct=-row['target_pct'],vol=float(abs(row["target_pct"])))
-        except Exception as e:
-            print(f"Error {e} in sell_dict for {symbol} in {strategy} CDVOLAGG")
-            print(polygon_df)
-            return {}
-    elif config['model'] == "CDVOLAGG":
-        try:
- 
-            if strategy in THREED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_3D_CDVOLAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["return_vol_10D"]))
-            elif strategy in THREED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict = trade.tda_PUT_3D_CDVOLAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["return_vol_10D"]))
-            elif strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_1D_CDVOLAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["return_vol_10D"]))
-            elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict = trade.tda_PUT_1D_CDVOLAGG(polygon_df,open_datetime,1,config,target_pct=-row['target_pct'],vol=float(row["return_vol_10D"]))
+                sell_dict = trade.tda_PUT_1D_CDVOLAGG(polygon_df,open_datetime,1,config,target_pct=-row['target_pct'],vol=float(row["target_pct"]))
         except Exception as e:
             print(f"Error {e} in sell_dict for {symbol} in {strategy} CDVOLAGG")
             print(polygon_df)
@@ -144,47 +73,18 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
     elif config['model'] == "CDVOLVARVC":
         try:
             if strategy in THREED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_3D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["return_vol_10D"]),order_num=order_num)
+                sell_dict = trade.tda_CALL_3D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
             elif strategy in THREED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict = trade.tda_PUT_3D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["return_vol_10D"]),order_num=order_num)
+                sell_dict = trade.tda_PUT_3D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
             elif strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_1D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["return_vol_10D"]),order_num=order_num)
+                sell_dict = trade.tda_CALL_1D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
             elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict = trade.tda_PUT_1D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=-row['target_pct'],vol=float(row["return_vol_10D"]),order_num=order_num)
+                sell_dict = trade.tda_PUT_1D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=-row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
         except Exception as e:
-            print(f"Error {e} in sell_dict for {symbol} in {strategy} CDVOLSFE")
+            print(f"Error {e} in sell_dict for {symbol} in {strategy} CDVOLVARVC")
             print(polygon_df)
             return {}
-        
-        # elif config['model'] == "CDVOLSFE":
-        # try:
- 
-        #     if strategy in THREED_STRATEGIES and strategy in CALL_STRATEGIES:
-        #         sell_dict = trade.tda_CALL_3D_CDVOLSFE(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["return_vol_10D"]))
-            # elif strategy in THREED_STRATEGIES and strategy in PUT_STRATEGIES:
-            #     sell_dict = trade.tda_CALL_1D_CDVOLAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["return_vol_10D"]))
-            # elif strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
-            #     sell_dict = trade.tda_PUT_3D_CDVOLAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["return_vol_10D"]))
-        #     elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
-        #         sell_dict = trade.tda_PUT_1D_CDVOLSFE(polygon_df,open_datetime,1,config,target_pct=-row['target_pct'],vol=float(row["return_vol_10D"]))
-        # except Exception as e:
-        #     print(f"Error {e} in sell_dict for {symbol} in {strategy} CDVOLSFE")
-        #     print(polygon_df)
-        #     return {}
-    # elif config['model'] == "RMF":
-    #     # try:
-    #         if strategy in THREED_STRATEGIES and strategy in CALL_STRATEGIES:
-    #             sell_dict = trade.tda_CALL_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['rm_target_pct'],vol=float(row["threeD_stddev50"]))
-    #         elif strategy in THREED_STRATEGIES and strategy in PUT_STRATEGIES:
-    #             sell_dict = trade.tda_PUT_3D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['rm_target_pct'],vol=float(row["threeD_stddev50"]))
-    #         elif strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
-    #             sell_dict = trade.tda_CALL_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['rm_target_pct'],vol=float(row["oneD_stddev50"]))
-    #         elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
-    #             sell_dict= trade.tda_PUT_1D_stdclsAGG(polygon_df,open_datetime,1,config,target_pct=row['rm_target_pct'],vol=float(row["oneD_stddev50"]))
-        # except Exception as e:
-        #     print(f"Error {e} in sell_dict for {symbol} in {strategy} stdClassAgg")
-        #     print(polygon_df)
-        #     return {}
+    
     try:
         sell_dict['position_id'] = position_id
         results_dict = backtrader_helper.create_results_dict(buy_dict, sell_dict, order_id)

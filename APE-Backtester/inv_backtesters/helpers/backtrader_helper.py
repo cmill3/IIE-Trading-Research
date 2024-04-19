@@ -140,6 +140,7 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
                 return [], []
             
     underlying_agg_data.rename(columns={'o':'underlying_price'}, inplace=True)
+    open_price = underlying_agg_data['underlying_price'].values[0]
     try:
         contracts = ast.literal_eval(row['contracts'])
     except Exception as e:
@@ -165,7 +166,9 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
             return [], []
     options_df = build_options_df(filtered_contracts, row)
     ## SPREAD ADJUSTMENT
-    options_df = options_df.iloc[config['spread_adjustment']:]
+    # options_df = options_df.iloc[config['spread_adjustment']:]
+    # spread_start, spread_end = config['spread_search'].split(':')
+    # options_df = options_df.iloc[int(spread_start):int(spread_end)]
     for index,contract in options_df.iterrows():
         try:
             options_agg_data = ph.polygon_optiondata(contract['contract_symbol'], start_date, end_date)
@@ -173,7 +176,7 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
             enriched_df.dropna(inplace=True)
             enriched_options_aggregates.append(enriched_df)
             options.append(contract)
-            if len(options) >= (spread_length+1):
+            if len(options) > (spread_length+1):
                 break
         except Exception as e:
             print(f"Error: {e} in options agg for {row['symbol']} of {row['strategy']}")
@@ -187,7 +190,6 @@ def generate_datetime_range(start_date, end_date):
     datetime_range = []
 
     while current_date <= end_date:
-        print("2")
         datetime_range.append(current_date.strftime("%Y-%m-%dT%H:%M"))
         current_date += delta
 
@@ -355,13 +357,18 @@ def build_positions_df(positions_list):
     positions_df = pd.DataFrame.from_dict(positions_dict, orient='index')
     return positions_df, positions_dict
 
-def extract_results_dict(positions_list):
+def extract_results_dict(positions_list, config, quantities):
     results_dicts = []
     transactions = positions_list['transactions']
     for transaction in transactions:
         try:
             sell_dict = transaction['sell_info']
-            buy_dict = transaction['buy_info']  
+            buy_dict = transaction['buy_info']
+            symbol = sell_dict['option_symbol']
+            try:
+                option_quantity = quantities[symbol]
+            except KeyError as e:
+                continue
             results_dicts.append(
             {
                 "price_change": transaction['price_change'], "pct_gain": transaction['pct_gain'],
@@ -370,7 +377,7 @@ def extract_results_dict(positions_list):
                 "max_gain_after": sell_dict['max_value_after_pct_change'],"option_symbol": sell_dict['option_symbol'],
                 "max_value_before_date": sell_dict['max_value_before_date'], "max_value_after_date": sell_dict['max_value_after_date'],
                 "max_value_before_idx": sell_dict['max_value_before_idx'], "max_value_after_idx": sell_dict['max_value_after_idx'],
-                "sell_code": sell_dict['sell_code'], "sell_quantity": sell_dict['quantity'], "buy_quantity": buy_dict['quantity'],
+                "sell_code": sell_dict['sell_code'], "quantity": option_quantity,
             })
         except Exception as e:
             print(f"Error: {e} in extracting results dict")
@@ -489,14 +496,17 @@ def build_options_df(contracts, row):
         print(contracts)
         return df
 
+    df['strike_diff'] = abs((df['strike'] - row['o'])/row['o'])
     if row['side'] == "P":
         df = df.loc[df['strike']< row['o']].reset_index(drop=True)
         df = df.sort_values('strike', ascending=False)
+        # df  = df.loc[df['strike_diff'] < 0.075].reset_index(drop=True)
         # print(df)
         # breakkk
     elif row['side'] == "C":
         df = df.loc[df['strike'] > row['o']].reset_index(drop=True)
         df = df.sort_values('strike', ascending=True)
+        # df  = df.loc[df['strike_diff'] < 0.075].reset_index(drop=True)
         # print(df)
         # breakkk
     

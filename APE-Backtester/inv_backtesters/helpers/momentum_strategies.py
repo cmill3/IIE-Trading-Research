@@ -1414,6 +1414,7 @@ def tda_PUT_3D_CDVOLAGG(polygon_df, simulation_date, quantity, config, target_pc
     open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
     isVC = False
+    Floor_pct = (-vol * config['volatility_threshold'])
     for index, row in polygon_df.iterrows():
         if index == 0:
             continue
@@ -1422,7 +1423,6 @@ def tda_PUT_3D_CDVOLAGG(polygon_df, simulation_date, quantity, config, target_pc
         min_value = polygon_df.iloc[:index]['underlying_price'].min()
         underlying_gain = ((float(min_value) - float(open_price))/float(open_price))
         pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
-        Floor_pct = (vol * config['volatility_threshold'])
         # Floor_pct -= underlying_gain
         hour = row['date'].hour
         # Floor_pct = ((float(min_value) - float(open_price))/float(open_price)) + (standard_risk + (-1*config['risk_adjustment']))
@@ -1484,6 +1484,7 @@ def tda_CALL_3D_CDVOLAGG(polygon_df, simulation_date, quantity, config, target_p
     open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
     isVC = False
+    Floor_pct = (-vol * config['volatility_threshold'])
     for index, row in polygon_df.iterrows():
         if index == 0:
             continue
@@ -1492,7 +1493,6 @@ def tda_CALL_3D_CDVOLAGG(polygon_df, simulation_date, quantity, config, target_p
         max_value = polygon_df.iloc[:index]['underlying_price'].max()
         underlying_gain = ((float(max_value) - float(open_price))/float(open_price))
         pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
-        Floor_pct = (-vol * config['volatility_threshold'])
         # Floor_pct += underlying_gain
         hour = row['date'].hour
         # Floor_pct = ((float(max_value) - float(open_price))/float(open_price)) - (float(standard_risk) + (-1*config['risk_adjustment']))
@@ -1553,6 +1553,7 @@ def tda_PUT_1D_CDVOLAGG(polygon_df, simulation_date, quantity, config, target_pc
     open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
     isVC = False
+    Floor_pct = (-vol * config['volatility_threshold'])
     for index, row in polygon_df.iterrows():
         if index == 0:
             continue
@@ -1561,7 +1562,6 @@ def tda_PUT_1D_CDVOLAGG(polygon_df, simulation_date, quantity, config, target_pc
         min_value = polygon_df.iloc[:index]['underlying_price'].min()
         underlying_gain = ((float(min_value) - float(open_price))/float(open_price))
         pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
-        Floor_pct = ((vol * config['volatility_threshold'])*.7)
         # Floor_pct -= underlying_gain
         hour = row['date'].hour
 
@@ -1622,6 +1622,7 @@ def tda_CALL_1D_CDVOLAGG(polygon_df, simulation_date, quantity, config, target_p
     open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
     isVC = False
+    Floor_pct = (-vol * config['volatility_threshold'])
     for index, row in polygon_df.iterrows():
         if index == 0:
             continue
@@ -1691,13 +1692,14 @@ def tda_CALL_1D_CDVOLAGG(polygon_df, simulation_date, quantity, config, target_p
 def tda_PUT_3D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target_pct, vol, order_num):
     open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
+    Floor_pct = (-vol * config['volatility_threshold'])
     isVC = False
     if order_num > 4:
         order_num = 4
     vc_config = {
         1: 100,
         2: 300,
-        3: 450,
+        3: 500,
         4: 500
     }
     for index, row in polygon_df.iterrows():
@@ -1708,7 +1710,6 @@ def tda_PUT_3D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target_
         min_value = polygon_df.iloc[:index]['underlying_price'].min()
         underlying_gain = ((float(min_value) - float(open_price))/float(open_price))
         pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
-        Floor_pct = (vol * config['volatility_threshold'])
         # Floor_pct -= underlying_gain
         hour = row['date'].hour
         # Floor_pct = ((float(min_value) - float(open_price))/float(open_price)) + (standard_risk + (-1*config['risk_adjustment']))
@@ -1766,12 +1767,13 @@ def tda_CALL_3D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target
     open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
     isVC = False
+    Floor_pct = (-vol * config['volatility_threshold'])
     if order_num > 4:
         order_num = 4
     vc_config = {
         1: 100,
         2: 300,
-        3: 450,
+        3: 500,
         4: 500
     }
     for index, row in polygon_df.iterrows():
@@ -1782,7 +1784,6 @@ def tda_CALL_3D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target
         max_value = polygon_df.iloc[:index]['underlying_price'].max()
         underlying_gain = ((float(max_value) - float(open_price))/float(open_price))
         pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
-        Floor_pct = (-vol * config['volatility_threshold'])
         # Floor_pct += underlying_gain
         hour = row['date'].hour
         # Floor_pct = ((float(max_value) - float(open_price))/float(open_price)) - (float(standard_risk) + (-1*config['risk_adjustment']))
@@ -1840,12 +1841,13 @@ def tda_PUT_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target_
     open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
     isVC = False
+    Floor_pct = (-vol * config['volatility_threshold'])
     if order_num > 4:
         order_num = 4
     vc_config = {
         1: 100,
         2: 300,
-        3: 450,
+        3: 500,
         4: 500
     }
     for index, row in polygon_df.iterrows():
@@ -1856,7 +1858,6 @@ def tda_PUT_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target_
         min_value = polygon_df.iloc[:index]['underlying_price'].min()
         underlying_gain = ((float(min_value) - float(open_price))/float(open_price))
         pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
-        Floor_pct = ((vol * config['volatility_threshold'])*.7)
         # Floor_pct -= underlying_gain
         hour = row['date'].hour
 
@@ -1913,12 +1914,13 @@ def tda_CALL_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target
     open_price = polygon_df.iloc[0]['underlying_price']
     derivative_open_price = polygon_df.iloc[0]['o']
     isVC = False
+    Floor_pct = (-vol * config['volatility_threshold'])
     if order_num > 4:
         order_num = 4
     vc_config = {
         1: 100,
         2: 300,
-        3: 450,
+        3: 500,
         4: 500
     }
     for index, row in polygon_df.iterrows():
@@ -1930,7 +1932,6 @@ def tda_CALL_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target
         underlying_gain = ((float(max_value) - float(open_price))/float(open_price))
         pct_change = ((float(row['underlying_price']) - float(open_price))/float(open_price))
         hour = row['date'].hour
-        Floor_pct = ((-vol * config['volatility_threshold'])*.7)
         # Floor_pct += underlying_gain
 
         if deriv_pct_change > vc_config[order_num]:

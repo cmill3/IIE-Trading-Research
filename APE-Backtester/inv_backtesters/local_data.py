@@ -71,13 +71,6 @@ def pull_contract_data(row):
         return []
     return contracts_list
 
-def s3_to_local(file_name):
-    data1, _ = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/1D_fiveDFeaturesPrice_top30FLowtuned", file_name = f"{file_name}.csv",prefixes=["gainers","vdiff_gainC"])
-    data2, _ = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/1D_priceShortDH_top30FLtuned", file_name = f"{file_name}.csv",prefixes=["losers"])
-    data3, _ = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/1D_fiveDFeaturesPrice3_top30FLLowtuned", file_name = f"{file_name}.csv",prefixes=["ma","maP"])
-    data4, _ = back_tester.pull_data_invalerts(bucket_name="icarus-research-data", object_key="backtesting_data/inv_alerts/1D_fiveDFeaturesPrice2_top30FLowtuned", file_name = f"{file_name}.csv",prefixes=["vdiff_gainP"])
-    data = pd.concat([data1,data2,data3,data4],ignore_index=True)
-    data.to_csv(f'/Users/charlesmiller/Documents/backtesting_data/{file_name}.csv', index=False)
 
 def generate_expiry_dates(date_str,symbol,strategy):
     if symbol in ['SPY','QQQ','IWM']:
@@ -153,43 +146,46 @@ def generate_expiry_dates_row(row):
 def add_weekdays(date,days,symbol):
     if type(date) == str:
         date = datetime.strptime(date, '%Y-%m-%d')
+    year = date.year
+    month = date.month
     # date = datetime.strptime(date, '%Y-%m-%d')
     while days > 0:
         date += timedelta(days=1)
         if date.weekday() < 5:
             days -= 1
 
-    if symbol == "IWM":
+    ## works fully for now, will need to fix if we expand to taking calendar spreads as well
+    if symbol == "IWM" or year == 2021 or (year == 2022 and month < 6):
         if date.weekday() in [1,3]:
             date += timedelta(days=1)
     return date
 
 if __name__ == "__main__":
-    for year in ["twenty1","twenty2","twenty3"]:
+    for year in ["twenty3","twenty2","twenty1"]:
         strategy_info = { 
             "CDBFC": {
-                "file_path": 'TSSIM1_BF3CHP2015_custHypTP0.6',
+                "file_path": 'TSSIM1_BF3TRIM_RD_custHypTP0.6',
                 "time_span": 4,
                 "side": "C"
             },
             "CDBFP": {
-                "file_path": 'TSSIM1_BF3CHP2015_custHypTP0.4',
+                "file_path": 'TSSIM1_BF3TRIM_RD_custHypTP0.4',
                 "time_span": 4,
                 "side": "P"
             },
             "CDBFC_1D": {
-                "file_path": 'TSSIM1_BF3CHP2015_custHypTP0.6',
+                "file_path": 'TSSIM1_BF3TRIM_RD_custHypTP0.6',
                 "time_span": 2,
                 "side": "C"
             },
             "CDBFP_1D": {
-                "file_path": 'TSSIM1_BF3CHP2015_custHypTP0.4',
+                "file_path": 'TSSIM1_BF3TRIM_RD_custHypTP0.4',
                 "time_span": 2,
                 "side": "P"
             },
         }
 
-        data_type = 'CDVOLBF3-6'
+        data_type = 'CDVOLBF3-6TRIM'
         file_names = YEAR_CONFIG[year]['all_files']
         
         # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')
