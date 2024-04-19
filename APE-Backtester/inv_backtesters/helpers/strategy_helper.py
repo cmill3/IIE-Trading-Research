@@ -7,10 +7,10 @@ def build_trade(position, risk_unit,put_adjustment,portfolio_cash,config):
     buy_orders = []
     sell_orders = []
     contract_costs = []
-    spread_start, spread_end = config['spread_search'].split(":")
-    transactions = position['transactions'][int(spread_start):int(spread_end)]
+    # spread_start, spread_end = config['spread_search'].split(":")
+    # transactions = position['transactions'][int(spread_start):int(spread_end)]
     contract_type = ""
-    for transaction in transactions:
+    for transaction in position['transactions']:
         # print(type(trade_info))
         # print(position_id)
         # print(trade_info[0])
@@ -27,14 +27,18 @@ def build_trade(position, risk_unit,put_adjustment,portfolio_cash,config):
             return [], []
 
     sized_buys, sized_sells = bet_sizer(contract_costs, buy_orders, sell_orders, risk_unit,portfolio_cash,config)
+    print("CONT")
+    print(sized_buys)
+    print(sized_sells)
+    print()
     if sized_buys == None:
-        sized_buys,sized_sells = add_extra_contracts(position['transactions'][int(spread_end):],risk_unit,portfolio_cash,config)
-        if sized_buys == None:
-            print("ERROR in build_trade, no trades")
-            print(position['position_id'])
-            return [], []
-        else:
-            return [sized_buys], [sized_sells]
+        # sized_buys,sized_sells = add_extra_contracts(position['transactions'][int(spread_end):],risk_unit,portfolio_cash,config)
+        print("ERROR in build_trade, no trades")
+        print(position['position_id'])
+        return [], []
+        # if sized_buys == None:
+        # else:
+        #     return [sized_buys], [sized_sells]
     
     return sized_buys, sized_sells
 
@@ -47,7 +51,8 @@ def bet_sizer(contract_costs,buy_orders,sell_orders,risk_unit,portfolio_cash,con
 
     quantities = size_spread_quantities(contract_costs, target_cost, config)
     # quantities = finalize_trade(buy_orders, spread_cost, target_cost)
-
+    print("QUANTITIES")
+    print(quantities)
     buy_df = pd.DataFrame.from_dict(buy_orders)
     sell_df = pd.DataFrame.from_dict(sell_orders)
     buy_df['quantity'] = 0
@@ -105,6 +110,8 @@ def size_spread_quantities(contracts_details, target_cost, config):
     quantities = []
     contract_quantity = 0
     spread_candidates = configure_contracts_for_trade_pct_based(adjusted_contracts, adjusted_target_cost, spread_length)
+    print
+    print(spread_candidates)
     # spread_candidates, spread_cost = configure_contracts_for_trade(adjusted_contracts, adjusted_target_cost, spread_length)
     # total_cost = 0
 

@@ -164,28 +164,28 @@ if __name__ == "__main__":
     for year in ["twenty1","twenty2","twenty3"]:
         strategy_info = { 
             "CDBFC": {
-                "file_path": 'TSSIM1_t23_custHypTP0.6',
+                "file_path": 'TSSIM1_BF3TRIM_RD_custHypTP0.6',
                 "time_span": 4,
                 "side": "C"
             },
             "CDBFP": {
-                "file_path": 'TSSIM1_t23_custHypTP0.4',
+                "file_path": 'TSSIM1_BF3TRIM_RD_custHypTP0.4',
                 "time_span": 4,
                 "side": "P"
             },
             "CDBFC_1D": {
-                "file_path": 'TSSIM1_t23_custHypTP0.6',
+                "file_path": 'TSSIM1_BF3TRIM_RD_custHypTP0.6',
                 "time_span": 2,
                 "side": "C"
             },
             "CDBFP_1D": {
-                "file_path": 'TSSIM1_t23_custHypTP0.4',
+                "file_path": 'TSSIM1_BF3TRIM_RD_custHypTP0.4',
                 "time_span": 2,
                 "side": "P"
             },
         }
 
-        data_type = 'CDVOLBF3-6t23'
+        data_type = 'CDVOLBF3-6TRIM'
         file_names = YEAR_CONFIG[year]['all_files']
         
         # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')
