@@ -498,19 +498,30 @@ def build_options_df(contracts, row):
 
     df['strike_diff'] = abs((df['strike'] - row['o'])/row['o'])
     if row['side'] == "P":
-        df = df.loc[df['strike']< row['o']].reset_index(drop=True)
-        df = df.sort_values('strike', ascending=False)
+        df['in_money'] = df['strike']  > row['o']
+        df_in = df.loc[df['strike'] > row['o']]
+        df_out = df.loc[df['strike'] < row['o']]
+        last_in = df_in.head(1)
+        # Concatenate the True rows and the last False row
+        result = pd.concat([last_in, df_out])
+        result = result.sort_values('strike', ascending=False)
         # df  = df.loc[df['strike_diff'] < 0.075].reset_index(drop=True)
         # print(df)
         # breakkk
     elif row['side'] == "C":
-        df = df.loc[df['strike'] > row['o']].reset_index(drop=True)
-        df = df.sort_values('strike', ascending=True)
+        df['in_money'] = df['strike']  < row['o']
+        # Select all rows where 'condition' is True
+        df_in = df.loc[df['strike'] < row['o']]
+        df_out = df.loc[df['strike'] > row['o']]
+        last_in = df_in.tail(1)
+        # Concatenate the True rows and the last False row
+        result = pd.concat([last_in, df_out])
+        result = result.sort_values('strike', ascending=True)
         # df  = df.loc[df['strike_diff'] < 0.075].reset_index(drop=True)
         # print(df)
         # breakkk
     
-    return df
+    return result
 
 
 

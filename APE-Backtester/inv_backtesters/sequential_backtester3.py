@@ -206,12 +206,12 @@ if __name__ == "__main__":
 
     ## TREND STRATEGIES ONLY
     strategies = ["CDBFC:3","CDBFP:3","CDBFC_1D:1","CDBFP_1D:1"]    
-    years = ['twenty4']
+    years = ['twenty3']
 
     for config in backtest_configs:
         for year in years:
             year_data = YEAR_CONFIG[year]
-            trading_strat = f"{config['user']}-{nowstr}-{year_data['year']}-modelCDVOL_dwnsdVOL_RD:{config['model']}_{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_{config['scaling']}_sssl{config['spread_search']}:{config['spread_length']}"
+            trading_strat = f"{config['user']}-{nowstr}-{year_data['year']}-modelCDVOL_dwnsdVOL_RD_IN$:{config['model']}_{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_{config['scaling']}_sssl{config['spread_search']}:{config['spread_length']}"
             for month in year_data['months']:
                 starting_cash = config['portfolio_cash']
                 try:
