@@ -484,7 +484,7 @@ def approve_trade_poslimit(portfolio_cash, threshold_cash, position_id, current_
 def build_options_df(contracts, row):
     if row['symbol'] in ["GOOG","GOOGL","NVDA","AMZN","TSLA"]:
         last_price = ph.get_last_price(row)
-        row['o'] = last_price
+        row['alert_price'] = last_price
     df = pd.DataFrame(contracts, columns=['contract_symbol'])
     df['underlying_symbol'] = row['symbol']
     df['option_type'] = row['side']
@@ -496,11 +496,11 @@ def build_options_df(contracts, row):
         print(contracts)
         return df
 
-    df['strike_diff'] = abs((df['strike'] - row['o'])/row['o'])
+    df['strike_diff'] = abs((df['strike'] - row['alert_price'])/row['alert_price'])
     if row['side'] == "P":
-        df['in_money'] = df['strike']  > row['o']
-        df_in = df.loc[df['strike'] > row['o']]
-        df_out = df.loc[df['strike'] < row['o']]
+        df['in_money'] = df['strike']  > row['alert_price']
+        df_in = df.loc[df['strike'] > row['alert_price']]
+        df_out = df.loc[df['strike'] < row['alert_price']]
         last_in = df_in.head(1)
         # Concatenate the True rows and the last False row
         result = pd.concat([last_in, df_out])
@@ -509,10 +509,10 @@ def build_options_df(contracts, row):
         # print(df)
         # breakkk
     elif row['side'] == "C":
-        df['in_money'] = df['strike']  < row['o']
+        df['in_money'] = df['strike']  < row['alert_price']
         # Select all rows where 'condition' is True
-        df_in = df.loc[df['strike'] < row['o']]
-        df_out = df.loc[df['strike'] > row['o']]
+        df_in = df.loc[df['strike'] < row['alert_price']]
+        df_out = df.loc[df['strike'] > row['alert_price']]
         last_in = df_in.tail(1)
         # Concatenate the True rows and the last False row
         result = pd.concat([last_in, df_out])

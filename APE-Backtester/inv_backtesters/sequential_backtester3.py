@@ -61,17 +61,17 @@ def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,c
 
     if not local_data:
         # cpu_count = os.cpu_count()
-        # merged_positions = build_backtest_data(file_names[0],strategies,config)
-        with concurrent.futures.ProcessPoolExecutor(max_workers=5) as executor:
-            # Submit the processing tasks to the ThreadPoolExecutor
-            processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies,config) for file_name in file_names]
+        merged_positions = build_backtest_data(file_names[0],strategies,config)
+        # with concurrent.futures.ProcessPoolExecutor(max_workers=5) as executor:
+        #     # Submit the processing tasks to the ThreadPoolExecutor
+        #     processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies,config) for file_name in file_names]
 
-        # Step 4: Retrieve the results from the futures
-        processed_weeks_results = [future.result() for future in processed_weeks_futures]
+        # # Step 4: Retrieve the results from the futures
+        # processed_weeks_results = [future.result() for future in processed_weeks_futures]
 
-        merged_positions = []
-        for week_results in processed_weeks_results:
-            merged_positions.extend(week_results)
+        # merged_positions = []
+        # for week_results in processed_weeks_results:
+        #     merged_positions.extend(week_results)
 
         # merged_df = pd.DataFrame.from_dict(merged_positions)
         # merged_df.to_csv(f'/Users/charlesmiller/Documents/backtesting_data/merged_positions.csv', index=False)
@@ -88,47 +88,83 @@ if __name__ == "__main__":
     strategy_theme = "invALERTS_cls" 
 
     backtest_configs = [
-{
-            "put_pct": 1, 
-            "spread_search": "1:3",
-            "aa": 0,
-            "risk_unit": .00825,
-            "model": "CDVOLVARVC",
-            "vc_level":"100+300+500",
-            "portfolio_cash": 100000,
-            "scaling": "dynamicscale",
-            "volatility_threshold": 0.4,
-            "model_type": "cls",
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6TRIM",
-            "spread_length": 2,
+# {
+#             "put_pct": 1, 
+#             "spread_search": "1:3",
+#             "aa": 0,
+#             "risk_unit": .009,
+#             "model": "CDVOLVARVC",
+#             "vc_level":"100+300+500",
+#             "portfolio_cash": 100000,
+#             "scaling": "dynamicscale",
+#             "volatility_threshold": 0.5,
+#             "model_type": "cls",
+#             "user": "cm3",
+#             "threeD_vol": "return_vol_10D",
+#             "oneD_vol": "return_vol_5D",
+#             "dataset": "CDVOLBF3-6NF",
+#             "spread_length": 2,
 
-        },
-{
-            "put_pct": 1, 
-            "spread_search": "0:3",
-            "aa": 0,
-            "risk_unit": .00875,
-            "model": "CDVOLVARVC",
-            "vc_level":"100+300+500",
-            "portfolio_cash": 100000,
-            "scaling": "dynamicscale",
-            "volatility_threshold": 0.4,
-            "model_type": "cls",
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6TRIM",
-            "spread_length": 3,
+#         },
+# {
+#             "put_pct": 1, 
+#             "spread_search": "1:3",
+#             "aa": 0,
+#             "risk_unit": .009,
+#             "model": "CDVOLVARVC",
+#             "vc_level":"100+300+500",
+#             "portfolio_cash": 100000,
+#             "scaling": "dynamicscale",
+#             "volatility_threshold": 0.4,
+#             "model_type": "cls",
+#             "user": "cm3",
+#             "threeD_vol": "return_vol_10D",
+#             "oneD_vol": "return_vol_5D",
+#             "dataset": "CDVOLBF3-6NF",
+#             "spread_length": 2,
 
-        },
+#         },
+#         {
+#             "put_pct": 1, 
+#             "spread_search": "1:3",
+#             "aa": 0,
+#             "risk_unit": .009,
+#             "model": "CDVOLVARVC",
+#             "vc_level":"100+300+500",
+#             "portfolio_cash": 100000,
+#             "scaling": "dynamicscale",
+#             "volatility_threshold": 0.6,
+#             "model_type": "cls",
+#             "user": "cm3",
+#             "threeD_vol": "return_vol_10D",
+#             "oneD_vol": "return_vol_5D",
+#             "dataset": "CDVOLBF3-6NF",
+#             "spread_length": 2,
+
+#         },
+# {
+#             "put_pct": 1, 
+#             "spread_search": "1:3",
+#             "aa": 0,
+#             "risk_unit": .009,
+#             "model": "CDVOLVARVC",
+#             "vc_level":"100+300+500",
+#             "portfolio_cash": 100000,
+#             "scaling": "dynamicscale",
+#             "volatility_threshold": 0.7,
+#             "model_type": "cls",
+#             "user": "cm3",
+#             "threeD_vol": "return_vol_10D",
+#             "oneD_vol": "return_vol_5D",
+#             "dataset": "CDVOLBF3-6NF",
+#             "spread_length": 2,
+
+#         },
         {
             "put_pct": 1, 
-            "spread_search": "1:3",
+            "spread_search": "1:4",
             "aa": 0,
-            "risk_unit": .00825,
+            "risk_unit": .011,
             "model": "CDVOLVARVC",
             "vc_level":"100+300+500",
             "portfolio_cash": 100000,
@@ -138,65 +174,29 @@ if __name__ == "__main__":
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6TRIM",
-            "spread_length": 2,
-
-        },
-{
-            "put_pct": 1, 
-            "spread_search": "0:3",
-            "aa": 0,
-            "risk_unit": .00875,
-            "model": "CDVOLVARVC",
-            "vc_level":"100+300+500",
-            "portfolio_cash": 100000,
-            "scaling": "dynamicscale",
-            "volatility_threshold": 0.5,
-            "model_type": "cls",
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6TRIM",
+            "dataset": "CDVOLBF3-6NF",
             "spread_length": 3,
+            "reserve_cash": 33000
 
         },
-        {
-            "put_pct": 1, 
-            "spread_search": "1:3",
-            "aa": 0,
-            "risk_unit": .00825,
-            "model": "CDVOLVARVC",
-            "vc_level":"100+300+500",
-            "portfolio_cash": 100000,
-            "scaling": "dynamicscale",
-            "volatility_threshold": 0.6,
-            "model_type": "cls",
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6TRIM",
-            "spread_length": 2,
+        # {
+        #     "put_pct": 1, 
+        #     "spread_search": "2:3",
+        #     "aa": 0,
+        #     "risk_unit": .0095,
+        #     "model": "CDVOLVARVC",
+        #     "vc_level":"100+300+500",
+        #     "portfolio_cash": 100000,
+        #     "scaling": "dynamicscale",
+        #     "volatility_threshold": 0.5,
+        #     "model_type": "cls",
+        #     "user": "cm3",
+        #     "threeD_vol": "return_vol_10D",
+        #     "oneD_vol": "return_vol_5D",
+        #     "dataset": "CDVOLBF3-6NF",
+        #     "spread_length": 3,
 
-        },
-{
-            "put_pct": 1, 
-            "spread_search": "0:3",
-            "aa": 0,
-            "risk_unit": .00875,
-            "model": "CDVOLVARVC",
-            "vc_level":"100+300+500",
-            "portfolio_cash": 100000,
-            "scaling": "dynamicscale",
-            "volatility_threshold": 0.6,
-            "model_type": "cls",
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6TRIM",
-            "spread_length": 3,
-
-        },
-
+        # },
     ]
     
     models_tested = []
@@ -211,7 +211,7 @@ if __name__ == "__main__":
     for config in backtest_configs:
         for year in years:
             year_data = YEAR_CONFIG[year]
-            trading_strat = f"{config['user']}-{nowstr}-{year_data['year']}-modelCDVOL_dwnsdVOL_RD_IN$:{config['model']}_{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_{config['scaling']}_sssl{config['spread_search']}:{config['spread_length']}"
+            trading_strat = f"{config['user']}-{nowstr}-{year_data['year']}-NF_REUP:{config['model']}_{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_sssl{config['spread_search']}:{config['spread_length']}"
             for month in year_data['months']:
                 starting_cash = config['portfolio_cash']
                 try:
