@@ -7,7 +7,6 @@ import helpers.momentum_strategies as trade
 import boto3
 import pytz
 from helpers.constants import *
-from helpers.RMF_strategies import tda_CALL_1D_RMF, tda_PUT_1D_RMF, tda_CALL_3D_RMF, tda_PUT_3D_RMF
 
 s3 = boto3.client('s3')
 
@@ -41,7 +40,7 @@ def create_simulation_data_inv(row,config):
         days_back = 3
     end_date = backtrader_helper.create_end_date(start_date, days_back)
     trading_aggregates, option_symbols = backtrader_helper.create_options_aggs_inv(row,start_date,end_date=end_date,spread_length=config['spread_length'],config=config)
-    return start_date, end_date, row['symbol'], row['o'], row['strategy'], option_symbols, trading_aggregates
+    return start_date, end_date, row['symbol'], row['alert_price'], row['strategy'], option_symbols, trading_aggregates
 
 def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, polygon_df, position_id, trading_date, alert_hour,order_id,config,row,order_num):
     open_price = open_prices[0]

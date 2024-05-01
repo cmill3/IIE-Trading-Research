@@ -138,6 +138,8 @@ def simulate_portfolio_DS(positions_list, datetime_list, portfolio_cash, risk_un
     contracts_bought = []
     contracts_sold = []
     starting_cash = portfolio_cash
+    starting_reserve = config['reserve_cash']
+    current_reserve = starting_reserve
     sales_dict = {}
     portfolio_dict, positions_dict, passed_trades_dict = convert_lists_to_dicts_inv(positions_list, datetime_list)
 
@@ -148,6 +150,9 @@ def simulate_portfolio_DS(positions_list, datetime_list, portfolio_cash, risk_un
     
     i = 0
     for key, value in portfolio_dict.items():
+        print(f"Key: {key}")
+        print(f"Value: {value}")
+        print()
         current_positions = []
         if i == 0:
             value['portfolio_cash'] = portfolio_cash
@@ -201,6 +206,10 @@ def simulate_portfolio_DS(positions_list, datetime_list, portfolio_cash, risk_un
             value['portfolio_cash'] = portfolio_dict[key - timedelta(minutes=15)]['portfolio_cash']
             current_positions = positions_open
             value['open_positions_start'].extend(current_positions)
+            check_reup = check_for_reup(key)
+            if check_reup:
+                value['portfolio_cash'],current_reserve = reup_cash(starting_cash, value['portfolio_cash'],current_reserve,starting_reserve)
+
         
         if sales_dict.get(key) is not None:
             # print(positions_dict)
@@ -268,3 +277,58 @@ def simulate_portfolio_DS(positions_list, datetime_list, portfolio_cash, risk_un
     diff2 = list(set(contracts_sold) - set(contracts_bought))
     print(diff2)
     return portfolio_df, passed_trades_df, positions_taken, positions_dict
+
+
+def check_for_reup(dt):
+    if dt.weekday() == 0:
+        if dt.hour == 0: 
+            if dt.minute == 0:
+                print("Reup Time")
+                return True
+    return False
+
+def reup_cash(starting_cash, current_cash, reserve_cash, starting_reserve):
+    if current_cash < starting_cash:
+        debit_amt = starting_cash - current_cash
+        if debit_amt > reserve_cash:
+            print('depleting_reserves')
+            current_cash += reserve_cash
+            reserve_cash = 0
+            print(f"Reserve Cash: {reserve_cash}")
+            print(f"Current Cash: {current_cash}")
+            return current_cash, reserve_cash
+        else:
+            print('reupping but not depleting reserves')
+            reserve_cash -= debit_amt
+            current_cash += debit_amt
+            print(f"Reserve Cash: {reserve_cash}")
+            print(f"Current Cash: {current_cash}")
+            return current_cash, reserve_cash
+    elif current_cash > starting_cash:
+        if reserve_cash == starting_reserve:
+            print('reserve is full')
+            print(f"Reserve Cash: {reserve_cash}")
+            print(f"Current Cash: {current_cash}")
+            return current_cash, reserve_cash
+        else:
+            cash_surplus = current_cash - starting_cash
+            reserve_debit = starting_reserve - reserve_cash
+            if cash_surplus > reserve_debit:
+                print('reupping reserves full')
+                current_cash -= reserve_debit
+                reserve_cash = starting_reserve
+                print(f"Reserve Cash: {reserve_cash}")
+                print(f"Current Cash: {current_cash}")
+                return current_cash, reserve_cash
+            else:
+                print('reupping reserves not full')
+                reserve_cash += cash_surplus
+                current_cash = starting_cash
+                print(f"Reserve Cash: {reserve_cash}")
+                print(f"Current Cash: {current_cash}")
+                return current_cash, reserve_cash
+    else:
+        print('no change')
+        print(f"Reserve Cash: {reserve_cash}")
+        print(f"Current Cash: {current_cash}")
+        return current_cash, reserve_cash
