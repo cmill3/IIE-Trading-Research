@@ -102,14 +102,25 @@ def size_spread_quantities(contracts_details, target_cost, config, open_datetime
     spread_start, spread_end = config['spread_search'].split(":")
     adjusted_target_cost = target_cost
     spread_length = config['spread_length']
-    if day_of_week >= 3:
-        print(f"Day of week is greater than 3 {dt}")
-        print(f"{(int(spread_start)-1)}:{(int(spread_end)-1)}")
-        adjusted_contracts = contracts_details[(int(spread_start)-1):(int(spread_end)-1)]
+
+    if spread_length == 4:
+        if day_of_week == 3:
+            adjusted_contracts = contracts_details[int(spread_start):int(spread_end)-2]
+            spread_length -= 2
+        elif day_of_week == 2:
+            adjusted_contracts = contracts_details[int(spread_start):int(spread_end)-1]
+            spread_length -= 1
+        else:
+            adjusted_contracts = contracts_details[int(spread_start):int(spread_end)]
     else:
-        print(f"Day of week is less than 3 {dt}")
-        print(f"{(int(spread_start))}:{(int(spread_end))}")
-        adjusted_contracts = contracts_details[int(spread_start):int(spread_end)]
+        if day_of_week >= 2:
+            # print(f"Day of week is greater than 3 {dt}")
+            # print(f"{(int(spread_start)-1)}:{(int(spread_end)-1)}")
+            adjusted_contracts = contracts_details[(int(spread_start)-1):(int(spread_end)-1)]
+        else:
+            # print(f"Day of week is less than 3 {dt}")
+            # print(f"{(int(spread_start))}:{(int(spread_end))}")
+            adjusted_contracts = contracts_details[int(spread_start):int(spread_end)]
 
     quantities = []
     contract_quantity = 0

@@ -519,9 +519,7 @@ def build_options_df(contracts, row):
         # Concatenate the True rows and the last False row
         result = pd.concat([last_in, df_out])
         result = result.sort_values('strike', ascending=True)
-        # df  = df.loc[df['strike_diff'] < 0.075].reset_index(drop=True)
-        # print(df)
-        # breakkk
+
     
     return result
 
