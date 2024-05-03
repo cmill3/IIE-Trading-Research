@@ -68,7 +68,7 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
         except Exception as e:
             print(f"Error {e} in sell_dict for {symbol} in {strategy} CDVOLAGG")
             print(polygon_df)
-            return {}
+            return "NO DICT"
     elif config['model'] == "CDVOLVARVC":
         try:
             if strategy in THREED_STRATEGIES and strategy in CALL_STRATEGIES:
@@ -82,7 +82,7 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
         except Exception as e:
             print(f"Error {e} in sell_dict for {symbol} in {strategy} CDVOLVARVC")
             print(polygon_df)
-            return {}
+            return "NO DICT"
     
     try:
         sell_dict['position_id'] = position_id
@@ -119,7 +119,7 @@ def simulate_trades_invalerts(data,config):
         order_dt = start_date.strftime("%m+%d")
         pos_dt = start_date.strftime("%Y-%m-%d-%H")
         position_id = f"{row['symbol']}-{(row['strategy'].replace('_',''))}-{pos_dt}"
-
+        open_trade_dt = start_date.strftime('%Y-%m-%d %H:%M')
         results = []
 
         for df in enriched_options_aggregates:
@@ -128,6 +128,8 @@ def simulate_trades_invalerts(data,config):
                 ticker = df.iloc[0]['ticker']
                 order_id = f"{order_num}_{order_dt}"
                 results_dict = buy_iterate_sellV2_invalerts(symbol, ticker, open_prices, strategy, df, position_id, trading_date, alert_hour, order_id,config,row,order_num)
+                if results_dict == "NO DICT":
+                    continue
                 results_dict['order_num'] = order_num
                 print(f"results_dict for {symbol} and {ticker}")
                 print(results_dict)
@@ -140,14 +142,12 @@ def simulate_trades_invalerts(data,config):
                 results.append(results_dict)
                 order_num += 1
             except Exception as e:
-                print(f"error: {e} in buy_iterate_sellV2_invalerts")
+                print(f"error: {e} in buy_iterate_sellV2_invalerts HERE")
                 print(df)
                 continue
         
         try:
-            position_trades = {"position_id": position_id, "transactions": results, "open_datetime": results_dict['open_trade_dt']}
-            # print("TEST")
-            # print(position_trades)
+            position_trades = {"position_id": position_id, "transactions": results, "open_datetime": open_trade_dt}
         except Exception as e:
             print(f"Error in position_trades for {position_id} {e}")
             print(results)

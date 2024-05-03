@@ -165,32 +165,33 @@ if __name__ == "__main__":
         "twenty4",
         "twenty3",
         "twenty2",
-        # "twenty1","twenty0"
+        "twenty1",
+        "twenty0"
         ]:
         strategy_info = { 
-            "CDBFC": {
-                "file_path": 'TSSIM2S_t11trALL_custHypTP0.6',
-                "time_span": 4,
-                "side": "C"
-            },
+            # "CDBFC": {
+            #     "file_path": 'TSSIM2S_t11trALL_custHypTP0.6',
+            #     "time_span": 4,
+            #     "side": "C"
+            # },
             # "CDBFP": {
             #     "file_path": 'TSSIM2S_t15_custHypTP0.4',
             #     "time_span": 4,
             #     "side": "P"
             # },
-            # "CDBFC_1D": {
-            #     "file_path": 'TSSIM2S_t15_custHypTP0.6',
-            #     "time_span": 2,
-            #     "side": "C"
-            # },
-            # "CDBFP_1D": {
-            #     "file_path": 'TSSIM2S_t15_custHypTP0.4',
-            #     "time_span": 2,
-            #     "side": "P"
-            # },
+            "CDBFC_1D": {
+                "file_path": 'TSSIM2S_PEBF3_custHypTP0.6',
+                "time_span": 2,
+                "side": "C"
+            },
+            "CDBFP_1D": {
+                "file_path": 'TSSIM2S_PEBF3_custHypTP0.4',
+                "time_span": 2,
+                "side": "P"
+            },
         }
 
-        data_type = 'CDVOLBF3-6t11'
+        data_type = 'CDVOLBF3-6PE'
         file_names = YEAR_CONFIG[year]['all_files']
         
         # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')
