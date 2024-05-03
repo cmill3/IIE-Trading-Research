@@ -220,7 +220,7 @@ if __name__ == "__main__":
         # "CDBFC:3","CDBFP:3",
         "CDBFC_1D:1","CDBFP_1D:1"
         ]    
-    years = ['twenty3']
+    years = ['twenty3','twenty4']
 
     for config in backtest_configs:
         for year in years:
