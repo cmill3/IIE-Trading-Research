@@ -88,172 +88,126 @@ if __name__ == "__main__":
     strategy_theme = "invALERTS_cls" 
 
     backtest_configs = [
-# {
-#             "put_pct": 1, 
-#             "spread_search": "1:3",
-#             "aa": 0,
-#             "risk_unit": .009,
-#             "model": "CDVOLVARVC",
-#             "vc_level":"100+300+500",
-#             "portfolio_cash": 100000,
-#             "scaling": "dynamicscale",
-#             "volatility_threshold": 0.5,
-#             "model_type": "cls",
-#             "user": "cm3",
-#             "threeD_vol": "return_vol_10D",
-#             "oneD_vol": "return_vol_5D",
-#             "dataset": "CDVOLBF3-6NF",
-#             "spread_length": 2,
-
-#         },
-# {
-#             "put_pct": 1, 
-#             "spread_search": "1:3",
-#             "aa": 0,
-#             "risk_unit": .009,
-#             "model": "CDVOLVARVC",
-#             "vc_level":"100+300+500",
-#             "portfolio_cash": 100000,
-#             "scaling": "dynamicscale",
-#             "volatility_threshold": 0.4,
-#             "model_type": "cls",
-#             "user": "cm3",
-#             "threeD_vol": "return_vol_10D",
-#             "oneD_vol": "return_vol_5D",
-#             "dataset": "CDVOLBF3-6NF",
-#             "spread_length": 2,
-
-#         },
-#         {
-#             "put_pct": 1, 
-#             "spread_search": "1:3",
-#             "aa": 0,
-#             "risk_unit": .009,
-#             "model": "CDVOLVARVC",
-#             "vc_level":"100+300+500",
-#             "portfolio_cash": 100000,
-#             "scaling": "dynamicscale",
-#             "volatility_threshold": 0.6,
-#             "model_type": "cls",
-#             "user": "cm3",
-#             "threeD_vol": "return_vol_10D",
-#             "oneD_vol": "return_vol_5D",
-#             "dataset": "CDVOLBF3-6NF",
-#             "spread_length": 2,
-
-#         },
-# {
-#             "put_pct": 1, 
-#             "spread_search": "1:3",
-#             "aa": 0,
-#             "risk_unit": .009,
-#             "model": "CDVOLVARVC",
-#             "vc_level":"100+300+500",
-#             "portfolio_cash": 100000,
-#             "scaling": "dynamicscale",
-#             "volatility_threshold": 0.7,
-#             "model_type": "cls",
-#             "user": "cm3",
-#             "threeD_vol": "return_vol_10D",
-#             "oneD_vol": "return_vol_5D",
-#             "dataset": "CDVOLBF3-6NF",
-#             "spread_length": 2,
-
-#         },
         {
             "put_pct": 1, 
-            "spread_search": "1:4",
+            "spread_search": "0:4",
             "aa": 0,
-            "risk_unit": .013,
+            "risk_unit": .05,
             "model": "CDVOLVARVC",
-            "vc_level":"100+300+500",
-            "portfolio_cash": 500000,
+            "vc_level":"50+100+250+500",
+            "capital_distributions": ".35,.30,.15,.10",
+            "portfolio_cash": 20000,
             "scaling": "dynamicscale",
             "volatility_threshold": 0.5,
             "model_type": "cls",
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6NF2S",
-            "spread_length": 3,
-            "reserve_cash": 100000
-
-        },
-        {
-            "put_pct": 1, 
-            "spread_search": "1:4",
-            "aa": 0,
-            "risk_unit": .013,
-            "model": "CDVOLVARVC",
-            "vc_level":"100+300+500",
-            "portfolio_cash": 500000,
-            "scaling": "dynamicscale",
-            "volatility_threshold": 0.4,
-            "model_type": "cls",
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6NF2S",
-            "spread_length": 3,
-            "reserve_cash": 100000
+            "dataset": "CDVOLBF3-6PE",
+            "spread_length": 4,
+            "reserve_cash": 5000
 
         },
                 {
             "put_pct": 1, 
             "spread_search": "1:4",
             "aa": 0,
-            "risk_unit": .013,
+            "risk_unit": .05,
             "model": "CDVOLVARVC",
-            "vc_level":"100+300+500",
-            "portfolio_cash": 50000,
+            "vc_level":"50+150+500+500",
+            "capital_distributions": ".40,.40,.20",
+            "portfolio_cash": 20000,
             "scaling": "dynamicscale",
             "volatility_threshold": 0.5,
             "model_type": "cls",
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6NF2S",
+            "dataset": "CDVOLBF3-6PE",
             "spread_length": 3,
-            "reserve_cash": 15000
+            "reserve_cash": 5000
 
         },
         {
             "put_pct": 1, 
-            "spread_search": "1:4",
+            "spread_search": "1:3",
             "aa": 0,
-            "risk_unit": .013,
+            "risk_unit": .05,
             "model": "CDVOLVARVC",
-            "vc_level":"100+300+500",
-            "portfolio_cash": 50000,
+            "vc_level":"100+250+500+500",
+            "capital_distributions": ".60,.40",
+            "portfolio_cash": 20000,
+            "scaling": "dynamicscale",
+            "volatility_threshold": 0.5,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBF3-6PE",
+            "spread_length": 2,
+            "reserve_cash": 5000
+
+        },
+                {
+            "put_pct": 1, 
+            "spread_search": "0:4",
+            "aa": 0,
+            "risk_unit": .05,
+            "model": "CDVOLVARVC",
+            "vc_level":"50+100+250+500",
+            "capital_distributions": ".35,.30,.15,.10",
+            "portfolio_cash": 20000,
             "scaling": "dynamicscale",
             "volatility_threshold": 0.4,
             "model_type": "cls",
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6NF2S",
-            "spread_length": 3,
-            "reserve_cash": 15000
+            "dataset": "CDVOLBF3-6PE",
+            "spread_length": 4,
+            "reserve_cash": 5000
 
         },
-        # {
-        #     "put_pct": 1, 
-        #     "spread_search": "2:3",
-        #     "aa": 0,
-        #     "risk_unit": .0095,
-        #     "model": "CDVOLVARVC",
-        #     "vc_level":"100+300+500",
-        #     "portfolio_cash": 100000,
-        #     "scaling": "dynamicscale",
-        #     "volatility_threshold": 0.5,
-        #     "model_type": "cls",
-        #     "user": "cm3",
-        #     "threeD_vol": "return_vol_10D",
-        #     "oneD_vol": "return_vol_5D",
-        #     "dataset": "CDVOLBF3-6NF",
-        #     "spread_length": 3,
+                {
+            "put_pct": 1, 
+            "spread_search": "1:4",
+            "aa": 0,
+            "risk_unit": .05,
+            "model": "CDVOLVARVC",
+            "vc_level":"50+150+500+500",
+            "capital_distributions": ".40,.40,.20",
+            "portfolio_cash": 20000,
+            "scaling": "dynamicscale",
+            "volatility_threshold": 0.4,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBF3-6PE",
+            "spread_length": 3,
+            "reserve_cash": 5000
 
-        # },
+        },
+        {
+            "put_pct": 1, 
+            "spread_search": "1:3",
+            "aa": 0,
+            "risk_unit": .05,
+            "model": "CDVOLVARVC",
+            "vc_level":"100+250+500+500",
+            "capital_distributions": ".60,.40",
+            "portfolio_cash": 20000,
+            "scaling": "dynamicscale",
+            "volatility_threshold": 0.4,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBF3-6PE",
+            "spread_length": 2,
+            "reserve_cash": 5000
+
+        },
     ]
     
     models_tested = []
@@ -263,15 +217,16 @@ if __name__ == "__main__":
 
     ## TREND STRATEGIES ONLY
     strategies = [
-        "CDBFC:3","CDBFP:3","CDBFC_1D:1",
-                  "CDBFP_1D:1"]    
-    years = ['twenty2']
+        # "CDBFC:3","CDBFP:3",
+        "CDBFC_1D:1","CDBFP_1D:1"
+        ]    
+    years = ['twenty3','twenty4']
 
     for config in backtest_configs:
         for year in years:
             year_data = YEAR_CONFIG[year]
-            trading_strat = f"{config['user']}-{nowstr}-{year_data['year']}-NF_REUP:{config['model']}_{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_sssl{config['spread_search']}:{config['spread_length']}"
-            for month in year_data['months'][3:]:
+            trading_strat = f"{config['user']}/{nowstr}-{year_data['year']}-REUP1D:{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_sssl{config['spread_search']}:{config['spread_length']}"
+            for month in year_data['months']:
                 starting_cash = config['portfolio_cash']
                 try:
                     start_dt = month[0]

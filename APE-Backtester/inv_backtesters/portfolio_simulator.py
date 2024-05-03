@@ -1,7 +1,7 @@
 import pandas as pd
 import boto3
 
-starting_capital = 300000
+starting_capital = 400000
 
 # trend_strategy = {
 #     "name": "cm3-20240201-modelTRENDNOLIM_dwnsdVOL:simple_TL15RM_vol1_vc400_dynamicscale$100000_0.0017",
@@ -18,19 +18,34 @@ starting_capital = 300000
 #     "results": [4.78,.18,.67,-.34,.21,.32,1.45,-.42,1.43,3.05,.44,1.56]
 # }
 
+# cdvol_strategy_21 = {
+#     "name": "cm3-20240425-21-modelCDVOL_dwnsdVOL_NF:CDVOLVARVC_CDVOLBF3-6NF_vol0.5_vc100+300+500_dynamicscale_sssl1:4:3$100000_0.011",
+#     "results": [.61,.02,3.56,.55,23.64,3.46,12.77,3.0,1.29,2.61,.06,.48]
+# }
+
+# cdvol_strategy_22 = {
+#     "name": "cm3-20240425-22-modelCDVOL_dwnsdVOL_NF:CDVOLVARVC_CDVOLBF3-6NF_vol0.5_vc100+300+500_dynamicscale_sssl1:4:3$100000_0.011",
+#     "results": [6.87,2.25,.017,4.02,3.62,5.36,8.14,.89,6.16,8.22,-.07,-.57]
+# }
+
+# cdvol_strategy_23 = {
+#     "name": "cm3-20240425-23-modelCDVOL_dwnsdVOL_NF:CDVOLVARVC_CDVOLBF3-6NF_vol0.5_vc100+300+500_dynamicscale_sssl1:4:3$100000_0.011",
+#     "results": [.17,.15,1.66,.14,2.98,1.4,.28,.13,.36,.09,-.3,.31]
+# }
+
 cdvol_strategy_21 = {
-    "name": "cm3-20240325-21-modelCDVOL_dwnsdVOL_BT2:CDVOLVARVC_CDVOLBF3-6_vol0.4_vc100/300/500_dynamicscale_sssl1:3:2$100000_0.0055",
-    "results": [.72,.1,2.04,-.1,1.24,.13,1.73,.17,-.07,.56,1.79,-.24]
+    "name": "cm3-20240425-21-modelCDVOL_dwnsdVOL_NF:CDVOLVARVC_CDVOLBF3-6NF_vol0.5_vc100+300+500_dynamicscale_sssl1:4:3$100000_0.011",
+    "results": [.62,.04,4.75,.6,28.74,4.06,15.19,3.63,1.39,2.94,.03,.59]
 }
 
 cdvol_strategy_22 = {
-    "name": "cm3-20240325-22-modelCDVOL_dwnsdVOL_BT2:CDVOLVARVC_CDVOLBF3-6_vol0.4_vc100/300/500_dynamicscale_sssl1:3:2$100000_0.0055",
-    "results": [6.35,5.64,.01,.85,3.57,.31,1.55,1.02,1.62,-.22,1.28,.17]
+    "name": "cm3-20240425-22-modelCDVOL_dwnsdVOL_NF:CDVOLVARVC_CDVOLBF3-6NF_vol0.5_vc100+300+500_dynamicscale_sssl1:4:3$100000_0.011",
+    "results": [7.72,3.09,.64,4.91,4.33,6.09,10.02,1.01,6.75,9.86,.007,-.18]
 }
 
 cdvol_strategy_23 = {
-    "name": "cm3-20240325-23-modelCDVOL_dwnsdVOL_BT2:CDVOLVARVC_CDVOLBF3-6_vol0.4_vc100/300/500_dynamicscale_sssl1:3:2$100000_0.0055",
-    "results": [1.22,.8,2.06,-.02,3.93,.38,1.91,.41,2.11,.89,.1,.01]
+    "name": "cm3-20240425-23-modelCDVOL_dwnsdVOL_NF:CDVOLVARVC_CDVOLBF3-6NF_vol0.5_vc100+300+500_dynamicscale_sssl1:4:3$100000_0.011",
+    "results": [1.19,.33,10.47,1.09,16.12,7.85,38.88,3.54,4.51,11.01,-.55,.85]
 }
 
 # portfolio_config_bad = {
@@ -44,7 +59,7 @@ def determine_capital_allocation(starting_capital, capital, risk_units):
     if capital <= starting_capital:
         capital_allocated = capital / risk_units
     elif capital > starting_capital:
-        capital_allocated = (starting_capital / risk_units) + ((capital - starting_capital) * .8)
+        capital_allocated = (starting_capital / risk_units) + ((capital - starting_capital) * .2)
     else:
         print(capital)
         raise ValueError("Capital is not correctly allocated. Please check the capital allocation.")
@@ -69,14 +84,15 @@ def run_portfolio_simulator(cdvol_strategy):
         cdvol_ending_capital = (cdvol_return * strategy_allotment) + strategy_allotment
 
         total_capital = cdvol_ending_capital + (capital - capital_allocated)
+        gain = (total_capital - capital) / capital
+        trading_gain = (cdvol_ending_capital - strategy_allotment) / strategy_allotment
 
         portfolio_config["results"].append({
             "PERIOD": f"MONTH {i+1}",
-            "TOTAL GAIN": (total_capital - capital) / capital,
+            "TOTAL GAIN": round(gain,2),
             # "TREND GAIN": (trend_ending_capital - strategy_allotment) / strategy_allotment,
-            "CDVOL GAIN": (cdvol_ending_capital - strategy_allotment) / strategy_allotment,
-            "TRADING GAIN": ((cdvol_ending_capital) - capital_allocated)/capital_allocated,
-            "CASH": total_capital
+            "CDVOL GAIN":round(trading_gain,2),
+            "CASH": round(capital,2),
         })
 
         portfolio_config["capital"] = total_capital
@@ -135,10 +151,10 @@ if __name__ == "__main__":
         # print(f'AVG MONTHLY GAIN:{sum(trend_strategy["results"])/len(trend_strategy["results"])}')
         # print()
         print(f'CDVOL STRATEGY: {cdvol_strategy["name"]}')
-        print(f'AVG MONTHLY GAIN:{sum(cdvol_strategy["results"])/len(cdvol_strategy["results"])}')
+        print(f'AVG MONTHLY GAIN:{round(sum(cdvol_strategy["results"])/len(cdvol_strategy["results"]),2)}')
         print()
-        print(f'PORTFOLIO SIMULATOR RESULTS: {(portfolio_config["capital"] - starting_capital)/starting_capital}')
-        print(f'FINAL CAPITAL: ${portfolio_config["capital"]}')
+        print(f'PORTFOLIO SIMULATOR RESULTS: {round((portfolio_config["capital"] - starting_capital)/starting_capital,2)}')
+        print(f'FINAL CAPITAL: ${round(portfolio_config["capital"],2)}')
         print()
         for result in portfolio_config["results"]:
             print(result)

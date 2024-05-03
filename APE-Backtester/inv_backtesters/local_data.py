@@ -161,31 +161,37 @@ def add_weekdays(date,days,symbol):
     return date
 
 if __name__ == "__main__":
-    for year in ['twenty0','twenty1','twenty2','twenty3','twenty4']:
+    for year in [
+        "twenty4",
+        "twenty3",
+        "twenty2",
+        "twenty1",
+        "twenty0"
+        ]:
         strategy_info = { 
-            "CDBFC": {
-                "file_path": 'TSSIM2S_BF3NFS_custHypTP0.6',
-                "time_span": 4,
-                "side": "C"
-            },
-            "CDBFP": {
-                "file_path": 'TSSIM2S_BF3NFS_custHypTP0.4',
-                "time_span": 4,
-                "side": "P"
-            },
+            # "CDBFC": {
+            #     "file_path": 'TSSIM2S_t11trALL_custHypTP0.6',
+            #     "time_span": 4,
+            #     "side": "C"
+            # },
+            # "CDBFP": {
+            #     "file_path": 'TSSIM2S_t15_custHypTP0.4',
+            #     "time_span": 4,
+            #     "side": "P"
+            # },
             "CDBFC_1D": {
-                "file_path": 'TSSIM2S_BF3NFS_custHypTP0.6',
+                "file_path": 'TSSIM2S_PEBF3_custHypTP0.6',
                 "time_span": 2,
                 "side": "C"
             },
             "CDBFP_1D": {
-                "file_path": 'TSSIM2S_BF3NFS_custHypTP0.4',
+                "file_path": 'TSSIM2S_PEBF3_custHypTP0.4',
                 "time_span": 2,
                 "side": "P"
             },
         }
 
-        data_type = 'CDVOLBF3-6NF2S'
+        data_type = 'CDVOLBF3-6PE'
         file_names = YEAR_CONFIG[year]['all_files']
         
         # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')
@@ -194,7 +200,7 @@ if __name__ == "__main__":
             with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
                 # Submit the processing tasks to the ThreadPoolExecutor
                 processed_weeks_futures = [executor.submit(add_contract_data_to_local,week,strategy_info[strategy],strategy,data_type) for week in file_names]
-            # add_contract_data_to_local(file_names[0],strategy_info[strategy],strategy,data_type)
+            # add_contract_data_to_local('2024-04-15',strategy_info[strategy],strategy,data_type)
 
     # for week in file_names:
     #     for strategy in ['BFC','BFP','BFC_1D','BFP_1D']:

@@ -1696,11 +1696,12 @@ def tda_PUT_3D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target_
     isVC = False
     if order_num > 4:
         order_num = 4
+    vc_values = config['vc_level'].split('+')
     vc_config = {
-        1: 100,
-        2: 300,
-        3: 500,
-        4: 500
+        1: vc_values[0],
+        2: vc_values[1],
+        3: vc_values[2],
+        4: vc_values[3]
     }
     for index, row in polygon_df.iterrows():
         if index == 0:
@@ -1770,11 +1771,12 @@ def tda_CALL_3D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target
     Floor_pct = (-vol * config['volatility_threshold'])
     if order_num > 4:
         order_num = 4
+    vc_values = config['vc_level'].split('+')
     vc_config = {
-        1: 100,
-        2: 300,
-        3: 500,
-        4: 500
+        1: vc_values[0],
+        2: vc_values[1],
+        3: vc_values[2],
+        4: vc_values[3]
     }
     for index, row in polygon_df.iterrows():
         if index == 0:
@@ -1844,11 +1846,12 @@ def tda_PUT_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target_
     Floor_pct = (-vol * config['volatility_threshold'])
     if order_num > 4:
         order_num = 4
+    vc_values = config['vc_level'].split('+')
     vc_config = {
-        1: 100,
-        2: 300,
-        3: 500,
-        4: 500
+        1: vc_values[0],
+        2: vc_values[1],
+        3: vc_values[2],
+        4: vc_values[3]
     }
     for index, row in polygon_df.iterrows():
         if index == 0:
@@ -1861,7 +1864,7 @@ def tda_PUT_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target_
         # Floor_pct -= underlying_gain
         hour = row['date'].hour
 
-        if deriv_pct_change > vc_config[order_num]:
+        if deriv_pct_change > int(vc_config[order_num]):
             reason = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,reason)  
             return sell_dict
@@ -1917,11 +1920,12 @@ def tda_CALL_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target
     Floor_pct = (-vol * config['volatility_threshold'])
     if order_num > 4:
         order_num = 4
+    vc_values = config['vc_level'].split('+')
     vc_config = {
-        1: 100,
-        2: 300,
-        3: 500,
-        4: 500
+        1: vc_values[0],
+        2: vc_values[1],
+        3: vc_values[2],
+        4: vc_values[3]
     }
     for index, row in polygon_df.iterrows():
         if index == 0:
@@ -1934,7 +1938,7 @@ def tda_CALL_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target
         hour = row['date'].hour
         # Floor_pct += underlying_gain
 
-        if deriv_pct_change > vc_config[order_num]:
+        if deriv_pct_change > int(vc_config[order_num]):
             reason = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,reason)  
             return sell_dict

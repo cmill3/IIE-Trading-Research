@@ -61,7 +61,7 @@ def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,c
 
     if not local_data:
         cpu_count = os.cpu_count()
-        # merged_positions = build_backtest_data(file_names[0],strategies,config)
+        # build_backtest_data(file_names[0],strategies,config)
         with concurrent.futures.ProcessPoolExecutor(max_workers=5) as executor:
             # Submit the processing tasks to the ThreadPoolExecutor
             processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies,config) for file_name in file_names]
@@ -73,8 +73,8 @@ def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,c
         for week_results in processed_weeks_results:
             merged_positions.extend(week_results)
 
-        merged_df = pd.DataFrame.from_dict(merged_positions)
-        merged_df.to_csv(f'/Users/charlesmiller/Documents/backtesting_data/merged_positions.csv', index=False)
+        # merged_df = pd.DataFrame.from_dict(merged_positions)
+        # merged_df.to_csv(f'/Users/charlesmiller/Documents/backtesting_data/merged_positions.csv', index=False)
     else:
         merged_positions = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/merged_positions.csv')
         merged_positions = merged_positions.to_dict('records')
@@ -82,128 +82,180 @@ def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,c
     full_df = pd.DataFrame.from_dict(merged_positions)
     portfolio_df, positions_df = run_trades_simulation(merged_positions, start_date, end_date, config, period_cash)
     return portfolio_df, positions_df, full_df
+
 if __name__ == "__main__":
     s3 = boto3.client('s3')
     strategy_theme = "invALERTS_cls" 
+
     backtest_configs = [
         {
             "put_pct": 1, 
-            "spread_search": "1:4",
+            "spread_search": "0:4",
             "aa": 0,
-            "risk_unit": .013,
+            "risk_unit": .05,
             "model": "CDVOLVARVC",
-            "vc_level":"100+300+500",
-            "portfolio_cash": 500000,
+            "vc_level":"50+100+250+500",
+            "capital_distributions": ".35,.30,.15,.10",
+            "portfolio_cash": 20000,
             "scaling": "dynamicscale",
             "volatility_threshold": 0.5,
             "model_type": "cls",
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6NF2S",
-            "spread_length": 3,
-            "reserve_cash": 100000
-
-        },
-        {
-            "put_pct": 1, 
-            "spread_search": "1:4",
-            "aa": 0,
-            "risk_unit": .013,
-            "model": "CDVOLVARVC",
-            "vc_level":"100+300+500",
-            "portfolio_cash": 500000,
-            "scaling": "dynamicscale",
-            "volatility_threshold": 0.4,
-            "model_type": "cls",
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6NF2S",
-            "spread_length": 3,
-            "reserve_cash": 100000
+            "dataset": "CDVOLBF3-6PE",
+            "spread_length": 4,
+            "reserve_cash": 5000
 
         },
                 {
             "put_pct": 1, 
             "spread_search": "1:4",
             "aa": 0,
-            "risk_unit": .013,
+            "risk_unit": .05,
             "model": "CDVOLVARVC",
-            "vc_level":"100+300+500",
-            "portfolio_cash": 50000,
+            "vc_level":"50+150+500+500",
+            "capital_distributions": ".40,.40,.20",
+            "portfolio_cash": 20000,
             "scaling": "dynamicscale",
             "volatility_threshold": 0.5,
             "model_type": "cls",
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6NF2S",
+            "dataset": "CDVOLBF3-6PE",
             "spread_length": 3,
-            "reserve_cash": 15000
+            "reserve_cash": 5000
 
         },
         {
             "put_pct": 1, 
-            "spread_search": "1:4",
+            "spread_search": "1:3",
             "aa": 0,
-            "risk_unit": .013,
+            "risk_unit": .05,
             "model": "CDVOLVARVC",
-            "vc_level":"100+300+500",
-            "portfolio_cash": 50000,
+            "vc_level":"100+250+500+500",
+            "capital_distributions": ".60,.40",
+            "portfolio_cash": 20000,
+            "scaling": "dynamicscale",
+            "volatility_threshold": 0.5,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBF3-6PE",
+            "spread_length": 2,
+            "reserve_cash": 5000
+
+        },
+                {
+            "put_pct": 1, 
+            "spread_search": "0:4",
+            "aa": 0,
+            "risk_unit": .05,
+            "model": "CDVOLVARVC",
+            "vc_level":"50+100+250+500",
+            "capital_distributions": ".35,.30,.15,.10",
+            "portfolio_cash": 20000,
             "scaling": "dynamicscale",
             "volatility_threshold": 0.4,
             "model_type": "cls",
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6NF2S",
+            "dataset": "CDVOLBF3-6PE",
+            "spread_length": 4,
+            "reserve_cash": 5000
+
+        },
+                {
+            "put_pct": 1, 
+            "spread_search": "1:4",
+            "aa": 0,
+            "risk_unit": .05,
+            "model": "CDVOLVARVC",
+            "vc_level":"50+150+500+500",
+            "capital_distributions": ".40,.40,.20",
+            "portfolio_cash": 20000,
+            "scaling": "dynamicscale",
+            "volatility_threshold": 0.4,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBF3-6PE",
             "spread_length": 3,
-            "reserve_cash": 15000
+            "reserve_cash": 5000
+
+        },
+        {
+            "put_pct": 1, 
+            "spread_search": "1:3",
+            "aa": 0,
+            "risk_unit": .05,
+            "model": "CDVOLVARVC",
+            "vc_level":"100+250+500+500",
+            "capital_distributions": ".60,.40",
+            "portfolio_cash": 20000,
+            "scaling": "dynamicscale",
+            "volatility_threshold": 0.4,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBF3-6PE",
+            "spread_length": 2,
+            "reserve_cash": 5000
 
         },
     ]
+    
     models_tested = []
     error_models = []
     nowstr = datetime.now().strftime("%Y%m%d")
 
 
     ## TREND STRATEGIES ONLY
-    strategies = ["CDBFC:3",
-                  "CDBFP:3","CDBFC_1D:1","CDBFP_1D:1"
-                  ]    
-    years = ['twenty1','twenty0']
+    strategies = [
+        # "CDBFC:3","CDBFP:3",
+        "CDBFC_1D:1","CDBFP_1D:1"
+        ]    
+    years = ['twenty0','twenty1']
 
     for config in backtest_configs:
         for year in years:
             year_data = YEAR_CONFIG[year]
-            trading_strat = f"{config['user']}-{nowstr}-{year_data['year']}-NF_REUP:{config['model']}_{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_sssl{config['spread_search']}:{config['spread_length']}"
+            trading_strat = f"{config['user']}/{nowstr}-{year_data['year']}-REUP1D:{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_sssl{config['spread_search']}:{config['spread_length']}"
             for month in year_data['months']:
                 starting_cash = config['portfolio_cash']
-                # try:
-                start_dt = month[0]
-                end_date = month[-1]
+                try:
+                    start_dt = month[0]
+                    end_date = month[-1]
 
-                start_date = start_dt.replace("-","/")
-                end_dt = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=7)
-                end_date = end_dt.strftime("%Y/%m/%d")
-                start_str = start_date.split("/")[1] + start_date.split("/")[2]
-                end_str = end_date.split("/")[1] + end_date.split("/")[2]
+                    start_date = start_dt.replace("-","/")
+                    end_dt = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=7)
+                    end_date = end_dt.strftime("%Y/%m/%d")
+                    start_str = start_date.split("/")[1] + start_date.split("/")[2]
+                    end_str = end_date.split("/")[1] + end_date.split("/")[2]
 
-                print(f"Starting {trading_strat} at {datetime.now()} for {start_date} to {end_date} with ${starting_cash}")
-                portfolio_df, positions_df, full_df = backtest_orchestrator(start_date, end_date,file_names=month,strategies=strategies,local_data=False, config=config, period_cash=starting_cash)
-                starting_cash = portfolio_df['portfolio_cash'].iloc[-1]
-                s3.put_object(Body=portfolio_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/portfolio_report.csv')
-                s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/positions_report.csv')
-                s3.put_object(Body=full_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/all_positions.csv')
-                print(f"Done with {trading_strat} at {datetime.now()}!")
-                # except Exception as e:
-                #     print(f"Error: {e} for {trading_strat}")
-                #     error_models.append(f"Error: {e} for {trading_strat}")
-                #     continue
+                    print(f"Starting {trading_strat} at {datetime.now()} for {start_date} to {end_date} with ${starting_cash}")
+                    portfolio_df, positions_df, full_df = backtest_orchestrator(start_date, end_date,file_names=month,strategies=strategies,local_data=False, config=config, period_cash=starting_cash)
+                    starting_cash = portfolio_df['portfolio_cash'].iloc[-1]
+                    s3.put_object(Body=portfolio_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/portfolio_report.csv')
+                    s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/positions_report.csv')
+                    s3.put_object(Body=full_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/all_positions.csv')
+                    print(f"Done with {trading_strat} at {datetime.now()}!")
+                except Exception as e:
+                    print(f"Error: {e} for {trading_strat}")
+                    error_models.append(f"Error: {e} for {trading_strat}")
+                    continue
             models_tested.append(f'{trading_strat}${config["portfolio_cash"]}_{config["risk_unit"]}')
 
         print(f"Completed all models at {datetime.now()}!")
         print(models_tested)
         print("Errors:")
         print(error_models)
+
+
+
+
