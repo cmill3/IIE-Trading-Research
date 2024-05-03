@@ -148,6 +148,66 @@ if __name__ == "__main__":
             "reserve_cash": 5000
 
         },
+                {
+            "put_pct": 1, 
+            "spread_search": "0:4",
+            "aa": 0,
+            "risk_unit": .05,
+            "model": "CDVOLVARVC",
+            "vc_level":"50+100+250+500",
+            "capital_distributions": ".35,.30,.15,.10",
+            "portfolio_cash": 20000,
+            "scaling": "dynamicscale",
+            "volatility_threshold": 0.4,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBF3-6PE",
+            "spread_length": 4,
+            "reserve_cash": 5000
+
+        },
+                {
+            "put_pct": 1, 
+            "spread_search": "1:4",
+            "aa": 0,
+            "risk_unit": .05,
+            "model": "CDVOLVARVC",
+            "vc_level":"50+150+500+500",
+            "capital_distributions": ".40,.40,.20",
+            "portfolio_cash": 20000,
+            "scaling": "dynamicscale",
+            "volatility_threshold": 0.4,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBF3-6PE",
+            "spread_length": 3,
+            "reserve_cash": 5000
+
+        },
+        {
+            "put_pct": 1, 
+            "spread_search": "1:3",
+            "aa": 0,
+            "risk_unit": .05,
+            "model": "CDVOLVARVC",
+            "vc_level":"100+250+500+500",
+            "capital_distributions": ".60,.40",
+            "portfolio_cash": 20000,
+            "scaling": "dynamicscale",
+            "volatility_threshold": 0.4,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBF3-6PE",
+            "spread_length": 2,
+            "reserve_cash": 5000
+
+        },
     ]
     
     models_tested = []
@@ -165,7 +225,7 @@ if __name__ == "__main__":
     for config in backtest_configs:
         for year in years:
             year_data = YEAR_CONFIG[year]
-            trading_strat = f"{config['user']}/{nowstr}-{year_data['year']}-REUP1D:{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_sssl{config['spread_search']}:{config['spread_length']}"
+            trading_strat = f"{config['user']}/{nowstr}-{year_data['year']}-REUP1D:{config['dataset']}_CD{config['capital_distributuions']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_sssl{config['spread_search']}:{config['spread_length']}"
             for month in year_data['months']:
                 starting_cash = config['portfolio_cash']
                 try:
