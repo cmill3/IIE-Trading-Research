@@ -124,35 +124,12 @@ def size_spread_quantities(contracts_details, target_cost, config, open_datetime
 
     quantities = []
     contract_quantity = 0
-    spread_candidates = configure_contracts_for_trade_pct_based(adjusted_contracts, adjusted_target_cost, spread_length)
-    print
-    print(spread_candidates)
+    spread_candidates = configure_contracts_for_trade_pct_based(adjusted_contracts, adjusted_target_cost, config['capital_distributions'])
     # spread_candidates, spread_cost = configure_contracts_for_trade(adjusted_contracts, adjusted_target_cost, spread_length)
     # total_cost = 0
 
     if len(spread_candidates) == 0:
         return []
-    # else:
-    #     while total_cost < adjusted_target_cost:
-    #         if (spread_cost + total_cost) < adjusted_target_cost:
-    #             total_cost += spread_cost
-    #             contract_quantity += 1
-    #         else:
-    #             break
-            
-    # formatted_spread_cost = 0
-    # for candidate in spread_candidates:
-    #         quantities.append({"option_symbol": candidate['option_symbol'], "quantity": contract_quantity,"contract_cost": candidate['contract_cost']})
-    #         formatted_spread_cost += (candidate['contract_cost'] * contract_quantity)
-
-    # cost_remaining = adjusted_target_cost - formatted_spread_cost
-    # # adjusted_quantities = []
-    # if cost_remaining > 0:
-    #     for quantity in quantities:
-    #         if quantity["contract_cost"] < cost_remaining:
-    #             cost_remaining -= quantity['contract_cost']
-    #             quantity['quantity'] += 1
-
 
     details_df = pd.DataFrame(spread_candidates)
     details_df = details_df.loc[details_df['quantity'] > 0]
@@ -191,7 +168,25 @@ def configure_contracts_for_trade_pct_based(contracts_details, target_cost, spre
 
         spread_candidates.append({"option_symbol": contract['option_symbol'], "quantity": contract_quantity,"contract_cost": contract['contract_cost']})
     return spread_candidates
-    
+
+def configure_contracts_for_trade_pct_based_v2(contracts_details, capital, capital_distributions):
+    capital_distributions = [float(x) for x in capital_distributions.split(",")]
+    sized_contracts = []
+    total_capital = capital
+    free_capital = 0
+    for index, contract in enumerate(contracts_details):
+        contract_capital = (capital_distributions[index]*total_capital) + free_capital
+        quantities = determine_shares(contract['contract_cost'], contract_capital)
+        if quantities > 0:
+            sized_contracts.append({"option_symbol": contract['option_symbol'], "quantity": quantities,"contract_cost": contract['contract_cost']})
+            free_capital = contract_capital - (quantities * contract['contract_cost'])
+        else:
+            free_capital += contract_capital
+    return sized_contracts
+
+def determine_shares(contract_cost, target_cost):
+    shares = math.floor(target_cost / contract_cost)
+    return shares
 
 def calculate_spread_cost(contracts_details):
     cost = 0

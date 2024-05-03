@@ -200,8 +200,6 @@ def convert_lists_to_dicts_inv(positions_list, datetime_list):
     positions_dict = {}
     sales_dict = {}
     passed_trades_dict = {}
-    print("POSITIONS LIST")
-    print(positions_list)
     for date in datetime_list:
         year = date.year
         month = date.month
@@ -222,7 +220,6 @@ def convert_lists_to_dicts_inv(positions_list, datetime_list):
             "open_positions_end": [],
         }
     for position in positions_list:
-        print(position)
         pos_dt = datetime.strptime(position['open_datetime'], "%Y-%m-%d %H:%M")
         # pos_dt = position['open_datetime']
         try:
@@ -410,6 +407,7 @@ def create_datetime_index(start_date, end_date):
     print("DATE TIME INDEX")
     print(start_date)
     print(end_date)
+    print()
     datetime_index = pd.date_range(start_date, end_date, freq='15min', name = 'Time')
     days = []
     for time in datetime_index:
