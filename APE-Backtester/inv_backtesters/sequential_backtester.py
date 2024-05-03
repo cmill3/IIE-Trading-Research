@@ -103,7 +103,7 @@ if __name__ == "__main__":
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6t11",
+            "dataset": "CDVOLBF3-6PE",
             "spread_length": 4,
             "reserve_cash": 5000
 
@@ -125,6 +125,26 @@ if __name__ == "__main__":
             "oneD_vol": "return_vol_5D",
             "dataset": "CDVOLBF3-6PE",
             "spread_length": 3,
+            "reserve_cash": 5000
+
+        },
+        {
+            "put_pct": 1, 
+            "spread_search": "1:3",
+            "aa": 0,
+            "risk_unit": .05,
+            "model": "CDVOLVARVC",
+            "vc_level":"100+250+500+500",
+            "capital_distributions": ".60,.40",
+            "portfolio_cash": 20000,
+            "scaling": "dynamicscale",
+            "volatility_threshold": 0.5,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBF3-6PE",
+            "spread_length": 2,
             "reserve_cash": 5000
 
         },
