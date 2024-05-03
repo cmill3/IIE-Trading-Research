@@ -164,19 +164,76 @@ if __name__ == "__main__":
             "put_pct": 1, 
             "spread_search": "1:4",
             "aa": 0,
-            "risk_unit": .011,
+            "risk_unit": .013,
             "model": "CDVOLVARVC",
             "vc_level":"100+300+500",
-            "portfolio_cash": 100000,
+            "portfolio_cash": 500000,
             "scaling": "dynamicscale",
             "volatility_threshold": 0.5,
             "model_type": "cls",
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6NF",
+            "dataset": "CDVOLBF3-6NF2S",
             "spread_length": 3,
-            "reserve_cash": 33000
+            "reserve_cash": 100000
+
+        },
+        {
+            "put_pct": 1, 
+            "spread_search": "1:4",
+            "aa": 0,
+            "risk_unit": .013,
+            "model": "CDVOLVARVC",
+            "vc_level":"100+300+500",
+            "portfolio_cash": 500000,
+            "scaling": "dynamicscale",
+            "volatility_threshold": 0.4,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBF3-6NF2S",
+            "spread_length": 3,
+            "reserve_cash": 100000
+
+        },
+                {
+            "put_pct": 1, 
+            "spread_search": "1:4",
+            "aa": 0,
+            "risk_unit": .013,
+            "model": "CDVOLVARVC",
+            "vc_level":"100+300+500",
+            "portfolio_cash": 50000,
+            "scaling": "dynamicscale",
+            "volatility_threshold": 0.5,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBF3-6NF2S",
+            "spread_length": 3,
+            "reserve_cash": 15000
+
+        },
+        {
+            "put_pct": 1, 
+            "spread_search": "1:4",
+            "aa": 0,
+            "risk_unit": .013,
+            "model": "CDVOLVARVC",
+            "vc_level":"100+300+500",
+            "portfolio_cash": 50000,
+            "scaling": "dynamicscale",
+            "volatility_threshold": 0.4,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBF3-6NF2S",
+            "spread_length": 3,
+            "reserve_cash": 15000
 
         },
         # {
@@ -214,7 +271,7 @@ if __name__ == "__main__":
         for year in years:
             year_data = YEAR_CONFIG[year]
             trading_strat = f"{config['user']}-{nowstr}-{year_data['year']}-NF_REUP:{config['model']}_{config['dataset']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_sssl{config['spread_search']}:{config['spread_length']}"
-            for month in year_data['months']:
+            for month in year_data['months'][3:]:
                 starting_cash = config['portfolio_cash']
                 try:
                     start_dt = month[0]

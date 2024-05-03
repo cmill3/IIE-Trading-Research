@@ -161,31 +161,31 @@ def add_weekdays(date,days,symbol):
     return date
 
 if __name__ == "__main__":
-    for year in ["twenty3","twenty2","twenty1"]:
+    for year in ['twenty0','twenty1','twenty2','twenty3','twenty4']:
         strategy_info = { 
             "CDBFC": {
-                "file_path": 'TSSIM1_BF3NF_custHypTP0.6',
+                "file_path": 'TSSIM2S_BF3NFS_custHypTP0.6',
                 "time_span": 4,
                 "side": "C"
             },
             "CDBFP": {
-                "file_path": 'TSSIM1_BF3NF_custHypTP0.4',
+                "file_path": 'TSSIM2S_BF3NFS_custHypTP0.4',
                 "time_span": 4,
                 "side": "P"
             },
             "CDBFC_1D": {
-                "file_path": 'TSSIM1.1_BF3NF_custHypTP0.6',
+                "file_path": 'TSSIM2S_BF3NFS_custHypTP0.6',
                 "time_span": 2,
                 "side": "C"
             },
             "CDBFP_1D": {
-                "file_path": 'TSSIM1_BF3NF_custHypTP0.4',
+                "file_path": 'TSSIM2S_BF3NFS_custHypTP0.4',
                 "time_span": 2,
                 "side": "P"
             },
         }
 
-        data_type = 'CDVOLBF3-6NF'
+        data_type = 'CDVOLBF3-6NF2S'
         file_names = YEAR_CONFIG[year]['all_files']
         
         # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')
