@@ -42,7 +42,21 @@ def create_simulation_data_inv(row,config):
     trading_aggregates, option_symbols = backtrader_helper.create_options_aggs_inv(row,start_date,end_date=end_date,spread_length=config['spread_length'],config=config)
     return start_date, end_date, row['symbol'], row['alert_price'], row['strategy'], option_symbols, trading_aggregates
 
+def create_simulation_data_pt(row,config):
+    print(row)
+    date_str = row['recent_date'].split(" ")[0]
+    start_date = datetime(int(date_str.split("-")[0]),int(date_str.split("-")[1]),int(date_str.split("-")[2]),int(row['hour']),0,0)
+    if row['strategy'] in ONED_STRATEGIES:
+        days_back = 1
+    elif row['strategy'] in THREED_STRATEGIES:
+        days_back = 3
+    end_date = backtrader_helper.create_end_date(start_date, days_back)
+    trading_aggregates, option_symbols, open_price = backtrader_helper.create_options_aggs_pt(row,start_date,end_date=end_date,config=config)
+    return start_date, end_date, row['symbol'], open_price, row['strategy'], option_symbols, trading_aggregates
+
 def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, polygon_df, position_id, trading_date, alert_hour,order_id,config,row,order_num):
+    print("ROW")
+    print(row)
     open_price = open_prices[0]
     open_datetime = datetime(int(trading_date.split("-")[0]),int(trading_date.split("-")[1]),int(trading_date.split("-")[2]),int(alert_hour),0,0,tzinfo=pytz.timezone('US/Eastern'))
     contract_cost = round(open_price * 100,2)
@@ -70,19 +84,19 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
             print(polygon_df)
             return "NO DICT"
     elif config['model'] == "CDVOLVARVC":
-        try:
-            if strategy in THREED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_3D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
-            elif strategy in THREED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict = trade.tda_PUT_3D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
-            elif strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_1D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
-            elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict = trade.tda_PUT_1D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=-row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
-        except Exception as e:
-            print(f"Error {e} in sell_dict for {symbol} in {strategy} CDVOLVARVC")
-            print(polygon_df)
-            return "NO DICT"
+        # try:
+        if strategy in THREED_STRATEGIES and strategy in CALL_STRATEGIES:
+            sell_dict = trade.tda_CALL_3D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
+        elif strategy in THREED_STRATEGIES and strategy in PUT_STRATEGIES:
+            sell_dict = trade.tda_PUT_3D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
+        elif strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
+            sell_dict = trade.tda_CALL_1D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
+        elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
+            sell_dict = trade.tda_PUT_1D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=-row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
+        # except Exception as e:
+        #     print(f"Error {e} in sell_dict for {symbol} in {strategy} CDVOLVARVC")
+        #     print(polygon_df)
+        #     return "NO DICT"
     
     try:
         sell_dict['position_id'] = position_id
@@ -105,7 +119,103 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
         print(results_dict)
         print()
     return results_dict
-    # return buy_dict, sell_dict, results_dict, transaction_dict, open_datetime
+
+def buy_iterate_sellV2_invalerts_pt(symbol, option_symbol, open_prices, strategy, polygon_df, position_id, trading_date, alert_hour,order_id,config,row,order_num,quantity):
+    print("ROW")
+    print(row)
+    open_price = open_prices[0]
+    open_datetime = datetime(int(trading_date.split("-")[0]),int(trading_date.split("-")[1]),int(trading_date.split("-")[2]),int(alert_hour),0,0,tzinfo=pytz.timezone('US/Eastern'))
+    contract_cost = round(open_price * 100,2)
+
+    if strategy in CALL_STRATEGIES:
+        contract_type = "calls"
+    elif strategy in PUT_STRATEGIES:
+        contract_type = "puts"
+        
+    buy_dict = {"open_price": open_price, "open_datetime": open_datetime, "quantity": quantity, "contract_cost": contract_cost, "option_symbol": option_symbol, "position_id": position_id, "contract_type": contract_type}
+
+    if strategy in THREED_STRATEGIES and strategy in CALL_STRATEGIES:
+        sell_dict = trade.tda_CALL_3D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
+    elif strategy in THREED_STRATEGIES and strategy in PUT_STRATEGIES:
+        sell_dict = trade.tda_PUT_3D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
+    elif strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
+        sell_dict = trade.tda_CALL_1D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
+    elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
+        sell_dict = trade.tda_PUT_1D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=-row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
+
+    
+    try:
+        sell_dict['position_id'] = position_id
+        results_dict = backtrader_helper.create_results_dict(buy_dict, sell_dict, order_id)
+        results_dict['position_id'] = position_id
+        # transaction_dict = {"buy_dict": buy_dict, "sell_dict":sell_dict, "results_dict": results_dict}
+        buy_dt = buy_dict['open_datetime']
+        sell_dt = sell_dict['close_datetime']
+        buy_dt = datetime(buy_dt.year,buy_dt.month,buy_dt.day,buy_dt.hour)
+        sell_dt = datetime(sell_dt.year,sell_dt.month,sell_dt.day,sell_dt.hour)
+        if buy_dt > sell_dt:
+            print(f"Date Mismatch for {symbol}")
+            print(f"{buy_dt} vs. {sell_dt}")
+            # print(sell_dict['close_datetime'])
+            print()
+    except Exception as e:
+        print(f"Error {e} in transaction_dict for {symbol}")
+        print(buy_dict)
+        print(sell_dict)
+        print(results_dict)
+        print()
+    return results_dict
+
+def simulate_trades_invalerts_pt(data,config):
+    positions_list = []
+    for i, row in data.iterrows():
+        order_num = 1
+        ## These variables are crucial for controlling the buy/sell flow of the simulation.
+        alert_hour = row['hour']
+        trading_date = row['recent_date']
+        trading_date = trading_date.split(" ")[0]
+        start_date, end_date, symbol, mkt_price, strategy, option_symbols, enriched_options_aggregates = create_simulation_data_pt(row,config)
+        order_dt = start_date.strftime("%m+%d")
+        pos_dt = start_date.strftime("%Y-%m-%d-%H")
+        position_id = f"{row['symbol']}-{(row['strategy'].replace('_',''))}-{pos_dt}"
+        open_trade_dt = start_date.strftime('%Y-%m-%d %H:%M')
+        results = []
+
+        for df in enriched_options_aggregates:
+            # try:
+            open_prices = df['o'].values
+            ticker = df.iloc[0]['ticker']
+            order_id = f"{order_num}_{order_dt}"
+            quantity = df.iloc[0]['quantity']
+            results_dict = buy_iterate_sellV2_invalerts_pt(symbol, ticker, open_prices, strategy, df, position_id, trading_date, alert_hour, order_id,config,row,order_num,quantity=quantity)
+            if results_dict == "NO DICT":
+                continue
+            results_dict['order_num'] = order_num
+            print(f"results_dict for {symbol} and {ticker}")
+            print(results_dict)
+            print()
+            if len(results_dict) == 0:
+                print(f"Error in simulate_trades_invalerts for {symbol} and {ticker}")
+                print(f"{order_id}_{order_dt}")
+                continue
+
+            results.append(results_dict)
+            order_num += 1
+            # except Exception as e:
+            #     print(f"error: {e} in simulate_trades_invalerts_pt")
+            #     print(df)
+            #     continue
+        
+        try:
+            position_trades = {"position_id": position_id, "transactions": results, "open_datetime": open_trade_dt}
+        except Exception as e:
+            print(f"Error in position_trades for {position_id} {e}")
+            print(results)
+            print()
+            continue
+        positions_list.append(position_trades)
+    
+    return positions_list
 
 def simulate_trades_invalerts(data,config):
     positions_list = []

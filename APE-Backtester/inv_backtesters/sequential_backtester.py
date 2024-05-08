@@ -148,14 +148,14 @@ if __name__ == "__main__":
             "reserve_cash": 5000
 
         },
-                {
+        {
             "put_pct": 1, 
             "spread_search": "0:4",
             "aa": 0,
             "risk_unit": .05,
             "model": "CDVOLVARVC",
             "vc_level":"50+100+250+500",
-            "capital_distributions": ".35,.30,.15,.10",
+            "capital_distributions": ".25,.25,.25,.25",
             "portfolio_cash": 20000,
             "scaling": "dynamicscale",
             "volatility_threshold": 0.4,

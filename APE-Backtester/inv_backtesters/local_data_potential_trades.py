@@ -1,12 +1,21 @@
 import boto3
 import helpers.backtest_functions as back_tester
+import helpers.backtrader_helper as helper
 import pandas as pd
-from datetime import datetime, timedelta
 import concurrent.futures
 import pandas_market_calendars as mcal
 import numpy as np
-from helpers.constants import ONED_STRATEGIES, THREED_STRATEGIES, YEAR_CONFIG
 import ast
+from datetime import datetime, timedelta
+import numpy as np
+import helpers.backtrader_helper as helper
+import helpers.portfolio_simulation as portfolio_sim
+import warnings
+import concurrent.futures
+
+
+warnings.filterwarnings("ignore")
+bucket_name = 'icarus-research-data'  #s3 bucket name
 
 s3 = boto3.client('s3')
 nyse = mcal.get_calendar('NYSE')
@@ -17,6 +26,8 @@ def pull_potential_trades(run_info):
     dfs = []
     for strategy in run_info['strategies']:
         for date in run_info['dates']:
+            dt = datetime.strptime(date, '%Y/%m/%d')
+            day_of_week = dt.weekday()
             for hour in ["10","11","12","13","14","15"]:
                 key = f"invalerts_potential_trades/PROD_VAL/{strategy}/{date}/{hour}.csv"
                 try:
@@ -25,6 +36,12 @@ def pull_potential_trades(run_info):
                     print(f"Error pulling data: {e} for {strategy}")
                     return []
                 contracts = pd.read_csv(contracts['Body'])
+                contracts['hour'] = hour
+                contracts['day_of_week'] = day_of_week
+                if strategy in ["CDBFC_1D","CDBFP_1D"]:
+                    contracts['prediction_horizon'] = "1"
+                else:
+                    contracts['prediction_horizon'] = "3"
                 dfs.append(contracts)
     contracts = pd.concat(dfs,ignore_index=True)
     contracts['probabilities'] = contracts['classifier_prediction'].astype(int)
@@ -32,149 +49,88 @@ def pull_potential_trades(run_info):
     trade_data['trade_details1wk'] = trade_data['trade_details1wk'].apply(lambda x: ast.literal_eval(x))
     trade_data['num_contracts'] = trade_data['trade_details1wk'].apply(lambda x: len(x))
     trade_data = trade_data.loc[trade_data['num_contracts'] > 0]
-    print(trade_data)
+    return trade_data
 
 
-    
 
-        
-def pull_contract_data(row):
-    if row['symbol'] in ['SPY','QQQ','IWM']:
-        date = row['date'].split(" ")[0]
-        file_date = create_index_date(row['date'])
-        year, month, day = file_date.strftime('%Y-%m-%d').split("-")
-    elif row['symbol'] in ['NVDA','GOOG','GOOGL','AMZN','TSLA']:
-        date = row['date'].split(" ")[0]
-        year, month, day = date.split("-")
-        if year in ['2021','2022']:
-            dt = datetime(int(year),int(month),int(day))
-            weekday = dt.weekday()
-            monday_dt = dt - timedelta(days=weekday)
-            monday_str = monday_dt.strftime('%Y-%m-%d')
-            year, month, day = monday_str.split("-")
-    else:
-        date = row['date'].split(" ")[0]
-        year, month, day = date.split("-")
-    key = f"options_snapshot/{year}/{month}/{day}/{row['symbol']}.csv"
-    try:
-        contracts = s3.get_object(Bucket="icarus-research-data", Key=key)
-    except Exception as e:
-        print(f"Error pulling data: {e} for {row['symbol']}")
-        return []
-    contracts = pd.read_csv(contracts['Body'])
-    try:
-        contracts['date'] = contracts['symbol'].apply(lambda x: x[-15:-9])
-        contracts['side'] = contracts['symbol'].apply(lambda x: x[-9])
-        contracts['year'] = contracts['date'].apply(lambda x: f"20{x[:2]}")
-        contracts['month'] = contracts['date'].apply(lambda x: x[2:4])
-        contracts['day'] = contracts['date'].apply(lambda x: x[4:])
-        contracts['date'] = contracts['year'] + "-" + contracts['month'] + "-" + contracts['day']
-        expiry_dates = generate_expiry_dates(date,row['symbol'],row['strategy'])
-        filtered_contracts = contracts[contracts['date'].isin(expiry_dates)]
-        filtered_contracts = filtered_contracts[filtered_contracts['side'] == row['side']]
-        contracts_list = filtered_contracts['symbol'].tolist()
-    except Exception as e:
-        print(f"Error: {e} for {row['symbol']}")
-        print(row)
-        print(row['symbol'])
-        print(contracts)
+def build_backtest_data(run_info,config):
+    predictions = pull_potential_trades(run_info)
+    filtered_by_date = helper.configure_trade_data(predictions,config)
+    ## What we will do is instead of simulating one trade at a time we will do one time period at a time and then combine and create results then.
+    positions_list = back_tester.simulate_trades_invalerts_pt(filtered_by_date,config)
+    return positions_list
+
+
+def backtest_orchestrator(start_date,end_date,file_name,run_info,local_data,config,period_cash):
+    positions_list = build_backtest_data(run_info,config)
+    print(f"Positions list length: {len(positions_list)}")
+    formatted_results = []
+    for position in positions_list:
+        print(position)
         print()
-        return []
-    return contracts_list
-
-
-def generate_expiry_dates(date_str,symbol,strategy):
-    if symbol in ['SPY','QQQ','IWM']:
-        if strategy in ONED_STRATEGIES:
-            day_of = add_weekdays(date_str,1,symbol)
-            next_day = add_weekdays(date_str,2,symbol)
-            return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
-        elif strategy in THREED_STRATEGIES:
-            day_of = add_weekdays(date_str,3,symbol)
-            next_day = add_weekdays(date_str,4,symbol)
-            return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
-    else: 
-        input_date = datetime.strptime(date_str, '%Y-%m-%d')
-        # Find the weekday of the input date (Monday is 0 and Sunday is 6)
-        weekday = input_date.weekday()
-
-
-    if weekday == 4:
-        closest_friday = input_date + timedelta(days=7)
-        following_friday = input_date + timedelta(days=14)
-        return [closest_friday.strftime('%Y-%m-%d'), following_friday.strftime('%Y-%m-%d')]
-
-    # Calculate days until the next Friday
-    days_until_closest_friday = (4 - weekday) % 7
-    days_until_following_friday = days_until_closest_friday + 7
-    closest_friday = input_date + timedelta(days=days_until_closest_friday)
-    following_friday = input_date + timedelta(days=days_until_following_friday)
-
-    return [closest_friday.strftime('%Y-%m-%d'), following_friday.strftime('%Y-%m-%d')]
-
-def create_index_date(date):
-    str = date.split(" ")[0]
-    dt = datetime.strptime(str, '%Y-%m-%d')
-    wk_day = dt.weekday()
-    monday = dt - timedelta(days=wk_day)
-    monday_np = np.datetime64(monday)
-    
-    if monday_np in holidays_multiyear:
-        monday = monday + timedelta(days=1)
-    return monday
-
-def generate_expiry_dates_row(row):
-    date_str = row['date'].split(" ")[0]
-    if row['symbol'] in ['SPY','QQQ','IWM']:
-        if row['strategy'] in ONED_STRATEGIES:
-            day_of = add_weekdays(date_str,1,row['symbol'])
-            next_day = add_weekdays(date_str,2,row['symbol'])
-            return [day_of.strftime('%y%m%d'),next_day.strftime('%y%m%d')]
-        elif row['strategy'] in THREED_STRATEGIES:
-            day_of = add_weekdays(date_str,3,row['symbol'])  
-            next_day = add_weekdays(date_str,4,row['symbol'])
-            return [day_of.strftime('%y%m%d'),next_day.strftime('%y%m%d')]
-    else: 
-        input_date = datetime.strptime(date_str, '%Y-%m-%d')
-        # Find the weekday of the input date (Monday is 0 and Sunday is 6)
-        weekday = input_date.weekday()
-
-    if weekday == 4:
-        closest_friday = input_date + timedelta(days=7)
-        following_friday = input_date + timedelta(days=14)
-
-        return [closest_friday.strftime('%y%m%d'), following_friday.strftime('%y%m%d')]
-
-    # Calculate days until the next Friday
-    days_until_closest_friday = (4 - weekday) % 7
-    days_until_following_friday = days_until_closest_friday + 7
-    closest_friday = input_date + timedelta(days=days_until_closest_friday)
-    following_friday = input_date + timedelta(days=days_until_following_friday)
-
-
-    return [closest_friday.strftime('%y%m%d'), following_friday.strftime('%y%m%d')]
-
-def add_weekdays(date,days,symbol):
-    if type(date) == str:
-        date = datetime.strptime(date, '%Y-%m-%d')
-    year = date.year
-    month = date.month
-    # date = datetime.strptime(date, '%Y-%m-%d')
-    while days > 0:
-        date += timedelta(days=1)
-        if date.weekday() < 5:
-            days -= 1
-
-    ## works fully for now, will need to fix if we expand to taking calendar spreads as well
-    if symbol == "IWM" or year == 2021 or (year == 2022 and month < 6):
-        if date.weekday() in [1,3]:
-            date += timedelta(days=1)
-    return date
+        results_dicts = helper.extract_results_dict_pt(position,config)
+        formatted_results.append({'position_id':position['position_id'],"results":results_dicts})
+    final_df = pd.DataFrame.from_dict(formatted_results)
+    # portfolio_df, positions_df = run_trades_simulation(merged_df, start_date, end_date, config, period_cash)
+    return final_df
 
 if __name__ == "__main__":
+    s3 = boto3.client('s3')
+    strategy_theme = "invALERTS_cls" 
+    backtest_configs = [
+        {
+            "put_pct": 1, 
+            "spread_search": "2:4",
+            "aa": 0,
+            "risk_unit": .00825,
+            "model": "CDVOLVARVC",
+            "vc_level":"100+300+500+500",
+            "portfolio_cash": 100000,
+            "scaling": "dynamicscale",
+            "volatility_threshold": 0.4,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            # "dataset": "CDVOLBF3-6TRIM",
+            "spread_length": 2,
+        },
+    ]
+
+    models_tested = []
+    error_models = []
+    nowstr = datetime.now().strftime("%Y%m%d")
+
+    ## TREND STRATEGIES ONLY
+    weeks = []
     run_info = {
-        "strategies": ['CDBFC','CDBFP','CDBFC_1D','CDBFP_1D'],
-        "dates": ["2024/04/29"],
+        "strategies": ['CDBFC_1D','CDBFP_1D',"CDBFC","CDBFP"],
+        "dates": ["2024/04/29","2024/04/30","2024/05/01","2024/05/02"],
     }
-    pull_potential_trades(run_info)
+    print(f"Starting {type(run_info['strategies'])} at {datetime.now()} for {run_info['dates']}")
+
+    for config in backtest_configs:
+            trading_strat = f"{config['user']}-POTTRADES:{config['model']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_{config['scaling']}_sssl{config['spread_search']}:{config['spread_length']}"
+            week = "2024-04-29"
+            starting_cash = config['portfolio_cash']                
+            start_date = week.replace("-","/")
+            end_dt = datetime.strptime(week, '%Y-%m-%d') + timedelta(days=13)
+            end_date = end_dt.strftime("%Y/%m/%d")
+            start_str = start_date.split("/")[1] + start_date.split("/")[2]
+            end_str = end_date.split("/")[1] + end_date.split("/")[2]
+
+            print(f"Starting {trading_strat} at {datetime.now()} for {start_date} to {end_date} with ${starting_cash}")
+            positions_df = backtest_orchestrator(start_date, end_date,file_name=week,run_info=run_info,local_data=False, config=config, period_cash=starting_cash)
+            # starting_cash = portfolio_df['portfolio_cash'].iloc[-1]
+            # s3.put_object(Body=portfolio_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports_weekly/pt_trades/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/portfolio_report.csv')
+            s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports_weekly/pt_trades/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/positions_report.csv')
+            # s3.put_object(Body=full_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports_weekly/pt_trades/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/all_positions.csv')
+            print(f"Done with {trading_strat} at {datetime.now()}!")
+            models_tested.append(f'{trading_strat}${config["portfolio_cash"]}_{config["risk_unit"]}')
+
+            print(f"Completed all models at {datetime.now()}!")
+            print(models_tested)
+            print("Errors:")
+            print(error_models)
+
 

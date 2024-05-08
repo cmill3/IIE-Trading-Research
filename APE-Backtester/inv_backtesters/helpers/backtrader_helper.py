@@ -184,6 +184,33 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
             continue
     return enriched_options_aggregates, options
 
+def create_options_aggs_pt(row,start_date,end_date,config):
+    options = []
+    enriched_options_aggregates = []
+
+    try:
+        underlying_agg_data = ph.polygon_stockdata_inv(row['symbol'],start_date,end_date)
+    except Exception as e:
+        print(f"Error: {e} in underlying agg for {row['symbol']} of {row['strategy']}")
+        underlying_agg_data = ph.polygon_stockdata_inv(row['symbol'],start_date,end_date)
+            
+    underlying_agg_data.rename(columns={'o':'underlying_price'}, inplace=True)
+    open_price = underlying_agg_data['underlying_price'].values[0]
+    for contract in row['trade_details1wk']:
+        try:
+            options_agg_data = ph.polygon_optiondata(contract['contract_ticker'], start_date, end_date)
+            enriched_df = pd.merge(options_agg_data, underlying_agg_data[['date', 'underlying_price']], on='date', how='left')
+            enriched_df.dropna(inplace=True)
+            enriched_df['quantity'] = contract['quantity']
+            enriched_options_aggregates.append(enriched_df)
+            enriched_options_aggregates['']
+            options.append(contract)
+        except Exception as e:
+            print(f"Error: {e} in options agg for {row['symbol']} of {row['strategy']}")
+            print(contract)
+            continue
+    return enriched_options_aggregates, options, open_price
+
 def generate_datetime_range(start_date, end_date):
     delta = timedelta(minutes=15)
     current_date = start_date
@@ -380,6 +407,31 @@ def extract_results_dict(positions_list, config, quantities):
                 "max_value_before_date": sell_dict['max_value_before_date'], "max_value_after_date": sell_dict['max_value_after_date'],
                 "max_value_before_idx": sell_dict['max_value_before_idx'], "max_value_after_idx": sell_dict['max_value_after_idx'],
                 "sell_code": sell_dict['sell_code'], "quantity": option_quantity,
+            })
+        except Exception as e:
+            print(f"Error: {e} in extracting results dict")
+            print(transaction)
+            continue
+    return results_dicts
+
+def extract_results_dict_pt(positions_list, config):
+    results_dicts = []
+    transactions = positions_list['transactions']
+    for transaction in transactions:
+        print("TRAAAA")
+        print(transaction)
+        try:
+            sell_dict = transaction['sell_info']
+            buy_dict = transaction['buy_info']
+            results_dicts.append(
+            {
+                "price_change": transaction['price_change'], "pct_gain": transaction['pct_gain'],
+                "total_gain": transaction['total_gain'], "open_trade_dt": transaction['open_trade_dt'], 
+                "close_trade_dt": transaction['close_trade_dt'],"max_gain_before": sell_dict['max_value_before_pct_change'],
+                "max_gain_after": sell_dict['max_value_after_pct_change'],"option_symbol": sell_dict['option_symbol'],
+                "max_value_before_date": sell_dict['max_value_before_date'], "max_value_after_date": sell_dict['max_value_after_date'],
+                "max_value_before_idx": sell_dict['max_value_before_idx'], "max_value_after_idx": sell_dict['max_value_after_idx'],
+                "sell_code": sell_dict['sell_code'], "quantity": buy_dict['quantity'],
             })
         except Exception as e:
             print(f"Error: {e} in extracting results dict")

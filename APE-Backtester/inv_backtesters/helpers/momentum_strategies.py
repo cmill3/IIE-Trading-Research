@@ -1715,7 +1715,7 @@ def tda_PUT_3D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target_
         hour = row['date'].hour
         # Floor_pct = ((float(min_value) - float(open_price))/float(open_price)) + (standard_risk + (-1*config['risk_adjustment']))
 
-        if deriv_pct_change > vc_config[order_num]:
+        if deriv_pct_change > int(vc_config[order_num]):
             reason = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,reason)  
             return sell_dict
@@ -1791,7 +1791,7 @@ def tda_CALL_3D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target
         # Floor_pct = ((float(max_value) - float(open_price))/float(open_price)) - (float(standard_risk) + (-1*config['risk_adjustment']))
 
 
-        if deriv_pct_change > vc_config[order_num]:
+        if deriv_pct_change > int(vc_config[order_num]):
             reason = "VCSell"
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,reason)  
             return sell_dict
