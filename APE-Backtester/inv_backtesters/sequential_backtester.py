@@ -24,7 +24,7 @@ def build_backtest_data(file_name,strategies,config):
         name, prediction_horizon = strategy.split(":")
         data = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/{config["dataset"]}/{name}/{file_name}.csv')
         data['prediction_horizon'] = prediction_horizon
-        dfs.append(data.head(5))
+        dfs.append(data)
     
     backtest_data = pd.concat(dfs,ignore_index=True)
     # backtest_data = backtest_data[backtest_data['probabilities'] > config['probability']]
@@ -61,17 +61,17 @@ def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,c
 
     if not local_data:
         cpu_count = os.cpu_count()
-        merged_positions = build_backtest_data(file_names[0],strategies,config)
-        # with concurrent.futures.ProcessPoolExecutor(max_workers=5) as executor:
-        #     # Submit the processing tasks to the ThreadPoolExecutor
-        #     processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies,config) for file_name in file_names]
+        # merged_positions = build_backtest_data(file_names[0],strategies,config)
+        with concurrent.futures.ProcessPoolExecutor(max_workers=5) as executor:
+            # Submit the processing tasks to the ThreadPoolExecutor
+            processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies,config) for file_name in file_names]
 
-        # # Step 4: Retrieve the results from the futures
-        # processed_weeks_results = [future.result() for future in processed_weeks_futures]
+        # Step 4: Retrieve the results from the futures
+        processed_weeks_results = [future.result() for future in processed_weeks_futures]
 
-        # merged_positions = []
-        # for week_results in processed_weeks_results:
-        #     merged_positions.extend(week_results)
+        merged_positions = []
+        for week_results in processed_weeks_results:
+            merged_positions.extend(week_results)
 
         # merged_df = pd.DataFrame.from_dict(merged_positions)
         # merged_df.to_csv(f'/Users/charlesmiller/Documents/backtesting_data/merged_positions.csv', index=False)
@@ -90,72 +90,12 @@ if __name__ == "__main__":
     backtest_configs = [
         {
             "put_pct": 1, 
-            "spread_search": "0:4",
-            "aa": 0,
-            "risk_unit": .05,
-            "model": "CDVOLVARVC",
-            "vc_level":"50+100+250+500",
-            "capital_distributions": ".35,.30,.15,.10",
-            "portfolio_cash": 20000,
-            "scaling": "dynamicscale",
-            "volatility_threshold": 0.5,
-            "model_type": "cls",
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6PE",
-            "spread_length": 4,
-            "reserve_cash": 5000
-
-        },
-                {
-            "put_pct": 1, 
             "spread_search": "1:4",
             "aa": 0,
-            "risk_unit": .05,
+            "risk_unit": .025,
             "model": "CDVOLVARVC",
-            "vc_level":"50+150+500+500",
-            "capital_distributions": ".40,.40,.20",
-            "portfolio_cash": 20000,
-            "scaling": "dynamicscale",
-            "volatility_threshold": 0.5,
-            "model_type": "cls",
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6PE",
-            "spread_length": 3,
-            "reserve_cash": 5000
-
-        },
-        {
-            "put_pct": 1, 
-            "spread_search": "1:3",
-            "aa": 0,
-            "risk_unit": .05,
-            "model": "CDVOLVARVC",
-            "vc_level":"100+250+500+500",
-            "capital_distributions": ".60,.40",
-            "portfolio_cash": 20000,
-            "scaling": "dynamicscale",
-            "volatility_threshold": 0.5,
-            "model_type": "cls",
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6PE",
-            "spread_length": 2,
-            "reserve_cash": 5000
-
-        },
-                {
-            "put_pct": 1, 
-            "spread_search": "0:4",
-            "aa": 0,
-            "risk_unit": .05,
-            "model": "CDVOLVARVC",
-            "vc_level":"50+100+250+500",
-            "capital_distributions": ".35,.30,.15,.10",
+            "vc_level":"100+200+300+300",
+            "capital_distributions": ".33,.33,.33",
             "portfolio_cash": 20000,
             "scaling": "dynamicscale",
             "volatility_threshold": 0.4,
@@ -163,18 +103,38 @@ if __name__ == "__main__":
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6PE",
-            "spread_length": 4,
+            "dataset": "CDVOLBF3-55PE",
+            "spread_length": 3,
             "reserve_cash": 5000
 
         },
-                {
+        {
+            "put_pct": 1, 
+            "spread_search": "0:4",
+            "aa": 0,
+            "risk_unit": .025,
+            "model": "CDVOLVARVC",
+            "vc_level":"50+100+200+300",
+            "capital_distributions": ".20,.35,.35,.10",
+            "portfolio_cash": 20000,
+            "scaling": "dynamicscale",
+            "volatility_threshold": 0.4,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBF3-55PE",
+            "spread_length": 4,
+            "reserve_cash": 20000
+
+        },
+        {
             "put_pct": 1, 
             "spread_search": "1:4",
             "aa": 0,
-            "risk_unit": .05,
+            "risk_unit": .025,
             "model": "CDVOLVARVC",
-            "vc_level":"50+150+500+500",
+            "vc_level":"100+200+300+300",
             "capital_distributions": ".40,.40,.20",
             "portfolio_cash": 20000,
             "scaling": "dynamicscale",
@@ -183,29 +143,49 @@ if __name__ == "__main__":
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6PE",
+            "dataset": "CDVOLBF3-55PE",
             "spread_length": 3,
-            "reserve_cash": 5000
+            "reserve_cash": 20000
 
         },
         {
             "put_pct": 1, 
-            "spread_search": "1:3",
+            "spread_search": "1:4",
             "aa": 0,
-            "risk_unit": .05,
+            "risk_unit": .025,
             "model": "CDVOLVARVC",
-            "vc_level":"100+250+500+500",
-            "capital_distributions": ".60,.40",
+            "vc_level":"100+200+300+300",
+            "capital_distributions": ".33,.33,.33",
             "portfolio_cash": 20000,
             "scaling": "dynamicscale",
-            "volatility_threshold": 0.4,
+            "volatility_threshold": 0.3,
             "model_type": "cls",
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-6PE",
-            "spread_length": 2,
-            "reserve_cash": 5000
+            "dataset": "CDVOLBF3-55PE",
+            "spread_length": 3,
+            "reserve_cash": 20000
+
+        },
+        {
+            "put_pct": 1, 
+            "spread_search": "1:4",
+            "aa": 0,
+            "risk_unit": .025,
+            "model": "CDVOLVARVC",
+            "vc_level":"100+200+300+300",
+            "capital_distributions": ".40,.40,.20",
+            "portfolio_cash": 20000,
+            "scaling": "dynamicscale",
+            "volatility_threshold": 0.3,
+            "model_type": "cls",
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "oneD_vol": "return_vol_5D",
+            "dataset": "CDVOLBF3-55PE",
+            "spread_length": 3,
+            "reserve_cash": 20000
 
         },
     ]
@@ -220,35 +200,35 @@ if __name__ == "__main__":
         # "CDBFC:3","CDBFP:3",
         "CDBFC_1D:1","CDBFP_1D:1"
         ]    
-    years = ['twenty0','twenty1']
+    years = ['twenty3']
 
     for config in backtest_configs:
         for year in years:
             year_data = YEAR_CONFIG[year]
-            trading_strat = f"{config['user']}/{nowstr}-{year_data['year']}-REUP1D:{config['dataset']}_CD{config['capital_distributuions']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_sssl{config['spread_search']}:{config['spread_length']}"
+            trading_strat = f"{config['user']}/{nowstr}-{year_data['year']}-NEWDATA:{config['dataset']}_CD{config['capital_distributions']}_vol{config['volatility_threshold']}_rc{config['reserve_cash']}_vc{config['vc_level']}_sssl{config['spread_search']}:{config['spread_length']}"
             for month in year_data['months']:
                 starting_cash = config['portfolio_cash']
-                # try:
-                start_dt = month[0]
-                end_date = month[-1]
+                try:
+                    start_dt = month[0]
+                    end_date = month[-1]
 
-                start_date = start_dt.replace("-","/")
-                end_dt = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=7)
-                end_date = end_dt.strftime("%Y/%m/%d")
-                start_str = start_date.split("/")[1] + start_date.split("/")[2]
-                end_str = end_date.split("/")[1] + end_date.split("/")[2]
+                    start_date = start_dt.replace("-","/")
+                    end_dt = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=7)
+                    end_date = end_dt.strftime("%Y/%m/%d")
+                    start_str = start_date.split("/")[1] + start_date.split("/")[2]
+                    end_str = end_date.split("/")[1] + end_date.split("/")[2]
 
-                print(f"Starting {trading_strat} at {datetime.now()} for {start_date} to {end_date} with ${starting_cash}")
-                portfolio_df, positions_df, full_df = backtest_orchestrator(start_date, end_date,file_names=month,strategies=strategies,local_data=False, config=config, period_cash=starting_cash)
-                starting_cash = portfolio_df['portfolio_cash'].iloc[-1]
-                s3.put_object(Body=portfolio_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/portfolio_report.csv')
-                s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/positions_report.csv')
-                s3.put_object(Body=full_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/all_positions.csv')
-                print(f"Done with {trading_strat} at {datetime.now()}!")
-                # except Exception as e:
-                #     print(f"Error: {e} for {trading_strat}")
-                #     error_models.append(f"Error: {e} for {trading_strat}")
-                #     continue
+                    print(f"Starting {trading_strat} at {datetime.now()} for {start_date} to {end_date} with ${starting_cash}")
+                    portfolio_df, positions_df, full_df = backtest_orchestrator(start_date, end_date,file_names=month,strategies=strategies,local_data=False, config=config, period_cash=starting_cash)
+                    starting_cash = portfolio_df['portfolio_cash'].iloc[-1]
+                    s3.put_object(Body=portfolio_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/portfolio_report.csv')
+                    s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/positions_report.csv')
+                    s3.put_object(Body=full_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/all_positions.csv')
+                    print(f"Done with {trading_strat} at {datetime.now()}!")
+                except Exception as e:
+                    print(f"Error: {e} for {trading_strat}")
+                    error_models.append(f"Error: {e} for {trading_strat}")
+                    continue
             models_tested.append(f'{trading_strat}${config["portfolio_cash"]}_{config["risk_unit"]}')
 
         print(f"Completed all models at {datetime.now()}!")

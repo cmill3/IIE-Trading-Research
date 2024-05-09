@@ -124,7 +124,7 @@ def size_spread_quantities(contracts_details, target_cost, config, open_datetime
 
     quantities = []
     contract_quantity = 0
-    spread_candidates = configure_contracts_for_trade_pct_based(adjusted_contracts, adjusted_target_cost, config['capital_distributions'])
+    spread_candidates = configure_contracts_for_trade_pct_based_v2(adjusted_contracts, adjusted_target_cost, config['capital_distributions'])
     # spread_candidates, spread_cost = configure_contracts_for_trade(adjusted_contracts, adjusted_target_cost, spread_length)
     # total_cost = 0
 
