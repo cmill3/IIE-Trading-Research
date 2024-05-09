@@ -222,13 +222,11 @@ def generate_datetime_range(start_date, end_date):
 
     return datetime_range
 
-def convert_lists_to_dicts_inv(positions_list, datetime_list):
+def convert_lists_to_dicts_inv(trades_df, datetime_list):
     portfolio_dict = {}
     positions_dict = {}
     sales_dict = {}
     passed_trades_dict = {}
-    print("POSITIONS LIST")
-    print(positions_list)
     for date in datetime_list:
         year = date.year
         month = date.month
@@ -248,8 +246,9 @@ def convert_lists_to_dicts_inv(positions_list, datetime_list):
             "open_positions_start": [],
             "open_positions_end": [],
         }
-    for position in positions_list:
-        print(position)
+    trades_df['open_datetime'] = trades_df.apply(lambda x: f"{x['dt']} {x['hour']}:00", axis=1)
+    for index,position in trades_df.iterrows():
+        # print(position)
         pos_dt = datetime.strptime(position['open_datetime'], "%Y-%m-%d %H:%M")
         # pos_dt = position['open_datetime']
         try:

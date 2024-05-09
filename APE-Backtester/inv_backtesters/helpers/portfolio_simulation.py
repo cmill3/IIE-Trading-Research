@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from helpers.backtrader_helper import *
 from helpers.strategy_helper import *
 import helpers.bf_strategies as ts
+from helpers.backtest_functions import *    
 
 
 # def simulate_portfolio(positions_list, datetime_list, portfolio_cash, risk_unit,put_adjustment,config,results_dict_func):

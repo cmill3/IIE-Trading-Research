@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import logging
 from helpers.helper import get_day_diff
-from helpers.strategy_helper import build_trade_analytics
+# from helpers.backtest_functions import build_trade_analytics
 import numpy as np  
 import math
 import ast
@@ -1987,3 +1987,31 @@ def tda_CALL_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target
         
     sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,len(polygon_df)-1,quantity,"never sold")
     return sell_dict
+
+def build_trade_analytics(row, polygon_df, derivative_open_price, index, quantity, sell_code):
+    trade_dict = {}
+    before_df = polygon_df.iloc[:index]
+    after_df = polygon_df.iloc[index:]
+    trade_dict['max_value_before'] = before_df['h'].max()
+    trade_dict['max_value_before_idx'] = before_df['h'].idxmax()
+    trade_dict['max_value_before_date'] = before_df.loc[trade_dict['max_value_before_idx']]['date'].strftime("%Y-%m-%d %H:%M")
+    trade_dict['max_value_before_pct_change'] = ((trade_dict['max_value_before'] - derivative_open_price)/derivative_open_price)
+
+    if len(after_df) > 0:
+        trade_dict['max_value_after'] = after_df['h'].max()
+        trade_dict['max_value_after_idx'] = after_df['h'].idxmax()
+        trade_dict['max_value_after_date'] = after_df.loc[trade_dict['max_value_after_idx']]['date'].strftime("%Y-%m-%d %H:%M")
+        trade_dict['max_value_after_pct_change'] = ((trade_dict['max_value_after'] - derivative_open_price)/derivative_open_price)
+    else:
+        trade_dict['max_value_after'] = None
+        trade_dict['max_value_after_idx'] = None
+        trade_dict['max_value_after_date'] = None
+        trade_dict['max_value_after_pct_change'] = None
+
+    trade_dict["close_price"] = row['o']
+    trade_dict["close_datetime"] = row['date'].to_pydatetime()
+    trade_dict["quantity"] = quantity
+    trade_dict["contract_cost"] = (row['o']*100)
+    trade_dict["option_symbol"] = row['ticker']
+    trade_dict["sell_code"] = sell_code
+    return trade_dict
