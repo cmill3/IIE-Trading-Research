@@ -180,18 +180,18 @@ if __name__ == "__main__":
             #     "side": "P"
             # },
             "CDBFC_1D": {
-                "file_path": 'TSSIM2S_PEBF3_custHypTP0.6',
+                "file_path": 'TSSIM2.1_PE2_custHypTP0.55',
                 "time_span": 2,
                 "side": "C"
             },
             "CDBFP_1D": {
-                "file_path": 'TSSIM2S_PEBF3_custHypTP0.4',
+                "file_path": 'TSSIM2.1_PE2_custHypTP0.45',
                 "time_span": 2,
                 "side": "P"
             },
         }
 
-        data_type = 'CDVOLBF3-6PE'
+        data_type = 'CDVOLBF3-55PE'
         file_names = YEAR_CONFIG[year]['all_files']
         
         # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')

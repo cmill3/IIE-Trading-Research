@@ -461,6 +461,7 @@ def create_datetime_index(start_date, end_date):
     print("DATE TIME INDEX")
     print(start_date)
     print(end_date)
+    print()
     datetime_index = pd.date_range(start_date, end_date, freq='15min', name = 'Time')
     days = []
     for time in datetime_index:

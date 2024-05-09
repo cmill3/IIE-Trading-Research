@@ -151,9 +151,6 @@ def simulate_portfolio_DS(positions_list, datetime_list, portfolio_cash, risk_un
     
     i = 0
     for key, value in portfolio_dict.items():
-        print(f"Key: {key}")
-        print(f"Value: {value}")
-        print()
         current_positions = []
         if i == 0:
             value['portfolio_cash'] = portfolio_cash
