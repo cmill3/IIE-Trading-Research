@@ -12,7 +12,7 @@ import math
 s3 = boto3.client('s3')
 
 
-def pull_data_invalerts(bucket_name, object_key, file_name, prefixes, time_span):
+def pull_data_invalerts(bucket_name, object_key, file_name, prefixes, time_span, config):
     dfs = []
     for prefix in prefixes:
         try:
@@ -28,7 +28,7 @@ def pull_data_invalerts(bucket_name, object_key, file_name, prefixes, time_span)
     data = data[data.predictions == 1]
     start_time = datetime.strptime(data['date'].values[0], '%Y-%m-%d')
     end_date = backtrader_helper.create_end_date_local_data(data['date'].values[-1], time_span)
-    datetime_list, datetime_index, results = backtrader_helper.create_datetime_index(start_time, end_date)
+    datetime_list, datetime_index, results = backtrader_helper.create_datetime_index(start_time, end_date, config)
     return data, datetime_list
 
 
@@ -55,7 +55,7 @@ def create_simulation_data_pt(row,config):
     trading_aggregates, option_symbols, open_price = backtrader_helper.create_options_aggs_pt(row,start_date,end_date=end_date,config=config)
     return start_date, end_date, row['symbol'], open_price, row['strategy'], option_symbols, trading_aggregates
 
-def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, polygon_df, position_id, trading_date, alert_hour,order_id,config,row,x):
+def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, polygon_df, position_id, trading_date, alert_hour,order_id,config,row,order_num,quantity):
 
     open_price = open_prices[0]
     open_datetime = datetime(int(trading_date.split("-")[0]),int(trading_date.split("-")[1]),int(trading_date.split("-")[2]),int(alert_hour),0,0,tzinfo=pytz.timezone('US/Eastern'))
@@ -66,40 +66,42 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
     elif strategy in PUT_STRATEGIES:
         contract_type = "puts"
         
-    buy_dict = {"open_price": open_price, "open_datetime": open_datetime, "quantity": 1, "contract_cost": contract_cost, "option_symbol": option_symbol, "position_id": position_id, "contract_type": contract_type}
+    buy_dict = {"open_price": open_price, "open_datetime": open_datetime, "quantity": quantity, "contract_cost": contract_cost, "option_symbol": option_symbol, "position_id": position_id, "contract_type": contract_type}
 
-    if config['model'] == "CDVOLAGG":
+    if config['model'] == "CDVOLVARVC2":
         try:
- 
-            if strategy in THREED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_3D_CDVOLAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]))
-            elif strategy in THREED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict = trade.tda_PUT_3D_CDVOLAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]))
-            elif strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_1D_CDVOLAGG(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]))
+            if strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
+                sell_dict = trade.tda_CALL_1D_CDVOLVARVC2(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num,symbol=symbol)
             elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict = trade.tda_PUT_1D_CDVOLAGG(polygon_df,open_datetime,1,config,target_pct=-row['target_pct'],vol=float(row["target_pct"]))
+                sell_dict = trade.tda_PUT_1D_CDVOLVARVC2(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num,symbol=symbol)
         except Exception as e:
-            print(f"Error {e} in sell_dict for {symbol} in {strategy} CDVOLAGG")
+            print(f"Error {e} in sell_dict for {symbol} in {strategy} CDVOLVARVC2")
             print(polygon_df)
             return "NO DICT"
     elif config['model'] == "CDVOLVARVC":
-        # try:
-        if strategy in THREED_STRATEGIES and strategy in CALL_STRATEGIES:
-            sell_dict = trade.tda_CALL_3D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
-        elif strategy in THREED_STRATEGIES and strategy in PUT_STRATEGIES:
-            sell_dict = trade.tda_PUT_3D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
-        elif strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
-            sell_dict = trade.tda_CALL_1D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
-        elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
-            sell_dict = trade.tda_PUT_1D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=-row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
-        # except Exception as e:
-        #     print(f"Error {e} in sell_dict for {symbol} in {strategy} CDVOLVARVC")
-        #     print(polygon_df)
-        #     return "NO DICT"
+        try:
+            if strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
+                sell_dict = trade.tda_CALL_1D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num,symbol=symbol)
+            elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
+                sell_dict = trade.tda_PUT_1D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num,symbol=symbol)
+        except Exception as e:
+            print(f"Error {e} in sell_dict for {symbol} in {strategy} CDVOLVARVC")
+            print(polygon_df)
+            return "NO DICT"
+    elif config['model'] == "CDVOLVARVC_AA1":
+        try:
+            if strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
+                sell_dict = trade.tda_CALL_1D_CDVOLVARVC_AA1(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
+            elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
+                sell_dict = trade.tda_PUT_1D_CDVOLVARVC_AA1(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
+        except Exception as e:
+            print(f"Error {e} in sell_dict for {symbol} in {strategy} CDVOLVARVC3")
+            print(polygon_df)
+            return "NO DICT"
     
     try:
         sell_dict['position_id'] = position_id
+        sell_dict['quantity'] = quantity
         results_dict = backtrader_helper.create_results_dict(buy_dict, sell_dict, order_id)
         results_dict['position_id'] = position_id
         # transaction_dict = {"buy_dict": buy_dict, "sell_dict":sell_dict, "results_dict": results_dict}
@@ -265,15 +267,12 @@ def simulate_trades_invalerts(data,config):
     
     return positions_list
 
-def simulate_trades_invalert_SINGLE(row,config,portfolio_cash):
-    print("ROW")
-    print(row)
-    positions_list = []
-
-    order_num = 1
+def simulate_trades_invalert_v2(row,config,portfolio_cash):
     ## These variables are crucial for controlling the buy/sell flow of the simulation.
+    order_num = 1
     alert_hour = row['hour']
     trading_date = row['date']
+    symbol = row['symbol']
     trading_date = trading_date.split(" ")[0]
     start_date, end_date, symbol, mkt_price, strategy, option_symbols, enriched_options_aggregates = create_simulation_data_inv(row,config)
     order_dt = start_date.strftime("%m+%d")
@@ -282,27 +281,30 @@ def simulate_trades_invalert_SINGLE(row,config,portfolio_cash):
     open_trade_dt = start_date.strftime('%Y-%m-%d %H:%M')
     results = []
 
-    print(f"Enriched Options Aggregates: {len(enriched_options_aggregates)}")
-    print(enriched_options_aggregates)
-
     contract_price_info = {}
-    for df in enriched_options_aggregates:
-        contract_price_info[df.iloc[0]['ticker']] = df.iloc[0]['o']
+    for contract in enriched_options_aggregates:
+        contract_price_info[enriched_options_aggregates[contract].iloc[0]['ticker']] = enriched_options_aggregates[contract].iloc[0]['o']
 
     
-    contract_sizing = bet_sizer(contract_price_info, config['risk_unit'],portfolio_cash,config,start_date)
+    contract_df = bet_sizer(contract_price_info, config['risk_unit'],portfolio_cash,config,start_date,symbol)
+    if len(contract_df) == 0:
+        print(f"Error in simulate_trades_invalert_v2 for {symbol}")
+        return []
+    contracts = contract_df.to_dict('records')
     ### Now we need to take that contract sizing info and pass it through to the buy_iterate_sellV2_invalerts function
     ## This way we can actually no the position of the trade and not have it predetermined.
 
-    for df in enriched_options_aggregates:
+    for contract in contracts:
+        option_aggs = enriched_options_aggregates[contract['option_symbol']]
         try:
-            open_prices = df['o'].values
-            ticker = df.iloc[0]['ticker']
+            open_prices = option_aggs['o'].values
+            ticker = option_aggs.iloc[0]['ticker']
             order_id = f"{order_num}_{order_dt}"
-            results_dict = buy_iterate_sellV2_invalerts(symbol, ticker, open_prices, strategy, df, position_id, trading_date, alert_hour, order_id,config,row,order_num)
+            results_dict = buy_iterate_sellV2_invalerts(symbol, ticker, open_prices, strategy, option_aggs, position_id, trading_date, alert_hour, order_id,config,row,contract['spread_position'],contract['quantity'])
             if results_dict == "NO DICT":
                 continue
-            results_dict['order_num'] = order_num
+            results_dict['order_num'] = contract['spread_position']
+            results_dict['quantity'] = contract['quantity']
             print(f"results_dict for {symbol} and {ticker}")
             print(results_dict)
             print()
@@ -314,104 +316,149 @@ def simulate_trades_invalert_SINGLE(row,config,portfolio_cash):
             results.append(results_dict)
             order_num += 1
         except Exception as e:
-            print(f"error: {e} in buy_iterate_sellV2_invalerts HERE")
-            print(df)
+            print(f"error: {e} in buy_iterate_sellV2_invalerts HERE22")
+            print(option_aggs)
             continue
     
     try:
-        position_trades = {"position_id": position_id, "transactions": results, "open_datetime": open_trade_dt}
+        position = {"position_id": position_id, "transactions": results, "open_datetime": open_trade_dt}
     except Exception as e:
         print(f"Error in position_trades for {position_id} {e}")
         print(results)
         print()
         return []
-    positions_list.append(position_trades)
     
-    return positions_list
+    return position
     # return purchases_list, sales_list, order_results_list, positions_list
 
 
 ### BET SIZING FUNCTIONS ###
+# def build_trade(position, risk_unit,put_adjustment,portfolio_cash,config):
+#     print("BUILDING TRADE")
+#     print(position)
+#     buy_orders = []
+#     sell_orders = []
+#     contract_costs = []
+#     # spread_start, spread_end = config['spread_search'].split(":")
+#     # transactions = position['transactions'][int(spread_start):int(spread_end)]
+#     transactions = simulate_trades_invalert_SINGLE(position,config,portfolio_cash)
+#     for transaction in position['transactions']:
+#         # print(type(trade_info))
+#         # print(position_id)
+#         # print(trade_info[0])
+#         try:
+#             transaction['sell_info']['close_trade_dt'] = transaction['close_trade_dt']
+#             buy_orders.append(transaction['buy_info'])
+#             sell_orders.append(transaction['sell_info'])
+#             contract_costs.append({"option_symbol":transaction['buy_info']['option_symbol'],"contract_cost":transaction['buy_info']['contract_cost']})
+#         except Exception as e:
+#             print(f"ERROR in build_trade f{e}")
+#             print(e)
+#             print(transaction)
+#             print(position)
+#             return [], []
+
+#     quantities = bet_sizer(contract_costs, buy_orders, sell_orders, risk_unit,portfolio_cash,config,position['open_datetime'])
+#     if quantities == None:
+#         # sized_buys,sized_sells = add_extra_contracts(position['transactions'][int(spread_end):],risk_unit,portfolio_cash,config)
+#         print("ERROR in build_trade, no trades")
+#         print(position['position_id'])
+#         return [], []
+#         # if sized_buys == None:
+#         # else:
+#         #     return [sized_buys], [sized_sells]
+    
+#     return sized_buys, sized_sells
+
 def build_trade(position, risk_unit,put_adjustment,portfolio_cash,config):
-    print("BUILDING TRADE")
-    print(position)
     buy_orders = []
     sell_orders = []
     contract_costs = []
     # spread_start, spread_end = config['spread_search'].split(":")
     # transactions = position['transactions'][int(spread_start):int(spread_end)]
-    transactions = simulate_trades_invalert_SINGLE(position,config,portfolio_cash)
-    for transaction in position['transactions']:
-        # print(type(trade_info))
-        # print(position_id)
-        # print(trade_info[0])
+    simulated_position = simulate_trades_invalert_v2(position,config,portfolio_cash)
+    if len(simulated_position) == 0:
+        return []
+    for transaction in simulated_position['transactions']:
         try:
-            transaction['sell_info']['close_trade_dt'] = transaction['close_trade_dt']
-            buy_orders.append(transaction['buy_info'])
-            sell_orders.append(transaction['sell_info'])
-            contract_costs.append({"option_symbol":transaction['buy_info']['option_symbol'],"contract_cost":transaction['buy_info']['contract_cost']})
+            transaction['sell_info']['close_trade_dt'] = transaction['sell_info']['close_datetime'].strftime('%Y-%m-%d %H:%M')
+        # buy_orders.append(transaction['buy_info'])
+        # sell_orders.append(transaction['sell_info'])
+        # contract_costs.append({"option_symbol":transaction['buy_info']['option_symbol'],"contract_cost":transaction['buy_info']['contract_cost']})
         except Exception as e:
             print(f"ERROR in build_trade f{e}")
             print(e)
             print(transaction)
             print(position)
-            return [], []
+            return []
 
-    sized_buys, sized_sells = bet_sizer(contract_costs, buy_orders, sell_orders, risk_unit,portfolio_cash,config,position['open_datetime'])
-    if sized_buys == None:
-        # sized_buys,sized_sells = add_extra_contracts(position['transactions'][int(spread_end):],risk_unit,portfolio_cash,config)
-        print("ERROR in build_trade, no trades")
-        print(position['position_id'])
-        return [], []
-        # if sized_buys == None:
-        # else:
-        #     return [sized_buys], [sized_sells]
     
-    return sized_buys, sized_sells
+    return simulated_position
 
-def bet_sizer(contract_costs,risk_unit,portfolio_cash,config,open_datetime):
-    ## FUNDS ADJUSTMENT
-    available_funds = portfolio_cash
-    ## PUT ADJUSTMENT
-    target_cost = (risk_unit * available_funds)
+def bet_sizer(contract_costs,risk_unit,portfolio_cash,config,open_datetime,symbol):
+    if config['scale'] == "FIX":
+        ## we pass in predetermined portfolio amount from simulator
+        target_cost = portfolio_cash
+    else:
+        target_cost = (risk_unit * portfolio_cash)
 
-
-    quantities = size_spread_quantities(contract_costs, target_cost, config,open_datetime)
-    # quantities = finalize_trade(buy_orders, spread_cost, target_cost)
-    buy_df = pd.DataFrame.from_dict(buy_orders)
-    sell_df = pd.DataFrame.from_dict(sell_orders)
-    buy_df['quantity'] = 0
-    sell_df['quantity'] = 0
-
-
+    try:
+        # if config['spread_type'] == "standard":
+        quantities = size_spread_quantities(contract_costs, target_cost, config,open_datetime,symbol)
+        # elif config['spread_type'] == "proxy":
+        #     quantities = create_single_contract_spread_proxy(contract_costs, target_cost, config,open_datetime)
+    except Exception as e:
+        print(f"Error in bet_sizer {e}")
+        return None
     if len(quantities) == 0:
-        return None, None
-    for index, row in quantities.iterrows():
-        try:
-            if row['quantity'] == 0:
-                continue
-            else:
-                try:
-                    buy_df.loc[buy_df['option_symbol'] == row['option_symbol'], 'quantity'] = row['quantity']
-                    sell_df.loc[sell_df['option_symbol'] == row['option_symbol'], 'quantity'] = row['quantity']
-                except Exception as e:
-                    print(f"Error {e} in size_trade {row}")
-                    print(e)
-                    print(buy_df)
-                    print(sell_df)
-                    print()
-                    return [], []
-        except Exception as e:
-            print("size_trade 2")
-            print(e)
-            print(buy_orders)
-            return [], []
+        return []
+    return quantities
 
-    buy_df = buy_df.loc[buy_df['quantity'] > 0]
-    sell_df = sell_df.loc[sell_df['quantity'] > 0]
-    buy_orders = buy_df.to_dict('records')
-    sell_orders = sell_df.to_dict('records')
-    return buy_orders, sell_orders
+# def bet_sizer(contract_costs,risk_unit,portfolio_cash,config,open_datetime):
+#     ## FUNDS ADJUSTMENT
+#     available_funds = portfolio_cash
+#     ## PUT ADJUSTMENT
+#     target_cost = (risk_unit * available_funds)
+
+#     if config['spread_type'] == "standard":
+#         quantities = size_spread_quantities(contract_costs, target_cost, config,open_datetime)
+#     elif config['spread_type'] == "proxy":
+#         quantities = create_single_contract_spread_proxy(contract_costs, target_cost, config,open_datetime)
+#     # quantities = finalize_trade(buy_orders, spread_cost, target_cost)
+#     # buy_df = pd.DataFrame.from_dict(buy_orders)
+#     # sell_df = pd.DataFrame.from_dict(sell_orders)
+#     # buy_df['quantity'] = 0
+#     # sell_df['quantity'] = 0
+
+
+#     # if len(quantities) == 0:
+#     #     return None, None
+#     # for index, row in quantities.iterrows():
+#     #     try:
+#     #         if row['quantity'] == 0:
+#     #             continue
+#     #         else:
+#     #             try:
+#     #                 buy_df.loc[buy_df['option_symbol'] == row['option_symbol'], 'quantity'] = row['quantity']
+#     #                 sell_df.loc[sell_df['option_symbol'] == row['option_symbol'], 'quantity'] = row['quantity']
+#     #             except Exception as e:
+#     #                 print(f"Error {e} in size_trade {row}")
+#     #                 print(e)
+#     #                 print(buy_df)
+#     #                 print(sell_df)
+#     #                 print()
+#     #                 return [], []
+#     #     except Exception as e:
+#     #         print("size_trade 2")
+#     #         print(e)
+#     #         print(buy_orders)
+#     #         return [], []
+
+#     # buy_df = buy_df.loc[buy_df['quantity'] > 0]
+#     # sell_df = sell_df.loc[sell_df['quantity'] > 0]
+#     # buy_orders = buy_df.to_dict('records')
+#     # sell_orders = sell_df.to_dict('records')
+#     return quantities
 
 def add_extra_contracts(positions, risk_unit,portfolio_cash,config):
     target_cost = (risk_unit * portfolio_cash)
@@ -426,62 +473,45 @@ def add_extra_contracts(positions, risk_unit,portfolio_cash,config):
             continue
     return None, None
 
-def size_spread_quantities(contracts_details, target_cost, config, open_datetime):
-    dt = datetime.strptime(open_datetime, "%Y-%m-%d %H:%M")
-    day_of_week = dt.weekday()
+def size_spread_quantities(contracts_details, target_cost, config, open_datetime,symbol):
+    # dt = datetime.strptime(open_datetime, "%Y-%m-%d %H:%M")
+    day_of_week = open_datetime.weekday()
     spread_start, spread_end = config['spread_search'].split(":")
-    adjusted_target_cost = target_cost
     spread_length = config['spread_length']
+    tickers = list(contracts_details.keys())
+    capital_distributions = config['capital_distributions']
 
-    if spread_length == 4:
+    if symbol in ["SPY","QQQ","IWM"]:
+        adjusted_contracts = tickers[int(spread_start):int(spread_end)]
+        capital_distributions = [float(x) for x in capital_distributions.split(",")]
+    elif spread_length == 4:
         if day_of_week == 3:
-            adjusted_contracts = contracts_details[int(spread_start):int(spread_end)-2]
+            adjusted_contracts = tickers[int(spread_start):int(spread_end)-2]
+            capital_distributions = [0.6,0.4]
             spread_length -= 2
         elif day_of_week == 2:
-            adjusted_contracts = contracts_details[int(spread_start):int(spread_end)-1]
+            adjusted_contracts = tickers[int(spread_start):int(spread_end)-1]
+            capital_distributions = [0.4,0.4,0.2]
             spread_length -= 1
         else:
-            adjusted_contracts = contracts_details[int(spread_start):int(spread_end)]
+            adjusted_contracts = tickers[int(spread_start):int(spread_end)]
+            capital_distributions = [float(x) for x in capital_distributions.split(",")]
     else:
         if day_of_week >= 2:
-            # print(f"Day of week is greater than 3 {dt}")
-            # print(f"{(int(spread_start)-1)}:{(int(spread_end)-1)}")
-            adjusted_contracts = contracts_details[(int(spread_start)-1):(int(spread_end)-1)]
+            adjusted_contracts = tickers[(int(spread_start)-1):(int(spread_end)-1)]
+            capital_distributions = [float(x) for x in capital_distributions.split(",")]
         else:
-            # print(f"Day of week is less than 3 {dt}")
-            # print(f"{(int(spread_start))}:{(int(spread_end))}")
-            adjusted_contracts = contracts_details[int(spread_start):int(spread_end)]
+            adjusted_contracts = tickers[int(spread_start):int(spread_end)]
+            capital_distributions = [float(x) for x in capital_distributions.split(",")]
 
-    quantities = []
-    contract_quantity = 0
-    spread_candidates = configure_contracts_for_trade_pct_based(adjusted_contracts, adjusted_target_cost, spread_length)
-    print
-    print(spread_candidates)
-    # spread_candidates, spread_cost = configure_contracts_for_trade(adjusted_contracts, adjusted_target_cost, spread_length)
-    # total_cost = 0
+    final_contracts = []
+    for contract in adjusted_contracts:
+        final_contracts.append({"option_symbol":contract,"contract_cost":(contracts_details[contract]*100)})
+    
+    spread_candidates = configure_contracts_for_trade_pct_based_v2(final_contracts, target_cost, capital_distributions)
 
     if len(spread_candidates) == 0:
         return []
-    # else:
-    #     while total_cost < adjusted_target_cost:
-    #         if (spread_cost + total_cost) < adjusted_target_cost:
-    #             total_cost += spread_cost
-    #             contract_quantity += 1
-    #         else:
-    #             break
-            
-    # formatted_spread_cost = 0
-    # for candidate in spread_candidates:
-    #         quantities.append({"option_symbol": candidate['option_symbol'], "quantity": contract_quantity,"contract_cost": candidate['contract_cost']})
-    #         formatted_spread_cost += (candidate['contract_cost'] * contract_quantity)
-
-    # cost_remaining = adjusted_target_cost - formatted_spread_cost
-    # # adjusted_quantities = []
-    # if cost_remaining > 0:
-    #     for quantity in quantities:
-    #         if quantity["contract_cost"] < cost_remaining:
-    #             cost_remaining -= quantity['contract_cost']
-    #             quantity['quantity'] += 1
 
 
     details_df = pd.DataFrame(spread_candidates)
@@ -490,8 +520,6 @@ def size_spread_quantities(contracts_details, target_cost, config, open_datetime
     details_df['spread_position'] = details_df.index
     return details_df
 
-# def size_next_contract(contracts_details, target_cost):
-     #Size the trades iteratively so there is flexibility in the length of the spread
 def configure_contracts_for_trade(contracts_details, target_cost, spread_length):
     spread_candidates = []
     total_cost = 0
@@ -522,6 +550,67 @@ def configure_contracts_for_trade_pct_based(contracts_details, target_cost, spre
         spread_candidates.append({"option_symbol": contract['option_symbol'], "quantity": contract_quantity,"contract_cost": contract['contract_cost']})
     return spread_candidates
     
+def configure_contracts_for_trade_pct_based_v2(contracts_details, capital, capital_distributions):
+    sized_contracts = []
+    total_capital = capital
+    free_capital = 0
+    for index, contract in enumerate(contracts_details):
+        contract_capital = (capital_distributions[index]*total_capital) + free_capital
+        quantities = determine_shares(contract['contract_cost'], contract_capital)
+        if quantities > 0:
+            sized_contracts.append({"option_symbol": contract['option_symbol'], "quantity": quantities,"contract_cost": contract['contract_cost']})
+            free_capital = contract_capital - (quantities * contract['contract_cost'])
+        else:
+            free_capital += contract_capital
+    return sized_contracts
+
+def configure_contracts_for_trade_pct_based_proxy_spread(contract, capital, capital_distributions):
+    sized_contracts = []
+    total_capital = capital
+    free_capital = 0
+    for distribution in capital_distributions:
+        contract_capital = (distribution*total_capital) + free_capital
+        quantities = determine_shares(contract['contract_cost'], contract_capital)
+        if quantities > 0:
+            sized_contracts.append({"option_symbol": contract['option_symbol'], "quantity": quantities,"contract_cost": contract['contract_cost']})
+            free_capital = contract_capital - (quantities * contract['contract_cost'])
+        else:
+            free_capital += contract_capital
+    return sized_contracts
+
+def determine_shares(contract_cost, target_cost):
+    shares = math.floor(target_cost / contract_cost)
+    return shares
+
+def create_single_contract_spread_proxy(contracts_details, target_cost, config, open_datetime):
+    dt = datetime.strptime(open_datetime, "%Y-%m-%d %H:%M")
+    day_of_week = dt.weekday()
+    spread_start, spread_end = config['spread_search'].split(":")
+    adjusted_target_cost = target_cost
+    spread_length = config['spread_length']
+
+    capital_distributions = [float(x) for x in config[capital_distributions].split(",")]
+    if day_of_week == 3:
+        ## selecting first out of the money
+        adjusted_contracts = contracts_details[1]
+    elif day_of_week == 2:
+        ## selecting second out of the money
+        adjusted_contracts = contracts_details[2]
+    else:
+        ## selecting third out of the money
+        adjusted_contracts = contracts_details[3]
+
+    spread_candidates = configure_contracts_for_trade_pct_based_v2(adjusted_contracts, adjusted_target_cost, capital_distributions)
+
+    if len(spread_candidates) == 0:
+        return []
+
+    details_df = pd.DataFrame(spread_candidates)
+    details_df = details_df.loc[details_df['quantity'] > 0]
+    details_df.reset_index(drop=True, inplace=True)
+    details_df['spread_position'] = details_df.index
+    return details_df
+
 
 def calculate_spread_cost(contracts_details):
     cost = 0

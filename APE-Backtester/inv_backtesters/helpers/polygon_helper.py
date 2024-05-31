@@ -52,12 +52,12 @@ def execute_polygon_call(url):
     response = session.request("GET", url, headers={}, data={})
     return response 
 
-def polygon_optiondata(options_ticker, from_date, to_date):
+def polygon_optiondata(options_ticker, from_date, to_date,frequency):
     #This is for option data
     from_stamp = int(from_date.timestamp() * 1000)
     to_stamp = int(to_date.timestamp() * 1000)
 
-    url = f"https://api.polygon.io/v2/aggs/ticker/{options_ticker}/range/15/minute/{from_stamp}/{to_stamp}?adjusted=false&sort=asc&limit=50000&apiKey={KEY}"
+    url = f"https://api.polygon.io/v2/aggs/ticker/{options_ticker}/range/{frequency}/minute/{from_stamp}/{to_stamp}?adjusted=false&sort=asc&limit=50000&apiKey={KEY}"
     response = execute_polygon_call(url)
     response_data = json.loads(response.text)
 
@@ -72,11 +72,11 @@ def polygon_optiondata(options_ticker, from_date, to_date):
     res_option_df =res_option_df.loc[res_option_df['time'] >= datetime.strptime("09:30:00", "%H:%M:%S").time()]
     return res_option_df
 
-def polygon_stockdata_inv(symbol, from_date, to_date):
+def polygon_stockdata_inv(symbol, from_date, to_date,frequency):
     from_stamp = int(from_date.timestamp() * 1000)
     to_stamp = int(to_date.timestamp() * 1000)
 
-    url = f"https://api.polygon.io/v2/aggs/ticker/{symbol}/range/15/minute/{from_stamp}/{to_stamp}?adjusted=false&sort=asc&limit=50000&apiKey={KEY}"
+    url = f"https://api.polygon.io/v2/aggs/ticker/{symbol}/range/{frequency}/minute/{from_stamp}/{to_stamp}?adjusted=false&sort=asc&limit=50000&apiKey={KEY}"
     response = execute_polygon_call(url)
 
     response_data = json.loads(response.text)
@@ -93,7 +93,7 @@ def polygon_stockdata_inv(symbol, from_date, to_date):
     return stock_df
 
 def stock_aggs(symbol,from_date, to_date):
-    url = f"https://api.polygon.io/v2/aggs/ticker/{symbol}/range/15/minute/{from_date}/{to_date}?adjusted=false&sort=asc&limit=50000&apiKey={KEY}"
+    url = f"https://api.polygon.io/v2/aggs/ticker/{symbol}/range/5/minute/{from_date}/{to_date}?adjusted=false&sort=asc&limit=50000&apiKey={KEY}"
     response = execute_polygon_call(url)
 
     response_data = json.loads(response.text)

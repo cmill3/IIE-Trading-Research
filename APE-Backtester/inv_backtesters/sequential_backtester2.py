@@ -7,6 +7,7 @@ import helpers.backtest_functions as back_tester
 import helpers.backtrader_helper as helper
 import helpers.portfolio_simulation as portfolio_sim
 import warnings
+from backtest_config import backtest_configs
 import concurrent.futures
 import os
 
@@ -28,28 +29,33 @@ def build_backtest_data(file_name,strategies,config):
     
     backtest_data = pd.concat(dfs,ignore_index=True)
     # backtest_data = backtest_data[backtest_data['probabilities'] > config['probability']]
-    if config['model_type'] == "reg":
-        predictions = helper.configure_regression_predictions(backtest_data,config)
-        filtered_by_date = helper.configure_trade_data(predictions,config)
-    elif config['model_type'] == "cls":
-        predictions = backtest_data.loc[backtest_data['predictions'] == 1]
-        filtered_by_date = helper.configure_trade_data(predictions,config)
+    # if config['model_type'] == "reg":
+    #     predictions = helper.configure_regression_predictions(backtest_data,config)
+    #     filtered_by_date = helper.configure_trade_data(predictions,config)
+    # elif config['model_type'] == "cls":
+    predictions = backtest_data.loc[backtest_data['predictions'] == 1]
+    filtered_by_date = helper.configure_trade_data(predictions,config)
     
     ## What we will do is instead of simulating one trade at a time we will do one time period at a time and then combine and create results then.
-    positions_list = back_tester.simulate_trades_invalerts(filtered_by_date,config)
-    full_positions_list.extend(positions_list)
+    # positions_list = back_tester.simulate_trades_invalerts(filtered_by_date,config)
+    # full_positions_list.extend(positions_list)
 
-    return positions_list
+    return filtered_by_date
 
 def run_trades_simulation(full_positions_list,start_date,end_date,config,period_cash):
     full_date_list = helper.create_portfolio_date_list(start_date, end_date)
-    if config['scaling'] == "dynamicscale":
+    if config['scale'] == "DS":
         portfolio_df, passed_trades_df, positions_taken, positions_dict = portfolio_sim.simulate_portfolio_DS(
+        full_positions_list, full_date_list,portfolio_cash=period_cash, risk_unit=config['risk_unit'],put_adjustment=config['put_pct'],
+        config=config,results_dict_func=helper.extract_results_dict
+        )
+    elif config['scale'] == "DC":
+        portfolio_df, passed_trades_df, positions_taken, positions_dict = portfolio_sim.simulate_portfolio_daily_rebalance(
             full_positions_list, full_date_list,portfolio_cash=period_cash, risk_unit=config['risk_unit'],put_adjustment=config['put_pct'],
             config=config,results_dict_func=helper.extract_results_dict
             )
-    elif config['scaling'] == "steadyscale":
-        portfolio_df, passed_trades_df, positions_taken, positions_dict = portfolio_sim.simulate_portfolio(
+    elif config['scale'] == "FIX":
+        portfolio_df, passed_trades_df, positions_taken, positions_dict = portfolio_sim.simulate_portfolio_FIXED(
             full_positions_list, full_date_list,portfolio_cash=period_cash, risk_unit=config['risk_unit'],put_adjustment=config['put_pct'],
             config=config,results_dict_func=helper.extract_results_dict
             )
@@ -59,136 +65,38 @@ def run_trades_simulation(full_positions_list,start_date,end_date,config,period_
 def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,config,period_cash):
     #  build_backtest_data(file_names[0],strategies,config)
 
-    if not local_data:
-        cpu_count = os.cpu_count()
-        # merged_positions = build_backtest_data(file_names[0],strategies,config)
-        with concurrent.futures.ProcessPoolExecutor(max_workers=5) as executor:
-            # Submit the processing tasks to the ThreadPoolExecutor
-            processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies,config) for file_name in file_names]
+    # if not local_data:
+        # cpu_count = os.cpu_count()
+        # # build_backtest_data(file_names[0],strategies,config)
+        # with concurrent.futures.ProcessPoolExecutor(max_workers=5) as executor:
+        #     # Submit the processing tasks to the ThreadPoolExecutor
+        #     processed_weeks_futures = [executor.submit(build_backtest_data,file_name,strategies,config) for file_name in file_names]
 
-        # Step 4: Retrieve the results from the futures
-        processed_weeks_results = [future.result() for future in processed_weeks_futures]
+        # # Step 4: Retrieve the results from the futures
+        # processed_weeks_results = [future.result() for future in processed_weeks_futures]
 
-        merged_positions = []
-        for week_results in processed_weeks_results:
-            merged_positions.extend(week_results)
+        # merged_positions = []
+        # for week_results in processed_weeks_results:
+        #     merged_positions.extend(week_results)
 
-        # merged_df = pd.DataFrame.from_dict(merged_positions)
-        # merged_df.to_csv(f'/Users/charlesmiller/Documents/backtesting_data/merged_positions.csv', index=False)
-    else:
-        merged_positions = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/merged_positions.csv')
-        merged_positions = merged_positions.to_dict('records')
+        # # merged_df = pd.DataFrame.from_dict(merged_positions)
+        # # merged_df.to_csv(f'/Users/charlesmiller/Documents/backtesting_data/merged_positions.csv', index=False)
+    # else:
+    #     merged_positions = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/merged_positions.csv')
+    #     merged_positions = merged_positions.to_dict('records')
+    all_trades = []
+    for file_name in file_names:
+        trades = build_backtest_data(file_name,strategies,config)
+        all_trades.append(trades)
 
-    full_df = pd.DataFrame.from_dict(merged_positions)
-    portfolio_df, positions_df = run_trades_simulation(merged_positions, start_date, end_date, config, period_cash)
+
+    full_df = pd.concat(all_trades)
+    portfolio_df, positions_df = run_trades_simulation(full_df, start_date, end_date, config, period_cash)
     return portfolio_df, positions_df, full_df
 
 if __name__ == "__main__":
     s3 = boto3.client('s3')
     strategy_theme = "invALERTS_cls" 
-
-    backtest_configs = [
-        {
-            "put_pct": 1, 
-            "spread_search": "1:4",
-            "aa": 0,
-            "risk_unit": .025,
-            "model": "CDVOLVARVC",
-            "vc_level":"100+200+300+300",
-            "capital_distributions": ".33,.33,.33",
-            "portfolio_cash": 20000,
-            "scaling": "dynamicscale",
-            "volatility_threshold": 0.4,
-            "model_type": "cls",
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-55PE",
-            "spread_length": 3,
-            "reserve_cash": 5000
-
-        },
-        {
-            "put_pct": 1, 
-            "spread_search": "0:4",
-            "aa": 0,
-            "risk_unit": .025,
-            "model": "CDVOLVARVC",
-            "vc_level":"50+100+200+300",
-            "capital_distributions": ".20,.35,.35,.10",
-            "portfolio_cash": 20000,
-            "scaling": "dynamicscale",
-            "volatility_threshold": 0.4,
-            "model_type": "cls",
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-55PE",
-            "spread_length": 4,
-            "reserve_cash": 20000
-
-        },
-        {
-            "put_pct": 1, 
-            "spread_search": "1:4",
-            "aa": 0,
-            "risk_unit": .025,
-            "model": "CDVOLVARVC",
-            "vc_level":"100+200+300+300",
-            "capital_distributions": ".40,.40,.20",
-            "portfolio_cash": 20000,
-            "scaling": "dynamicscale",
-            "volatility_threshold": 0.4,
-            "model_type": "cls",
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-55PE",
-            "spread_length": 3,
-            "reserve_cash": 20000
-
-        },
-        {
-            "put_pct": 1, 
-            "spread_search": "1:4",
-            "aa": 0,
-            "risk_unit": .025,
-            "model": "CDVOLVARVC",
-            "vc_level":"100+200+300+300",
-            "capital_distributions": ".33,.33,.33",
-            "portfolio_cash": 20000,
-            "scaling": "dynamicscale",
-            "volatility_threshold": 0.3,
-            "model_type": "cls",
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-55PE",
-            "spread_length": 3,
-            "reserve_cash": 20000
-
-        },
-        {
-            "put_pct": 1, 
-            "spread_search": "1:4",
-            "aa": 0,
-            "risk_unit": .025,
-            "model": "CDVOLVARVC",
-            "vc_level":"100+200+300+300",
-            "capital_distributions": ".40,.40,.20",
-            "portfolio_cash": 20000,
-            "scaling": "dynamicscale",
-            "volatility_threshold": 0.3,
-            "model_type": "cls",
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "oneD_vol": "return_vol_5D",
-            "dataset": "CDVOLBF3-55PE",
-            "spread_length": 3,
-            "reserve_cash": 20000
-
-        },
-    ]
     
     models_tested = []
     error_models = []
@@ -200,14 +108,41 @@ if __name__ == "__main__":
         # "CDBFC:3","CDBFP:3",
         "CDBFC_1D:1","CDBFP_1D:1"
         ]    
-    years = ['twenty4']
-
+    years = [
+        'twenty2',
+        # 'twenty0',
+        ]
+    
+    backtest_configs = [
+        {
+            "put_pct": 1, 
+            "spread_search": "1:4",
+            "aa": 0,
+            "risk_unit": 60,
+            "portfolio_pct": .2,
+            "model": "CDVOLVARVC2",
+            "vc_level":"75+100+150+300",
+            "capital_distributions": ".25,.25,.50",
+            "portfolio_cash": 60000,
+            "volatility_threshold": 0.5,
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "dataset": "CDVOLBF3-55PE2",
+            "spread_length": 3,
+            "reserve_cash": 5000,
+            "days": "23",
+            "scale": "FIX",
+            "divisor": .75,
+            "reup": "daily",
+            "IDX": False
+        },
+        ]
     for config in backtest_configs:
         for year in years:
+            starting_cash = config['portfolio_cash']
             year_data = YEAR_CONFIG[year]
-            trading_strat = f"{config['user']}/{nowstr}-{year_data['year']}-NEWDATA:{config['dataset']}_CD{config['capital_distributions']}_vol{config['volatility_threshold']}_rc{config['reserve_cash']}_vc{config['vc_level']}_sssl{config['spread_search']}:{config['spread_length']}"
+            trading_strat = f"{config['user']}/{nowstr}-{year_data['year']}:{config['reserve_cash']}:_{config['dataset']}_{config['IDX']}_{config['model']}_CD{config['capital_distributions']}_{config['days']}_vol{config['volatility_threshold']}_{config['scale']}_vc{config['vc_level']}_sssl{config['spread_search']}:{config['spread_length']}"
             for month in year_data['months']:
-                starting_cash = config['portfolio_cash']
                 try:
                     start_dt = month[0]
                     end_date = month[-1]

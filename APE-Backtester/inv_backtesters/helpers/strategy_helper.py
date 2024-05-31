@@ -172,24 +172,24 @@
     #     spread_candidates.append({"option_symbol": contract['option_symbol'], "quantity": contract_quantity,"contract_cost": contract['contract_cost']})
     # return spread_candidates
 
-def configure_contracts_for_trade_pct_based_v2(contracts_details, capital, capital_distributions):
-    capital_distributions = [float(x) for x in capital_distributions.split(",")]
-    sized_contracts = []
-    total_capital = capital
-    free_capital = 0
-    for index, contract in enumerate(contracts_details):
-        contract_capital = (capital_distributions[index]*total_capital) + free_capital
-        quantities = determine_shares(contract['contract_cost'], contract_capital)
-        if quantities > 0:
-            sized_contracts.append({"option_symbol": contract['option_symbol'], "quantity": quantities,"contract_cost": contract['contract_cost']})
-            free_capital = contract_capital - (quantities * contract['contract_cost'])
-        else:
-            free_capital += contract_capital
-    return sized_contracts
+# def configure_contracts_for_trade_pct_based_v2(contracts_details, capital, capital_distributions):
+#     capital_distributions = [float(x) for x in capital_distributions.split(",")]
+#     sized_contracts = []
+#     total_capital = capital
+#     free_capital = 0
+#     for index, contract in enumerate(contracts_details):
+#         contract_capital = (capital_distributions[index]*total_capital) + free_capital
+#         quantities = determine_shares(contract['contract_cost'], contract_capital)
+#         if quantities > 0:
+#             sized_contracts.append({"option_symbol": contract['option_symbol'], "quantity": quantities,"contract_cost": contract['contract_cost']})
+#             free_capital = contract_capital - (quantities * contract['contract_cost'])
+#         else:
+#             free_capital += contract_capital
+#     return sized_contracts
 
-def determine_shares(contract_cost, target_cost):
-    shares = math.floor(target_cost / contract_cost)
-    return shares
+# def determine_shares(contract_cost, target_cost):
+#     shares = math.floor(target_cost / contract_cost)
+#     return shares
 
 # def calculate_spread_cost(contracts_details):
 #     cost = 0
