@@ -615,13 +615,13 @@ def extract_strike(row):
 #     return data
 
 def configure_trade_data(df,config):
-    index = df.loc[df['symbol'].isin(["IWM","SPY","QQQ"])]
-    stocks = df.loc[df['symbol'].isin(["IWM","SPY","QQQ"]) == False]
+    # index = df.loc[df['symbol'].isin(["IWM","SPY","QQQ"])]
+    # stocks = df.loc[df['symbol'].isin(["IWM","SPY","QQQ"]) == False]
 
 
-    one = stocks.loc[stocks['prediction_horizon'] == "1"]
+    one = df.loc[df['prediction_horizon'] == "1"]
     # three = stocks.loc[stocks['prediction_horizon'] == "3"]
-    one_idx = index.loc[index['prediction_horizon'] == "1"]
+    # one_idx = index.loc[index['prediction_horizon'] == "1"]
     # three_idx = index.loc[index['prediction_horizon'] == "3"]
 
     if config['days'] == '23':
@@ -640,7 +640,7 @@ def configure_trade_data(df,config):
     # trade_df = pd.concat([filt_one,filt_three,one_idxF,three_idxF])
     # trade_df = pd.concat([stocks,index])
     filt_one = filt_one.loc[filt_one['symbol'] != 'GOOG']
-    trade_df = pd.concat([filt_one,one_idx])
+    # trade_df = pd.concat([filt_one,one_idx])
 
-    return trade_df
+    return filt_one
 

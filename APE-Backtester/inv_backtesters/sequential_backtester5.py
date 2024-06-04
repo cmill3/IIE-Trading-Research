@@ -43,7 +43,7 @@ def build_backtest_data(file_name,strategies,config):
     return filtered_by_date
 
 def run_trades_simulation(full_positions_list,start_date,end_date,config,period_cash):
-    full_date_list = helper.create_portfolio_date_list(start_date, end_date)
+    full_date_list = helper.create_portfolio_date_list(start_date, end_date,config)
     if config['scale'] == "DS":
         portfolio_df, passed_trades_df, positions_taken, positions_dict = portfolio_sim.simulate_portfolio_DS(
         full_positions_list, full_date_list,portfolio_cash=period_cash, risk_unit=config['risk_unit'],put_adjustment=config['put_pct'],
@@ -120,8 +120,8 @@ if __name__ == "__main__":
             "aa": 0,
             "risk_unit": 35,
             "portfolio_pct": .2,
-            "model": "CDVOLVARVC2",
-            "vc_level":"75+100+150+300",
+            "model": "CDVOLVARVC",
+            "vc_level":"100+125+150+300",
             "capital_distributions": ".25,.25,.50",
             "portfolio_cash": 60000,
             "volatility_threshold": 0.5,
@@ -131,17 +131,18 @@ if __name__ == "__main__":
             "spread_length": 3,
             "reserve_cash": 5000,
             "days": "23",
-            "scale": "FIX",
+            "scale": "DS",
             "divisor": .75,
             "reup": "daily",
-            "IDX": False
+            "IDX": False,
+            "frequency": "15",
         },
         ]
     for config in backtest_configs:
         for year in years:
             starting_cash = config['portfolio_cash']
             year_data = YEAR_CONFIG[year]
-            trading_strat = f"{config['user']}/{nowstr}-{year_data['year']}:{config['reserve_cash']}:_{config['dataset']}_{config['IDX']}_{config['model']}_CD{config['capital_distributions']}_{config['days']}_vol{config['volatility_threshold']}_{config['scale']}_vc{config['vc_level']}_sssl{config['spread_search']}:{config['spread_length']}"
+            trading_strat = f"{config['user']}/{nowstr}-{year_data['year']}:{config['scale']}:_{config['dataset']}_{config['frequency']}min_{config['model']}_CD{config['capital_distributions']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_sssl{config['spread_search']}:{config['spread_length']}"
             for month in year_data['months']:
                 try:
                     start_dt = month[0]

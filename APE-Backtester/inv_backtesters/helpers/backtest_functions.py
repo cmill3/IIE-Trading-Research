@@ -217,55 +217,55 @@ def simulate_trades_invalerts_pt(data,config):
     
     return positions_list
 
-def simulate_trades_invalerts(data,config):
-    positions_list = []
-    for i, row in data.iterrows():
-        order_num = 1
-        ## These variables are crucial for controlling the buy/sell flow of the simulation.
-        alert_hour = row['hour']
-        trading_date = row['date']
-        trading_date = trading_date.split(" ")[0]
-        start_date, end_date, symbol, mkt_price, strategy, option_symbols, enriched_options_aggregates = create_simulation_data_inv(row,config)
-        order_dt = start_date.strftime("%m+%d")
-        pos_dt = start_date.strftime("%Y-%m-%d-%H")
-        position_id = f"{row['symbol']}-{(row['strategy'].replace('_',''))}-{pos_dt}"
-        open_trade_dt = start_date.strftime('%Y-%m-%d %H:%M')
-        results = []
+# def simulate_trades_invalerts(data,config):
+#     positions_list = []
+#     for i, row in data.iterrows():
+#         order_num = 1
+#         ## These variables are crucial for controlling the buy/sell flow of the simulation.
+#         alert_hour = row['hour']
+#         trading_date = row['date']
+#         trading_date = trading_date.split(" ")[0]
+#         start_date, end_date, symbol, mkt_price, strategy, option_symbols, enriched_options_aggregates = create_simulation_data_inv(row,config)
+#         order_dt = start_date.strftime("%m+%d")
+#         pos_dt = start_date.strftime("%Y-%m-%d-%H")
+#         position_id = f"{row['symbol']}-{(row['strategy'].replace('_',''))}-{pos_dt}"
+#         open_trade_dt = start_date.strftime('%Y-%m-%d %H:%M')
+#         results = []
 
-        for df in enriched_options_aggregates:
-            try:
-                open_prices = df['o'].values
-                ticker = df.iloc[0]['ticker']
-                order_id = f"{order_num}_{order_dt}"
-                results_dict = buy_iterate_sellV2_invalerts(symbol, ticker, open_prices, strategy, df, position_id, trading_date, alert_hour, order_id,config,row,order_num)
-                if results_dict == "NO DICT":
-                    continue
-                results_dict['order_num'] = order_num
-                print(f"results_dict for {symbol} and {ticker}")
-                print(results_dict)
-                print()
-                if len(results_dict) == 0:
-                    print(f"Error in simulate_trades_invalerts for {symbol} and {ticker}")
-                    print(f"{order_id}_{order_dt}")
-                    continue
+#         for df in enriched_options_aggregates:
+#             try:
+#                 open_prices = df['o'].values
+#                 ticker = df.iloc[0]['ticker']
+#                 order_id = f"{order_num}_{order_dt}"
+#                 results_dict = buy_iterate_sellV2_invalerts(symbol, ticker, open_prices, strategy, df, position_id, trading_date, alert_hour, order_id,config,row,order_num)
+#                 if results_dict == "NO DICT":
+#                     continue
+#                 results_dict['order_num'] = order_num
+#                 print(f"results_dict for {symbol} and {ticker}")
+#                 print(results_dict)
+#                 print()
+#                 if len(results_dict) == 0:
+#                     print(f"Error in simulate_trades_invalerts for {symbol} and {ticker}")
+#                     print(f"{order_id}_{order_dt}")
+#                     continue
 
-                results.append(results_dict)
-                order_num += 1
-            except Exception as e:
-                print(f"error: {e} in buy_iterate_sellV2_invalerts HERE")
-                print(df)
-                continue
+#                 results.append(results_dict)
+#                 order_num += 1
+#             except Exception as e:
+#                 print(f"error: {e} in buy_iterate_sellV2_invalerts HERE")
+#                 print(df)
+#                 continue
         
-        try:
-            position_trades = {"position_id": position_id, "transactions": results, "open_datetime": open_trade_dt}
-        except Exception as e:
-            print(f"Error in position_trades for {position_id} {e}")
-            print(results)
-            print()
-            continue
-        positions_list.append(position_trades)
+#         try:
+#             position_trades = {"position_id": position_id, "transactions": results, "open_datetime": open_trade_dt}
+#         except Exception as e:
+#             print(f"Error in position_trades for {position_id} {e}")
+#             print(results)
+#             print()
+#             continue
+#         positions_list.append(position_trades)
     
-    return positions_list
+#     return positions_list
 
 def simulate_trades_invalert_v2(row,config,portfolio_cash):
     ## These variables are crucial for controlling the buy/sell flow of the simulation.
@@ -300,7 +300,10 @@ def simulate_trades_invalert_v2(row,config,portfolio_cash):
             open_prices = option_aggs['o'].values
             ticker = option_aggs.iloc[0]['ticker']
             order_id = f"{order_num}_{order_dt}"
-            results_dict = buy_iterate_sellV2_invalerts(symbol, ticker, open_prices, strategy, option_aggs, position_id, trading_date, alert_hour, order_id,config,row,contract['spread_position'],contract['quantity'])
+            results_dict = buy_iterate_sellV2_invalerts(
+                symbol, ticker, open_prices, strategy, option_aggs, position_id, trading_date, alert_hour, 
+                order_id,config,row,order_num=contract['spread_position'],quantity=contract['quantity']
+                )
             if results_dict == "NO DICT":
                 continue
             results_dict['order_num'] = contract['spread_position']
@@ -396,11 +399,11 @@ def build_trade(position, risk_unit,put_adjustment,portfolio_cash,config):
     return simulated_position
 
 def bet_sizer(contract_costs,risk_unit,portfolio_cash,config,open_datetime,symbol):
-    if config['scale'] == "FIX":
+    # if config['scale'] == "FIX":
         ## we pass in predetermined portfolio amount from simulator
-        target_cost = portfolio_cash
-    else:
-        target_cost = (risk_unit * portfolio_cash)
+    target_cost = portfolio_cash
+    # else:
+    #     target_cost = (risk_unit * portfolio_cash)
 
     try:
         # if config['spread_type'] == "standard":

@@ -193,10 +193,11 @@ def simulate_portfolio_DS(positions_list, datetime_list, portfolio_cash, risk_un
             if positions_dict.get(key) is not None:
                 for position in positions_dict[key]:
                     if value['portfolio_cash'] > (.05 * starting_cash):
+                        trade_value = (value['portfolio_cash']*config['portfolio_pct'])/config['risk_unit']
                         print(f"Position: {position}")
                         print(f"Portfolio Cash: {value['portfolio_cash']}")
-                        print()
-                        simulated_position = build_trade(position,risk_unit,put_adjustment,value['portfolio_cash'],config)
+                        print(f"Trade Value: {trade_value}")
+                        simulated_position = build_trade(position,risk_unit,put_adjustment,trade_value,config)
                         if len(simulated_position) == 0:
                             continue
                         orders_taken = False
@@ -244,9 +245,9 @@ def simulate_portfolio_DS(positions_list, datetime_list, portfolio_cash, risk_un
             value['portfolio_cash'] = portfolio_dict[key - timedelta(minutes=15)]['portfolio_cash']
             current_positions = positions_open
             value['open_positions_start'].extend(current_positions)
-            check_reup = check_for_reup(key)
-            if check_reup:
-                value['portfolio_cash'],current_reserve = reup_cash_v2(value['portfolio_cash'],current_reserve,starting_reserve,starting_cash)
+            # check_reup = check_for_reup(key)
+            # if check_reup:
+            #     value['portfolio_cash'],current_reserve = reup_cash_v2(value['portfolio_cash'],current_reserve,starting_reserve,starting_cash)
 
         
         if sales_dict.get(key) is not None:
@@ -265,10 +266,11 @@ def simulate_portfolio_DS(positions_list, datetime_list, portfolio_cash, risk_un
         if positions_dict.get(key) is not None:
                 for position in positions_dict[key]:
                     if value['portfolio_cash'] > (.05 * starting_cash):
+                        trade_value = (value['portfolio_cash']*config['portfolio_pct'])/config['risk_unit']
                         print(f"Position: {position}")
                         print(f"Portfolio Cash: {value['portfolio_cash']}")
-                        print()
-                        simulated_position = build_trade(position,risk_unit,put_adjustment,value['portfolio_cash'],config)
+                        print(f"Trade Value: {trade_value}")
+                        simulated_position = build_trade(position,risk_unit,put_adjustment,trade_value,config)
                         if len(simulated_position) == 0:
                             continue
                         orders_taken = False

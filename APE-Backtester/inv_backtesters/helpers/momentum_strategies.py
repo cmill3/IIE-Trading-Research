@@ -31,11 +31,17 @@ def tda_PUT_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target_
         hour = row['date'].hour
         minute = row['date'].minute
 
-
-        if deriv_pct_change > vc_config[order_num]:
-            reason = f"VCSell{order_num}"
-            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  
-            return sell_dict
+        if deriv_pct_change > int(vc_config[order_num]):
+            if order_num == 0:
+                Floor_pct = (.8*underlying_gain)
+            elif order_num == 1:
+                Floor_pct = (.75*underlying_gain)
+            elif order_num == 2:
+                Floor_pct = (.7*underlying_gain)
+            if pct_change >= Floor_pct:
+                reason = f"VCSell{order_num}"
+                sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  
+                return sell_dict
 
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
@@ -59,9 +65,14 @@ def tda_PUT_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target_
             if hour == 15 and minute == 45:
                 sell_code = 7
                 reason = "End of day, sell."
-            elif  current_weekday == 4 and hour > 10:
+            elif  current_weekday == 4 and hour > 12:
                 sell_code = 8
                 reason = "Friday Cutoff."
+            elif current_weekday == 4:
+                Floor_pct = (.95*underlying_gain)
+                if pct_change >= Floor_pct:
+                    sell_code = 8
+                    reason = "Friday Cutoff Gain Track."
             elif pct_change > Floor_pct:
                 sell_code = 4
                 if isVC:
@@ -69,7 +80,7 @@ def tda_PUT_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target_
                 else:
                     reason = "Hit point of no confidence, sell."
             elif pct_change <= target_pct:
-                Floor_pct = (.95*underlying_gain)
+                Floor_pct = (.8*underlying_gain)
                 if pct_change >= Floor_pct:
                     sell_code = 6
                     reason = "Hit exit target, sell."
@@ -105,10 +116,17 @@ def tda_CALL_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target
         minute = row['date'].minute
         # Floor_pct += underlying_gain
 
-        if deriv_pct_change > vc_config[order_num]:
-            reason = f"VCSell{order_num}"
-            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  
-            return sell_dict
+        if deriv_pct_change > int(vc_config[order_num]):
+            if order_num == 0:
+                Floor_pct = (.8*underlying_gain)
+            elif order_num == 1:
+                Floor_pct = (.75*underlying_gain)
+            elif order_num == 2:
+                Floor_pct = (.7*underlying_gain)
+            if pct_change <= Floor_pct:
+                reason = f"VCSell{order_num}"
+                sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  
+                return sell_dict
 
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
@@ -132,8 +150,13 @@ def tda_CALL_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target
             if hour == 15 and minute == 45:
                 sell_code = 7
                 reason = "End of day, sell."
-            elif  current_weekday == 4 and hour >= 10:
+            elif  current_weekday == 4 and hour > 12:
                 sell_code = 8
+                reason = "Friday Cutoff."
+            elif current_weekday == 4:
+                Floor_pct = (.95*underlying_gain)
+                if pct_change <= Floor_pct:
+                    sell_code = 8
                 reason = "Friday Cutoff."
             elif pct_change < Floor_pct:
                 sell_code = 4
@@ -142,7 +165,7 @@ def tda_CALL_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target
                 else:
                     reason = "Hit point of no confidence, sell."
             elif pct_change >= target_pct:
-                Floor_pct = (.95*underlying_gain)
+                Floor_pct = (.8*underlying_gain)
                 if pct_change <= Floor_pct:
                     sell_code = 6
                     reason = "Hit exit target, sell."
@@ -179,8 +202,13 @@ def tda_PUT_1D_CDVOLVARVC2(polygon_df, simulation_date, quantity, config, target
         hour = row['date'].hour
         minute = row['date'].minute
 
-        if deriv_pct_change > vc_config[order_num]:
-            Floor_pct = (.9*underlying_gain)
+        if deriv_pct_change > int(vc_config[order_num]):
+            if order_num == 0:
+                Floor_pct = (.8*underlying_gain)
+            elif order_num == 1:
+                Floor_pct = (.75*underlying_gain)
+            elif order_num == 2:
+                Floor_pct = (.7*underlying_gain)
             if pct_change >= Floor_pct:
                 reason = f"VCSell{order_num}"
                 sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  
@@ -255,7 +283,12 @@ def tda_CALL_1D_CDVOLVARVC2(polygon_df, simulation_date, quantity, config, targe
         # Floor_pct += underlying_gain
 
         if deriv_pct_change > int(vc_config[order_num]):
-            Floor_pct = (.8*underlying_gain)
+            if order_num == 0:
+                Floor_pct = (.8*underlying_gain)
+            elif order_num == 1:
+                Floor_pct = (.75*underlying_gain)
+            elif order_num == 2:
+                Floor_pct = (.7*underlying_gain)
             if pct_change <= Floor_pct:
                 reason = f"VCSell{order_num}"
                 sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  
@@ -484,17 +517,17 @@ def build_vc_config(vc_values,simulation_date,symbol):
     }
     elif day_of_week == 2:
         vc_config = {
-        0:  100,
-        1: 150,
-        2: 200,
-        3: 250
+        0:  vc_values[0],
+        1: vc_values[1],
+        2: vc_values[2],
+        3: vc_values[3]
     }
     elif day_of_week == 3:
         vc_config = {
-        0:  100,
-        1: 150,
-        2: 200,
-        3: 350
+        0:  vc_values[0],
+        1: vc_values[1],
+        2: vc_values[2],
+        3: vc_values[3]
     }
     print(f"VC Config: {vc_config}")
     return vc_config
