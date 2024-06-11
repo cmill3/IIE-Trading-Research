@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import concurrent.futures
 import pandas_market_calendars as mcal
 import numpy as np
-from helpers.constants import ONED_STRATEGIES, THREED_STRATEGIES, YEAR_CONFIG
+from helpers.constants import ONED_STRATEGIES, YEAR_CONFIG
 
 s3 = boto3.client('s3')
 nyse = mcal.get_calendar('NYSE')
@@ -78,10 +78,10 @@ def generate_expiry_dates(date_str,symbol,strategy):
             day_of = add_weekdays(date_str,1,symbol)
             next_day = add_weekdays(date_str,2,symbol)
             return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
-        elif strategy in THREED_STRATEGIES:
-            day_of = add_weekdays(date_str,3,symbol)
-            next_day = add_weekdays(date_str,4,symbol)
-            return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
+        # elif strategy in THREED_STRATEGIES:
+        #     day_of = add_weekdays(date_str,3,symbol)
+        #     next_day = add_weekdays(date_str,4,symbol)
+        #     return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
     else: 
         input_date = datetime.strptime(date_str, '%Y-%m-%d')
         # Find the weekday of the input date (Monday is 0 and Sunday is 6)
@@ -119,10 +119,10 @@ def generate_expiry_dates_row(row):
             day_of = add_weekdays(date_str,1,row['symbol'])
             next_day = add_weekdays(date_str,2,row['symbol'])
             return [day_of.strftime('%y%m%d'),next_day.strftime('%y%m%d')]
-        elif row['strategy'] in THREED_STRATEGIES:
-            day_of = add_weekdays(date_str,3,row['symbol'])  
-            next_day = add_weekdays(date_str,4,row['symbol'])
-            return [day_of.strftime('%y%m%d'),next_day.strftime('%y%m%d')]
+        # elif row['strategy'] in THREED_STRATEGIES:
+        #     day_of = add_weekdays(date_str,3,row['symbol'])  
+        #     next_day = add_weekdays(date_str,4,row['symbol'])
+        #     return [day_of.strftime('%y%m%d'),next_day.strftime('%y%m%d')]
     else: 
         input_date = datetime.strptime(date_str, '%Y-%m-%d')
         # Find the weekday of the input date (Monday is 0 and Sunday is 6)
@@ -164,8 +164,8 @@ if __name__ == "__main__":
     for year in [
         "twenty3",
         "twenty2",
-        "twenty4",
-        "twenty1",
+        # "twenty4",
+        # "twenty1",
         # "twenty0"
         ]:
         strategy_info = { 
@@ -180,18 +180,18 @@ if __name__ == "__main__":
             #     "side": "P"
             # },
             # "CDBFC_1D": {
-            #     "file_path": 'TSSIM2.4_PE_HYPOPT10.55',
+            #     "file_path": 'TSSIM2.4_PE_23fix_HYPOPT1_TP0.6',
             #     "time_span": 2,
             #     "side": "C"
             # },
             "CDBFP_1D": {
-                "file_path": 'TSSIM2.4_PEBF3NM_HYPOPT10.45',
+                "file_path": 'TSSIM2.4_PE_23fix_HYPOPT2_TP0.4',
                 "time_span": 2,
                 "side": "P"
             },
         }
 
-        data_type = 'CDVOLBF3-55PE2'
+        data_type = 'CDVOLBF3-6PE2'
         file_names = YEAR_CONFIG[year]['all_files']
         
         # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')

@@ -12,7 +12,7 @@ import warnings
 # import helpers.helper as helper
 import helpers.polygon_helper as ph
 import pytz
-from helpers.constants import THREED_STRATEGIES, ONED_STRATEGIES
+from helpers.constants import ONED_STRATEGIES
 
 
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -466,12 +466,12 @@ def extract_results_dict_pt(positions_list, config):
 #     return results_dicts
 
 
-def create_datetime_index(start_date, end_date, config):
+def create_datetime_index(start_date, end_date):
     print("DATE TIME INDEX")
     print(start_date)
     print(end_date)
     print()
-    datetime_index = pd.date_range(start_date, end_date, freq=f"{config['frequency']}min", name = 'Time')
+    datetime_index = pd.date_range(start_date, end_date, freq=f"15min", name = 'Time')
     days = []
     for time in datetime_index:
         convertedtime = time.strftime('%Y-%m-%d %H:%M:%S')
@@ -487,7 +487,7 @@ def create_portfolio_date_list(start_date, end_date, config):
     start_time = datetime(int(sy), int(sm), int(sd), 9, 30)
     end_time = datetime(int(ey), int(em), int(ed), 16, 0)
     end_date = create_end_date(end_time, 4)
-    date_list, _, _  = create_datetime_index(start_time, end_date, config)
+    date_list, _, _  = create_datetime_index(start_time, end_date)
     return date_list
 
 def map_assignment_adjustment(aa):

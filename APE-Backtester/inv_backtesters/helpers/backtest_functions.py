@@ -12,7 +12,7 @@ import math
 s3 = boto3.client('s3')
 
 
-def pull_data_invalerts(bucket_name, object_key, file_name, prefixes, time_span, config):
+def pull_data_invalerts(bucket_name, object_key, file_name, prefixes, time_span):
     dfs = []
     for prefix in prefixes:
         try:
@@ -28,7 +28,7 @@ def pull_data_invalerts(bucket_name, object_key, file_name, prefixes, time_span,
     data = data[data.predictions == 1]
     start_time = datetime.strptime(data['date'].values[0], '%Y-%m-%d')
     end_date = backtrader_helper.create_end_date_local_data(data['date'].values[-1], time_span)
-    datetime_list, datetime_index, results = backtrader_helper.create_datetime_index(start_time, end_date, config)
+    datetime_list, datetime_index, results = backtrader_helper.create_datetime_index(start_time, end_date)
     return data, datetime_list
 
 
@@ -37,8 +37,8 @@ def create_simulation_data_inv(row,config):
     start_date = datetime(int(date_str.split("-")[0]),int(date_str.split("-")[1]),int(date_str.split("-")[2]),int(row['hour']),0,0)
     if row['strategy'] in ONED_STRATEGIES:
         days_back = 1
-    elif row['strategy'] in THREED_STRATEGIES:
-        days_back = 3
+    # elif row['strategy'] in THREED_STRATEGIES:
+    #     days_back = 3
     end_date = backtrader_helper.create_end_date(start_date, days_back)
     trading_aggregates, option_symbols = backtrader_helper.create_options_aggs_inv(row,start_date,end_date=end_date,spread_length=config['spread_length'],config=config)
     return start_date, end_date, row['symbol'], row['alert_price'], row['strategy'], option_symbols, trading_aggregates
@@ -49,8 +49,8 @@ def create_simulation_data_pt(row,config):
     start_date = datetime(int(date_str.split("-")[0]),int(date_str.split("-")[1]),int(date_str.split("-")[2]),int(row['hour']),0,0)
     if row['strategy'] in ONED_STRATEGIES:
         days_back = 1
-    elif row['strategy'] in THREED_STRATEGIES:
-        days_back = 3
+    # elif row['strategy'] in THREED_STRATEGIES:
+    #     days_back = 3
     end_date = backtrader_helper.create_end_date(start_date, days_back)
     trading_aggregates, option_symbols, open_price = backtrader_helper.create_options_aggs_pt(row,start_date,end_date=end_date,config=config)
     return start_date, end_date, row['symbol'], open_price, row['strategy'], option_symbols, trading_aggregates
@@ -88,16 +88,27 @@ def buy_iterate_sellV2_invalerts(symbol, option_symbol, open_prices, strategy, p
             print(f"Error {e} in sell_dict for {symbol} in {strategy} CDVOLVARVC")
             print(polygon_df)
             return "NO DICT"
-    elif config['model'] == "CDVOLVARVC_AA1":
+    elif config['model'] == "CDVOLVARVC3":
         try:
             if strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_1D_CDVOLVARVC_AA1(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
+                sell_dict = trade.tda_CALL_1D_CDVOLVARVC3(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num,symbol=symbol)
             elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
-                sell_dict = trade.tda_PUT_1D_CDVOLVARVC_AA1(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
+                sell_dict = trade.tda_PUT_1D_CDVOLVARVC3(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num,symbol=symbol)
         except Exception as e:
             print(f"Error {e} in sell_dict for {symbol} in {strategy} CDVOLVARVC3")
             print(polygon_df)
             return "NO DICT"
+    elif config['model'] == "CDVOLVARVC_AA1":
+        try:
+            if strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
+                sell_dict = trade.tda_CALL_1D_CDVOLVARVC_AA1(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num,symbol=symbol)
+            elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
+                sell_dict = trade.tda_PUT_1D_CDVOLVARVC_AA1(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num,symbol=symbol)
+        except Exception as e:
+            print(f"Error {e} in sell_dict for {symbol} in {strategy} CDVOLVARVCAA1")
+            print(polygon_df)
+            return "NO DICT"
+    
     
     try:
         sell_dict['position_id'] = position_id
@@ -134,11 +145,11 @@ def buy_iterate_sellV2_invalerts_pt(symbol, option_symbol, open_prices, strategy
         
     buy_dict = {"open_price": open_price, "open_datetime": open_datetime, "quantity": quantity, "contract_cost": contract_cost, "option_symbol": option_symbol, "position_id": position_id, "contract_type": contract_type}
 
-    if strategy in THREED_STRATEGIES and strategy in CALL_STRATEGIES:
-        sell_dict = trade.tda_CALL_3D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
-    elif strategy in THREED_STRATEGIES and strategy in PUT_STRATEGIES:
-        sell_dict = trade.tda_PUT_3D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
-    elif strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
+    # if strategy in THREED_STRATEGIES and strategy in CALL_STRATEGIES:
+    #     sell_dict = trade.tda_CALL_3D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
+    # elif strategy in THREED_STRATEGIES and strategy in PUT_STRATEGIES:
+    #     sell_dict = trade.tda_PUT_3D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
+    if strategy in ONED_STRATEGIES and strategy in CALL_STRATEGIES:
         sell_dict = trade.tda_CALL_1D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
     elif strategy in ONED_STRATEGIES and strategy in PUT_STRATEGIES:
         sell_dict = trade.tda_PUT_1D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=-row['target_pct'],vol=float(row["target_pct"]),order_num=order_num)
@@ -483,7 +494,8 @@ def size_spread_quantities(contracts_details, target_cost, config, open_datetime
     spread_length = config['spread_length']
     tickers = list(contracts_details.keys())
     capital_distributions = config['capital_distributions']
-
+    # print("CONTRACTS")
+    # print(contracts_details)
     if symbol in ["SPY","QQQ","IWM"]:
         adjusted_contracts = tickers[int(spread_start):int(spread_end)]
         capital_distributions = [float(x) for x in capital_distributions.split(",")]
@@ -500,12 +512,12 @@ def size_spread_quantities(contracts_details, target_cost, config, open_datetime
             adjusted_contracts = tickers[int(spread_start):int(spread_end)]
             capital_distributions = [float(x) for x in capital_distributions.split(",")]
     else:
-        if day_of_week >= 2:
-            adjusted_contracts = tickers[(int(spread_start)-1):(int(spread_end)-1)]
-            capital_distributions = [float(x) for x in capital_distributions.split(",")]
-        else:
-            adjusted_contracts = tickers[int(spread_start):int(spread_end)]
-            capital_distributions = [float(x) for x in capital_distributions.split(",")]
+        # if day_of_week >= 2:
+        #     adjusted_contracts = tickers[(int(spread_start)-1):(int(spread_end)-1)]
+        #     capital_distributions = [float(x) for x in capital_distributions.split(",")]
+        # else:
+        adjusted_contracts = tickers[int(spread_start):int(spread_end)]
+        capital_distributions = [float(x) for x in capital_distributions.split(",")]
 
     final_contracts = []
     for contract in adjusted_contracts:
