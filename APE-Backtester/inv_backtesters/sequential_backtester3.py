@@ -126,14 +126,38 @@ if __name__ == "__main__":
             "aa": 0,
             "risk_unit": 35,
             "portfolio_pct": .2,
-            "model": "CDVOLVARVC2",
+            "model": "CDVOLVARVC3",
             "vc_level":"100+120+140+300",
             "capital_distributions": ".40,.60",
             "portfolio_cash": 60000,
             "volatility_threshold": 1,
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
-            "dataset": "CDVOLBF3-6PE2",
+            "dataset": "CDVOLBF3-6PE",
+            "reserve_cash": 5000,
+            "days": "23",
+            "scale": "FIX",
+            "divisor": .75,
+            "reup": "daily",
+            "IDX": False,
+            "frequency": "15",
+            "holiday_weeks": False,
+        },
+                {
+            "put_pct": 1, 
+            "spread_search": "2:4",
+            "spread_length": 2,
+            "aa": 0,
+            "risk_unit": 35,
+            "portfolio_pct": .2,
+            "model": "CDVOLVARVC",
+            "vc_level":"100+120+140+300",
+            "capital_distributions": ".40,.60",
+            "portfolio_cash": 60000,
+            "volatility_threshold": 1,
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "dataset": "CDVOLBF3-6PE",
             "reserve_cash": 5000,
             "days": "23",
             "scale": "FIX",
@@ -148,7 +172,7 @@ if __name__ == "__main__":
         for year in years:
             starting_cash = config['portfolio_cash']
             year_data = YEAR_CONFIG[year]
-            trading_strat = f"{config['user']}/{nowstr}-{year_data['year']}:{config['aa']}:_{config['dataset']}_{config['holiday_weeks']}_{config['model']}_CD{config['capital_distributions']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_sssl{config['spread_search']}:{config['spread_length']}"
+            trading_strat = f"{config['user']}/{nowstr}-{year_data['year']}:{config['aa']}:_{config['dataset']}_{config['days']}_{config['holiday_weeks']}_{config['model']}_CD{config['capital_distributions']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_sssl{config['spread_search']}:{config['spread_length']}"
             for month in year_data['months']:
                 try:
                     start_dt = month[0]

@@ -628,6 +628,8 @@ def configure_trade_data(df,config):
         filt_one = one.loc[one['day_of_week'].isin([2,3])]
     elif config['days'] == '123':
         filt_one = one.loc[one['day_of_week'].isin([1,2,3])]
+    elif config['days'] == '12':
+        filt_one = one.loc[one['day_of_week'].isin([1,2])]
     else:
         filt_one = one.loc[one['day_of_week'].isin([0,1,2,3])]
     if config['IDX'] == True:

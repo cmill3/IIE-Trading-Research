@@ -93,9 +93,9 @@ def tda_PUT_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target_
                 if pct_change >= Floor_pct:
                     sell_code = 6
                     reason = "Hit exit target, sell."
-            elif pct_change >= (.5*(target_pct)) and hour >= 10:
-                sell_code = 5
-                reason = "Failed momentum gate, sell."
+            # elif pct_change >= (.5*(target_pct)) and hour >= 10:
+            #     sell_code = 5
+            #     reason = "Failed momentum gate, sell."
 
         if sell_code != 0:
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)
@@ -173,9 +173,9 @@ def tda_CALL_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target
                 if pct_change <= Floor_pct:
                     sell_code = 6
                     reason = "Hit exit target, sell."
-            elif pct_change < (.5*(target_pct)) and hour >= 10:
-                sell_code = 5
-                reason = "Failed momentum gate, sell."
+            # elif pct_change < (.5*(target_pct)) and hour >= 10:
+            #     sell_code = 5
+            #     reason = "Failed momentum gate, sell."
 
         if sell_code != 0:
             sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)
