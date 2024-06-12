@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import concurrent.futures
 import pandas_market_calendars as mcal
 import numpy as np
-from helpers.constants import ONED_STRATEGIES, THREED_STRATEGIES, YEAR_CONFIG
+from helpers.constants import ONED_STRATEGIES, YEAR_CONFIG
 
 s3 = boto3.client('s3')
 nyse = mcal.get_calendar('NYSE')
@@ -78,10 +78,10 @@ def generate_expiry_dates(date_str,symbol,strategy):
             day_of = add_weekdays(date_str,1,symbol)
             next_day = add_weekdays(date_str,2,symbol)
             return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
-        elif strategy in THREED_STRATEGIES:
-            day_of = add_weekdays(date_str,3,symbol)
-            next_day = add_weekdays(date_str,4,symbol)
-            return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
+        # elif strategy in THREED_STRATEGIES:
+        #     day_of = add_weekdays(date_str,3,symbol)
+        #     next_day = add_weekdays(date_str,4,symbol)
+        #     return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
     else: 
         input_date = datetime.strptime(date_str, '%Y-%m-%d')
         # Find the weekday of the input date (Monday is 0 and Sunday is 6)
@@ -119,10 +119,10 @@ def generate_expiry_dates_row(row):
             day_of = add_weekdays(date_str,1,row['symbol'])
             next_day = add_weekdays(date_str,2,row['symbol'])
             return [day_of.strftime('%y%m%d'),next_day.strftime('%y%m%d')]
-        elif row['strategy'] in THREED_STRATEGIES:
-            day_of = add_weekdays(date_str,3,row['symbol'])  
-            next_day = add_weekdays(date_str,4,row['symbol'])
-            return [day_of.strftime('%y%m%d'),next_day.strftime('%y%m%d')]
+        # elif row['strategy'] in THREED_STRATEGIES:
+        #     day_of = add_weekdays(date_str,3,row['symbol'])  
+        #     next_day = add_weekdays(date_str,4,row['symbol'])
+        #     return [day_of.strftime('%y%m%d'),next_day.strftime('%y%m%d')]
     else: 
         input_date = datetime.strptime(date_str, '%Y-%m-%d')
         # Find the weekday of the input date (Monday is 0 and Sunday is 6)

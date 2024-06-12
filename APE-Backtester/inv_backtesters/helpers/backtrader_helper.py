@@ -12,7 +12,7 @@ import warnings
 # import helpers.helper as helper
 import helpers.polygon_helper as ph
 import pytz
-from helpers.constants import THREED_STRATEGIES, ONED_STRATEGIES
+from helpers.constants import ONED_STRATEGIES
 
 
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -487,7 +487,7 @@ def create_portfolio_date_list(start_date, end_date, config):
     start_time = datetime(int(sy), int(sm), int(sd), 9, 30)
     end_time = datetime(int(ey), int(em), int(ed), 16, 0)
     end_date = create_end_date(end_time, 4)
-    date_list, _, _  = create_datetime_index(start_time, end_date, config)
+    date_list, _, _  = create_datetime_index(start_time, end_date)
     return date_list
 
 def map_assignment_adjustment(aa):
@@ -628,6 +628,8 @@ def configure_trade_data(df,config):
         filt_one = one.loc[one['day_of_week'].isin([2,3])]
     elif config['days'] == '123':
         filt_one = one.loc[one['day_of_week'].isin([1,2,3])]
+    elif config['days'] == '12':
+        filt_one = one.loc[one['day_of_week'].isin([1,2])]
     else:
         filt_one = one.loc[one['day_of_week'].isin([0,1,2,3])]
     if config['IDX'] == True:

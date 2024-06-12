@@ -15,6 +15,8 @@ import os
 warnings.filterwarnings("ignore")
 bucket_name = 'icarus-research-data'  #s3 bucket name
 
+holiday_weeks = ['2022-07-05','2022-11-21','2022-12-26','2023-11-20','2023-07-03']
+
 def build_backtest_data(file_name,strategies,config):
     full_purchases_list = []
     full_positions_list = []
@@ -86,6 +88,10 @@ def backtest_orchestrator(start_date,end_date,file_names,strategies,local_data,c
     #     merged_positions = merged_positions.to_dict('records')
     all_trades = []
     for file_name in file_names:
+        if config['holiday_weeks'] == False:
+            if file_name in holiday_weeks:
+                continue
+
         trades = build_backtest_data(file_name,strategies,config)
         all_trades.append(trades)
 
@@ -115,26 +121,51 @@ if __name__ == "__main__":
     backtest_configs = [
         {
             "put_pct": 1, 
-            "spread_search": "1:4",
+            "spread_search": "2:4",
+            "spread_length": 2,
             "aa": 0,
             "risk_unit": 35,
             "portfolio_pct": .2,
-            "model": "CDVOLVARVC2",
-            "vc_level":"75+125+150+300",
-            "capital_distributions": ".25,.25,.50",
+            "model": "CDVOLVARVC3",
+            "vc_level":"100+120+140+300",
+            "capital_distributions": ".40,.60",
             "portfolio_cash": 60000,
-            "volatility_threshold": 0.5,
+            "volatility_threshold": 1,
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
-            "dataset": "CDVOLBF3-6PE2",
-            "spread_length": 3,
+            "dataset": "CDVOLBF3-6PE",
             "reserve_cash": 5000,
             "days": "23",
-            "scale": "DS",
+            "scale": "FIX",
             "divisor": .75,
             "reup": "daily",
             "IDX": False,
             "frequency": "15",
+            "holiday_weeks": False,
+        },
+                {
+            "put_pct": 1, 
+            "spread_search": "2:4",
+            "spread_length": 2,
+            "aa": 0,
+            "risk_unit": 35,
+            "portfolio_pct": .2,
+            "model": "CDVOLVARVC",
+            "vc_level":"100+120+140+300",
+            "capital_distributions": ".40,.60",
+            "portfolio_cash": 60000,
+            "volatility_threshold": 1,
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "dataset": "CDVOLBF3-6PE",
+            "reserve_cash": 5000,
+            "days": "23",
+            "scale": "FIX",
+            "divisor": .75,
+            "reup": "daily",
+            "IDX": False,
+            "frequency": "15",
+            "holiday_weeks": False,
         },
         ]
     
@@ -143,7 +174,7 @@ if __name__ == "__main__":
         for year in years:
             starting_cash = config['portfolio_cash']
             year_data = YEAR_CONFIG[year]
-            trading_strat = f"{config['user']}/{nowstr}-{year_data['year']}:{config['scale']}:_{config['dataset']}_{config['frequency']}min_{config['model']}_CD{config['capital_distributions']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_sssl{config['spread_search']}:{config['spread_length']}"
+            trading_strat = f"{config['user']}/{nowstr}-{year_data['year']}:{config['aa']}:_{config['dataset']}_{config['days']}_{config['holiday_weeks']}_{config['model']}_CD{config['capital_distributions']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_sssl{config['spread_search']}:{config['spread_length']}"
             for month in year_data['months']:
                 try:
                     start_dt = month[0]
