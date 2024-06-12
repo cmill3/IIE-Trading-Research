@@ -12,7 +12,7 @@ import math
 s3 = boto3.client('s3')
 
 
-def pull_data_invalerts(bucket_name, object_key, file_name, prefixes, time_span, config):
+def pull_data_invalerts(bucket_name, object_key, file_name, prefixes, time_span):
     dfs = []
     for prefix in prefixes:
         try:
@@ -28,7 +28,7 @@ def pull_data_invalerts(bucket_name, object_key, file_name, prefixes, time_span,
     data = data[data.predictions == 1]
     start_time = datetime.strptime(data['date'].values[0], '%Y-%m-%d')
     end_date = backtrader_helper.create_end_date_local_data(data['date'].values[-1], time_span)
-    datetime_list, datetime_index, results = backtrader_helper.create_datetime_index(start_time, end_date, config)
+    datetime_list, datetime_index, results = backtrader_helper.create_datetime_index(start_time, end_date)
     return data, datetime_list
 
 

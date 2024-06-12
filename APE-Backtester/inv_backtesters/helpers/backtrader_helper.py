@@ -466,12 +466,12 @@ def extract_results_dict_pt(positions_list, config):
 #     return results_dicts
 
 
-def create_datetime_index(start_date, end_date, config):
+def create_datetime_index(start_date, end_date):
     print("DATE TIME INDEX")
     print(start_date)
     print(end_date)
     print()
-    datetime_index = pd.date_range(start_date, end_date, freq=f"{config['frequency']}min", name = 'Time')
+    datetime_index = pd.date_range(start_date, end_date, freq=f"15min", name = 'Time')
     days = []
     for time in datetime_index:
         convertedtime = time.strftime('%Y-%m-%d %H:%M:%S')
