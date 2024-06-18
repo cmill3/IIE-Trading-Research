@@ -165,8 +165,8 @@ if __name__ == "__main__":
         "twenty3",
         "twenty2",
         "twenty4",
-        # "twenty1",
-        # "twenty0"
+        "twenty1",
+        "twenty0"
         ]:
         strategy_info = { 
             # "CDBFC": {
@@ -189,6 +189,26 @@ if __name__ == "__main__":
                 "time_span": 2,
                 "side": "P"
             },
+            "CDLOSEC_1D": {
+                "file_path": 'TSSIM3.1_PE_HYPOPT1_TP0.55',
+                "time_span": 2,
+                "side": "C"
+            },
+            "CDLOSEP_1D": {
+                "file_path": 'TSSIM3.1_PE_HYPOPT1_TP0.55',
+                "time_span": 2,
+                "side": "P"
+            },
+            # "CDBFC_1D": {
+            #     "file_path": 'TSSIM2.4_PE_HYPOPT10.55',
+            #     "time_span": 2,
+            #     "side": "C"
+            # },
+            # "CDBFP_1D": {
+            #     "file_path": 'TSSIM2.4_PEBF3NM_HYPOPT10.45',
+            #     "time_span": 2,
+            #     "side": "P"
+            # },
         }
 
         data_type = 'CDVOLBF3-6PE3'
