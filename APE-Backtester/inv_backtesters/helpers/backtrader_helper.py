@@ -88,6 +88,8 @@ def s3_data_inv(bucket_name, object_key, prefixes):
     return df
 
 def create_results_dict(buy_dict, sell_dict,order_id):
+    sell_dict['close_price'] = .98*sell_dict['close_price']
+    buy_dict['open_price'] = 1.02*buy_dict['open_price']
     price_change = sell_dict['close_price'] - buy_dict['open_price']
     pct_gain = (price_change / buy_dict['open_price']) *100
     total_gain = (price_change*100) * buy_dict['quantity']
@@ -128,10 +130,7 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
         if config['aa'] == 0:
             expiry = expiries[0]
         elif config['aa'] == 1:
-            if start_date.weekday() <= 1:
-                expiry = expiries[0]
-            else:
-                expiry = expiries[1]
+            expiry = expiries[1]
     
     strike = row['symbol'] + expiry
     try:
@@ -192,7 +191,7 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
             enriched_df.dropna(inplace=True)
             enriched_options_aggregates[contract['contract_symbol']] = enriched_df
             options.append(contract)
-            if len(options) > (spread_length+1):
+            if len(options) > (spread_length+4):
                 break
         except Exception as e:
             print(f"Error: {e} in options agg for {row['symbol']} of {row['strategy']}")
@@ -620,6 +619,7 @@ def configure_trade_data(df,config):
 
 
     one = df.loc[df['prediction_horizon'] == "1"]
+    # one_idx = index.loc[index['prediction_horizon'] == "1"]
     # three = stocks.loc[stocks['prediction_horizon'] == "3"]
     # one_idx = index.loc[index['prediction_horizon'] == "1"]
     # three_idx = index.loc[index['prediction_horizon'] == "3"]
@@ -632,8 +632,19 @@ def configure_trade_data(df,config):
         filt_one = one.loc[one['day_of_week'].isin([1,2])]
     else:
         filt_one = one.loc[one['day_of_week'].isin([0,1,2,3])]
-    if config['IDX'] == True:
-        filt_one = filt_one.loc[filt_one['symbol'].isin(["IWM","SPY","QQQ"]) == True]
+
+    filt_one = filt_one.loc[filt_one['symbol'] != 'GOOG']
+    return filt_one
+    # if config['IDX'] == "ONLY":
+    #     return one_idx
+    # elif config['IDX'] ==  False:
+    #     one_idx = one_idx.loc[one['day_of_week'].isin([2,3])]
+    #     trades = pd.concat([filt_one,one_idx])
+    #     return trades
+    # elif config['IDX'] == True:
+    #     trades = pd.concat([filt_one,one_idx])
+    #     return trades
+
     # filt_three = three.loc[three['day_of_week'].isin([0,1,2])]
 
     # one_idxF = one_idx.loc[one_idx['day_of_week'].isin([0,1,2,3])]
@@ -641,8 +652,6 @@ def configure_trade_data(df,config):
 
     # trade_df = pd.concat([filt_one,filt_three,one_idxF,three_idxF])
     # trade_df = pd.concat([stocks,index])
-    filt_one = filt_one.loc[filt_one['symbol'] != 'GOOG']
     # trade_df = pd.concat([filt_one,one_idx])
 
-    return filt_one
 

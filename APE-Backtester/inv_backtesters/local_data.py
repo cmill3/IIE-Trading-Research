@@ -179,19 +179,19 @@ if __name__ == "__main__":
             #     "time_span": 4,
             #     "side": "P"
             # },
-            "CDBFC_1D": {
-                "file_path": 'TSSIM2.4_PE10D_HYPOPT1_TP0.6',
-                "time_span": 2,
-                "side": "C"
-            },
+            # "CDBFC_1D": {
+            #     "file_path": 'TSSIM2.4_TOP_HYPOPT1_TP0.6',
+            #     "time_span": 2,
+            #     "side": "C"
+            # },
             "CDBFP_1D": {
-                "file_path": 'TSSIM2.4_PE10D_HYPOPT2_TP0.4',
+                "file_path": 'TSSIM2.4_TOP_HYPOPT2_TP0.4',
                 "time_span": 2,
                 "side": "P"
             },
         }
 
-        data_type = 'CDVOLBF3-6PE'
+        data_type = 'CDVOLBF3-6PE3'
         file_names = YEAR_CONFIG[year]['all_files']
         
         # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')

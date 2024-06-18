@@ -327,8 +327,7 @@ def simulate_portfolio_FIXED(positions_list, datetime_list, portfolio_cash, risk
     contracts_bought = []
     contracts_sold = []
     starting_cash = portfolio_cash
-    starting_reserve = config['reserve_cash']
-    current_reserve = starting_reserve
+    current_reserve = 0
     sales_dict = {}
     portfolio_dict, positions_dict, passed_trades_dict = convert_lists_to_dicts_inv(positions_list, datetime_list)
 
@@ -363,8 +362,8 @@ def simulate_portfolio_FIXED(positions_list, datetime_list, portfolio_cash, risk
                             if buy_order != None:
                                 orders_taken = True
                                 value['contracts_purchased'].append(f"{buy_order['option_symbol']}_{buy_order['order_id']}")
-                                value['purchase_costs'] += (buy_order['contract_cost'] * buy_order['quantity'])
-                                value['portfolio_cash'] -= (buy_order['contract_cost'] * buy_order['quantity'])
+                                value['purchase_costs'] += 1.02*(buy_order['contract_cost'] * buy_order['quantity'])
+                                value['portfolio_cash'] -= 1.02*(buy_order['contract_cost'] * buy_order['quantity'])
                                 contracts_bought.append(f"{buy_order['option_symbol']}_{buy_order['order_id']}")
                                 # quantities[order['option_symbol']] = order['quantity']
                                 ### CHASE
@@ -400,16 +399,24 @@ def simulate_portfolio_FIXED(positions_list, datetime_list, portfolio_cash, risk
             value['open_positions_start'].extend(current_positions)
             check_reup = check_for_reup(key,config)
             if check_reup:
-                # elif config['reup'] == 'cold':
-                #     if value['portfolio_cash'] > starting_cash:
-                #         cash_surplus = value['portfolio_cash'] - starting_cash
-                #         trade_value = (starting_cash+(.67*cash_surplus))/risk_unit
-                #         print(f"New Trade Value Surplus: {trade_value}")
-                #     else:
-                #         trade_value = starting_cash/risk_unit
-                #         print(f"New Trade Value: {trade_value}")        
-                trading_capital = value['portfolio_cash'] * config['portfolio_pct']
-                trade_value = trading_capital/config['risk_unit']
+                print("Reup Time")
+                print(f"Portfolio Cash: {value['portfolio_cash']}")
+                print(f"Starting Cash: {starting_cash}")
+                print(f"Current Reserve: {current_reserve}")
+                print()
+                if value['portfolio_cash'] < starting_cash:
+                    diff = abs(value['portfolio_cash'] - starting_cash)
+                    value['portfolio_cash'] += diff
+                    current_reserve -= diff
+                elif value['portfolio_cash'] > starting_cash:
+                    diff = abs(value['portfolio_cash'] - starting_cash)
+                    value['portfolio_cash'] -= diff
+                    current_reserve += diff
+                print("After Adjustments")
+                print(f"Portfolio Cash: {value['portfolio_cash']}")
+                print(f"Current Reserve: {current_reserve}")
+                print()
+
         
         if sales_dict.get(key) is not None:
             # print(positions_dict)
@@ -418,8 +425,8 @@ def simulate_portfolio_FIXED(positions_list, datetime_list, portfolio_cash, risk
                 # opt_sym = sale['option_symbol'].split("O:")[1]
                 if (f"{sale['option_symbol']}_{sale['order_id']}") in contracts_bought:
                     value['contracts_sold'].append(f"{sale['option_symbol']}_{sale['order_id']}")
-                    value['sale_returns'] += (sale['contract_cost'] * sale['quantity'])
-                    value['portfolio_cash'] += (sale['contract_cost'] * sale['quantity'])
+                    value['sale_returns'] += (.98*(sale['contract_cost'] * sale['quantity']))
+                    value['portfolio_cash'] += (.98*(sale['contract_cost'] * sale['quantity']))
                     contracts_sold.append(f"{sale['option_symbol']}_{sale['order_id']}")
                     if (sale['position_id'].split("-")[0] + sale['position_id'].split("-")[1]) in current_positions:
                         current_positions.remove((sale['position_id'].split("-")[0] + sale['position_id'].split("-")[1]))    
@@ -440,8 +447,8 @@ def simulate_portfolio_FIXED(positions_list, datetime_list, portfolio_cash, risk
                             if buy_order != None:
                                 orders_taken = True
                                 value['contracts_purchased'].append(f"{buy_order['option_symbol']}_{buy_order['order_id']}")
-                                value['purchase_costs'] += (buy_order['contract_cost'] * buy_order['quantity'])
-                                value['portfolio_cash'] -= (buy_order['contract_cost'] * buy_order['quantity'])
+                                value['purchase_costs'] += 1.02*(buy_order['contract_cost'] * buy_order['quantity'])
+                                value['portfolio_cash'] -= 1.02*(buy_order['contract_cost'] * buy_order['quantity'])
                                 contracts_bought.append(f"{buy_order['option_symbol']}_{buy_order['order_id']}")
                                 # quantities[order['option_symbol']] = order['quantity']
                                 ### CHASE
@@ -479,21 +486,21 @@ def simulate_portfolio_FIXED(positions_list, datetime_list, portfolio_cash, risk
     print("Elements in sold but not in bought:")
     diff2 = list(set(contracts_sold) - set(contracts_bought))
     print(diff2)
-    return portfolio_df, passed_trades_df, positions_taken, positions_dict
+    return portfolio_df, passed_trades_df, positions_taken, positions_dict, current_reserve
 
 
 def check_for_reup(dt,config):
-    if config['reup'] == 'weekly':
-        if dt.weekday() == 0:
-            if dt.hour == 0: 
-                if dt.minute == 0:
-                    print("Reup Time Week")
-                    return True
-    elif config['reup'] == 'daily':
+    # if config['reup'] == 'weekly':
+    if dt.weekday() == 0:
         if dt.hour == 0: 
             if dt.minute == 0:
-                print("Reup Time Day")
+                print("Reup Time Week")
                 return True
+    # elif config['reup'] == 'daily':
+    #     if dt.hour == 0: 
+    #         if dt.minute == 0:
+    #             print("Reup Time Day")
+    #             return True
     return False
 
 def reup_cash(current_cash, reserve_cash, starting_reserve,starting_cash):

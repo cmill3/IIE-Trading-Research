@@ -389,11 +389,20 @@ def tda_CALL_1D_CDVOLVARVC2(polygon_df, simulation_date, quantity, config, targe
 
         if deriv_pct_change > int(vc_config[order_num]):
             if order_num == 0:
-                Floor_pct = (.8*underlying_gain)
+                if deriv_pct_change > 2*int(vc_config[order_num]):
+                    Floor_pct = (.95*underlying_gain)
+                else:
+                    Floor_pct = (.8*underlying_gain)
             elif order_num == 1:
-                Floor_pct = (.8*underlying_gain)
+                if deriv_pct_change > 2*int(vc_config[order_num]):
+                    Floor_pct = (.95*underlying_gain)
+                else:
+                    Floor_pct = (.75*underlying_gain)
             elif order_num == 2:
-                Floor_pct = (.8*underlying_gain)
+                if deriv_pct_change > 2*int(vc_config[order_num]):
+                    Floor_pct = (.95*underlying_gain)
+                else:
+                    Floor_pct = (.7*underlying_gain)
             if pct_change <= Floor_pct:
                 reason = f"VCSell{order_num}"
                 sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  
@@ -655,11 +664,20 @@ def tda_CALL_1D_CDVOLVARVC_AA1(polygon_df, simulation_date, quantity, config, ta
 
         if deriv_pct_change > int(vc_config[order_num]):
             if order_num == 0:
-                Floor_pct = (.8*underlying_gain)
+                if deriv_pct_change > 2*int(vc_config[order_num]):
+                    Floor_pct = (.95*underlying_gain)
+                else:
+                    Floor_pct = (.8*underlying_gain)
             elif order_num == 1:
-                Floor_pct = (.8*underlying_gain)
+                if deriv_pct_change > 2*int(vc_config[order_num]):
+                    Floor_pct = (.95*underlying_gain)
+                else:
+                    Floor_pct = (.75*underlying_gain)
             elif order_num == 2:
-                Floor_pct = (.8*underlying_gain)
+                if deriv_pct_change > 2*int(vc_config[order_num]):
+                    Floor_pct = (.95*underlying_gain)
+                else:
+                    Floor_pct = (.7*underlying_gain)
             if pct_change <= Floor_pct:
                 reason = f"VCSell{order_num}"
                 sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  

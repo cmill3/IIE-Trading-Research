@@ -497,17 +497,12 @@ def size_spread_quantities(contracts_details, target_cost, config, open_datetime
     # print("CONTRACTS")
     # print(contracts_details)
     if symbol in ["SPY","QQQ","IWM"]:
-        adjusted_contracts = tickers[int(spread_start):int(spread_end)]
+        adjusted_contracts = tickers[int(spread_start)+2:int(spread_end)+2]
         capital_distributions = [float(x) for x in capital_distributions.split(",")]
-    elif spread_length == 4:
+    elif spread_length == 2:
         if day_of_week == 3:
-            adjusted_contracts = tickers[int(spread_start):int(spread_end)-2]
-            capital_distributions = [0.6,0.4]
-            spread_length -= 2
-        elif day_of_week == 2:
-            adjusted_contracts = tickers[int(spread_start):int(spread_end)-1]
-            capital_distributions = [0.4,0.4,0.2]
-            spread_length -= 1
+            adjusted_contracts = tickers[int(spread_start):int(spread_end)]
+            capital_distributions = [float(x) for x in capital_distributions.split(",")]
         else:
             adjusted_contracts = tickers[int(spread_start):int(spread_end)]
             capital_distributions = [float(x) for x in capital_distributions.split(",")]
