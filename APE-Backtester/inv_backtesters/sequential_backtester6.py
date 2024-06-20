@@ -58,7 +58,7 @@ def run_trades_simulation(full_positions_list,start_date,end_date,config,period_
             )
     elif config['scale'] == "FIX":
         portfolio_df, passed_trades_df, positions_taken, positions_dict, cash_reserve = portfolio_sim.simulate_portfolio_FIXED(
-            full_positions_list, full_date_list,portfolio_cash=period_cash, risk_unit=config['risk_unit'],put_adjustment=config['put_pct'],
+            full_positions_list, full_date_list,period_starting_capital=period_cash, risk_unit=config['risk_unit'],put_adjustment=config['put_pct'],
             config=config,results_dict_func=helper.extract_results_dict
             )
     positions_df = pd.DataFrame.from_dict(positions_taken)
@@ -124,16 +124,16 @@ if __name__ == "__main__":
             "spread_search": "1:4",
             "spread_length": 3,
             "aa": 1,
-            "risk_unit": 65,
-            "portfolio_pct": 1,
+            "risk_unit": 90,
+            "portfolio_pct": .2,
+            "portfolio_capital": 100000,            
             "model": "CDVOLVARVC_AA1",
             "vc_level":"100+120+140+300",
             "capital_distributions": ".33,.33,.33",
-            "portfolio_cash": 20000,
             "volatility_threshold": 1,
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
-            "dataset": "CDVOLBF3-6PE3",
+            "dataset": "CDVOLBF3-55PE3",
             "reserve_cash": 5000,
             "days": "all",
             "scale": "FIX",
@@ -148,40 +148,16 @@ if __name__ == "__main__":
             "spread_search": "1:4",
             "spread_length": 3,
             "aa": 1,
-            "risk_unit": 65,
-            "portfolio_pct": 1,
+            "risk_unit": 90,
+            "portfolio_pct": .2,
+            "portfolio_capital": 100000,
             "model": "CDVOLVARVC_AA1",
             "vc_level":"100+120+140+300",
             "capital_distributions": ".33,.33,.33",
-            "portfolio_cash": 10000,
             "volatility_threshold": .5,
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
-            "dataset": "CDVOLBF3-6PE3",
-            "reserve_cash": 5000,
-            "days": "all",
-            "scale": "FIX",
-            "divisor": .75,
-            "reup": "daily",
-            "IDX": False,
-            "frequency": "15",
-            "holiday_weeks": False,
-        },
-        {
-            "put_pct": 1, 
-            "spread_search": "1:4",
-            "spread_length": 3,
-            "aa": 1,
-            "risk_unit": 65,
-            "portfolio_pct": 1,
-            "model": "CDVOLVARVC_AA1",
-            "vc_level":"100+120+140+300",
-            "capital_distributions": ".33,.33,.33",
-            "portfolio_cash": 10000,
-            "volatility_threshold": .75,
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "dataset": "CDVOLBF3-6PE3",
+            "dataset": "CDVOLBF3-55PE3",
             "reserve_cash": 5000,
             "days": "all",
             "scale": "FIX",
@@ -196,7 +172,7 @@ if __name__ == "__main__":
 
     for config in backtest_configs:
         for year in years:
-            starting_cash = config['portfolio_cash']
+            starting_cash = config['portfolio_capital']
             year_data = YEAR_CONFIG[year]
             trading_strat = f"{config['user']}/{nowstr}-{year_data['year']}:{config['aa']}_{config['dataset']}_{config['days']}_{config['holiday_weeks']}_{config['model']}_CD{config['capital_distributions']}_vol{config['volatility_threshold']}_vc{config['vc_level']}_sssl{config['spread_search']}:{config['spread_length']}"
             for month in year_data['months']:
@@ -214,21 +190,22 @@ if __name__ == "__main__":
                     portfolio_df, positions_df, full_df, cash_reserve = backtest_orchestrator(start_date, end_date,file_names=month,strategies=strategies,local_data=False, config=config, period_cash=starting_cash)
                     print(f"Done with {trading_strat} at {datetime.now()} made {cash_reserve}!")
                     portfolio_df['profits'] = cash_reserve
-                    # starting_cash = portfolio_df['portfolio_cash'].iloc[-1]
-                    s3.put_object(Body=portfolio_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/portfolio_report.csv')
-                    s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/positions_report.csv')
-                    s3.put_object(Body=full_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_cash"]}_{config["risk_unit"]}/all_positions.csv')
+                    starting_cash = portfolio_df['portfolio_capital'].iloc[-1]
+                    s3.put_object(Body=portfolio_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_capital"]}_{config["risk_unit"]}/portfolio_report.csv')
+                    s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_capital"]}_{config["risk_unit"]}/positions_report.csv')
+                    s3.put_object(Body=full_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{strategy_theme}/{trading_strat}/{start_str}-{end_str}/{config["portfolio_capital"]}_{config["risk_unit"]}/all_positions.csv')
                     print(f"Done with {trading_strat} at {datetime.now()}!")
                 except Exception as e:
                     print(f"Error: {e} for {trading_strat}")
                     error_models.append(f"Error: {e} for {trading_strat}")
                     continue
-            models_tested.append(f'{trading_strat}${config["portfolio_cash"]}_{config["risk_unit"]}')
+            models_tested.append(f'{trading_strat}${config["portfolio_capital"]}_{config["risk_unit"]}')
 
         print(f"Completed all models at {datetime.now()}!")
         print(models_tested)
         print("Errors:")
         print(error_models)
+
 
 
 

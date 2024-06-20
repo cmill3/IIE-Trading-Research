@@ -49,7 +49,7 @@ def tda_PUT_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target_
                     Floor_pct = (.7*underlying_gain)
             if pct_change >= Floor_pct:
                 reason = f"VCSell{order_num}"
-                sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  
+                sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)  
                 return sell_dict
 
 
@@ -68,7 +68,7 @@ def tda_PUT_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target_
         elif day_diff > 1:
             sell_code = 3
             reason = "Held through confidence."
-            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)  
             return sell_dict
         elif day_diff == 1:
             if hour == 15 and minute == 45:
@@ -98,10 +98,10 @@ def tda_PUT_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target_
             #     reason = "Failed momentum gate, sell."
 
         if sell_code != 0:
-            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)
             return sell_dict
         
-    sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,"never sold")
+    sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,"never sold",order_num)
     return sell_dict
 
 def tda_CALL_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target_pct, vol, order_num,symbol):
@@ -134,7 +134,7 @@ def tda_CALL_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target
                 Floor_pct = (.8*underlying_gain)
             if pct_change <= Floor_pct:
                 reason = f"VCSell{order_num}"
-                sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  
+                sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)  
                 return sell_dict
 
 
@@ -153,7 +153,7 @@ def tda_CALL_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target
         elif day_diff > 1:
             sell_code = 3
             reason = "Held through confidence."
-            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)  
             return sell_dict
         elif day_diff == 1 :
             if hour == 15 and minute == 45:
@@ -178,11 +178,11 @@ def tda_CALL_1D_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target
             #     reason = "Failed momentum gate, sell."
 
         if sell_code != 0:
-            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)
             return sell_dict
         
         
-    sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,"never sold")
+    sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,"never sold",order_num)
     return sell_dict
 
 def tda_PUT_1D_CDVOLVARVC3(polygon_df, simulation_date, quantity, config, target_pct, vol, order_num,symbol):
@@ -224,7 +224,7 @@ def tda_PUT_1D_CDVOLVARVC3(polygon_df, simulation_date, quantity, config, target
                     Floor_pct = (.7*underlying_gain)
             if pct_change >= Floor_pct:
                 reason = f"VCSell{order_num}"
-                sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  
+                sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)  
                 return sell_dict
 
 
@@ -243,7 +243,7 @@ def tda_PUT_1D_CDVOLVARVC3(polygon_df, simulation_date, quantity, config, target
         elif day_diff > 1:
             sell_code = 3
             reason = "Held through confidence."
-            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)  
             return sell_dict
         elif day_diff == 1:
             if hour == 15 and minute == 45:
@@ -276,10 +276,10 @@ def tda_PUT_1D_CDVOLVARVC3(polygon_df, simulation_date, quantity, config, target
                 reason = "momentum gate 2"
 
         if sell_code != 0:
-            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)
             return sell_dict
         
-    sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,"never sold")
+    sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,"never sold",order_num)
     return sell_dict
 
 def tda_CALL_1D_CDVOLVARVC3(polygon_df, simulation_date, quantity, config, target_pct, vol, order_num,symbol):
@@ -312,7 +312,7 @@ def tda_CALL_1D_CDVOLVARVC3(polygon_df, simulation_date, quantity, config, targe
                 Floor_pct = (.8*underlying_gain)
             if pct_change <= Floor_pct:
                 reason = f"VCSell{order_num}"
-                sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  
+                sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)  
                 return sell_dict
 
 
@@ -331,7 +331,7 @@ def tda_CALL_1D_CDVOLVARVC3(polygon_df, simulation_date, quantity, config, targe
         elif day_diff > 1:
             sell_code = 3
             reason = "Held through confidence."
-            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)  
             return sell_dict
         elif day_diff == 1 :
             if hour == 15 and minute == 45:
@@ -359,11 +359,11 @@ def tda_CALL_1D_CDVOLVARVC3(polygon_df, simulation_date, quantity, config, targe
                 reason = "momentum gate 2"
 
         if sell_code != 0:
-            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)
             return sell_dict
         
         
-    sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,"never sold")
+    sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,"never sold",order_num)
     return sell_dict
 
 def tda_CALL_1D_CDVOLVARVC2(polygon_df, simulation_date, quantity, config, target_pct, vol, order_num,symbol):
@@ -405,7 +405,7 @@ def tda_CALL_1D_CDVOLVARVC2(polygon_df, simulation_date, quantity, config, targe
                     Floor_pct = (.7*underlying_gain)
             if pct_change <= Floor_pct:
                 reason = f"VCSell{order_num}"
-                sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  
+                sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)  
                 return sell_dict
 
 
@@ -424,7 +424,7 @@ def tda_CALL_1D_CDVOLVARVC2(polygon_df, simulation_date, quantity, config, targe
         elif day_diff > 1:
             sell_code = 3
             reason = "Held through confidence."
-            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)  
             return sell_dict
         elif day_diff == 1 :
             if hour == 15 and minute == 45:
@@ -454,11 +454,11 @@ def tda_CALL_1D_CDVOLVARVC2(polygon_df, simulation_date, quantity, config, targe
             #     reason = "Failed momentum gate, sell."
 
         if sell_code != 0:
-            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)
             return sell_dict
         
         
-    sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,"never sold")
+    sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,"never sold",order_num)
     return sell_dict
 
 def tda_PUT_1D_CDVOLVARVC2(polygon_df, simulation_date, quantity, config, target_pct, vol, order_num,symbol):
@@ -500,7 +500,7 @@ def tda_PUT_1D_CDVOLVARVC2(polygon_df, simulation_date, quantity, config, target
                     Floor_pct = (.7*underlying_gain)
             if pct_change >= Floor_pct:
                 reason = f"VCSell{order_num}"
-                sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  
+                sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)  
                 return sell_dict
 
 
@@ -519,7 +519,7 @@ def tda_PUT_1D_CDVOLVARVC2(polygon_df, simulation_date, quantity, config, target
         elif day_diff > 1:
             sell_code = 3
             reason = "Held through confidence."
-            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)  
             return sell_dict
         elif day_diff == 1:
             if hour == 15 and minute == 45:
@@ -549,10 +549,10 @@ def tda_PUT_1D_CDVOLVARVC2(polygon_df, simulation_date, quantity, config, target
             #     reason = "Failed momentum gate, sell."
 
         if sell_code != 0:
-            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)
             return sell_dict
         
-    sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,"never sold")
+    sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,"never sold",order_num)
     return sell_dict
 
 def tda_PUT_1D_CDVOLVARVC_AA1(polygon_df, simulation_date, quantity, config, target_pct, vol, order_num,symbol):
@@ -594,7 +594,7 @@ def tda_PUT_1D_CDVOLVARVC_AA1(polygon_df, simulation_date, quantity, config, tar
                     Floor_pct = (.7*underlying_gain)
             if pct_change >= Floor_pct:
                 reason = f"VCSell{order_num}"
-                sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  
+                sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)  
                 return sell_dict
 
 
@@ -613,7 +613,7 @@ def tda_PUT_1D_CDVOLVARVC_AA1(polygon_df, simulation_date, quantity, config, tar
         elif day_diff > 1:
             sell_code = 3
             reason = "Held through confidence."
-            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)  
             return sell_dict
         elif day_diff == 1:
             if hour == 15 and minute == 45:
@@ -635,10 +635,10 @@ def tda_PUT_1D_CDVOLVARVC_AA1(polygon_df, simulation_date, quantity, config, tar
             #     reason = "Failed momentum gate, sell."
 
         if sell_code != 0:
-            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)
             return sell_dict
         
-    sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,"never sold")
+    sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,"never sold",order_num)
     return sell_dict
 
 def tda_CALL_1D_CDVOLVARVC_AA1(polygon_df, simulation_date, quantity, config, target_pct, vol, order_num, symbol):
@@ -680,7 +680,7 @@ def tda_CALL_1D_CDVOLVARVC_AA1(polygon_df, simulation_date, quantity, config, ta
                     Floor_pct = (.7*underlying_gain)
             if pct_change <= Floor_pct:
                 reason = f"VCSell{order_num}"
-                sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  
+                sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)  
                 return sell_dict
 
 
@@ -699,7 +699,7 @@ def tda_CALL_1D_CDVOLVARVC_AA1(polygon_df, simulation_date, quantity, config, ta
         elif day_diff > 1:
             sell_code = 3
             reason = "Held through confidence."
-            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)  
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)  
             return sell_dict
         elif day_diff == 1 :
             if hour == 15 and minute == 45:
@@ -721,11 +721,11 @@ def tda_CALL_1D_CDVOLVARVC_AA1(polygon_df, simulation_date, quantity, config, ta
             #     reason = "Failed momentum gate, sell."
 
         if sell_code != 0:
-            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason)
+            sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)
             return sell_dict
         
         
-    sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,"never sold")
+    sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,"never sold",order_num)
     return sell_dict
 
 def build_vc_config(vc_values,simulation_date,symbol):
@@ -770,7 +770,7 @@ def build_vc_config(vc_values,simulation_date,symbol):
     print(f"VC Config: {vc_config}")
     return vc_config
 
-def build_trade_analytics(row, polygon_df, derivative_open_price, index, quantity, sell_code):
+def build_trade_analytics(row, polygon_df, derivative_open_price, index, quantity, sell_code,order_num):
     trade_dict = {}
     before_df = polygon_df.iloc[:index]
     after_df = polygon_df.iloc[(index+1):]
@@ -778,6 +778,7 @@ def build_trade_analytics(row, polygon_df, derivative_open_price, index, quantit
     trade_dict['max_value_before_idx'] = before_df['h'].idxmax()
     trade_dict['max_value_before_date'] = before_df.loc[trade_dict['max_value_before_idx']]['date'].strftime("%Y-%m-%d %H:%M")
     trade_dict['max_value_before_pct_change'] = ((trade_dict['max_value_before'] - derivative_open_price)/derivative_open_price)
+    trade_dict['order_num'] = order_num
 
     if len(after_df) > 0:
         trade_dict['max_value_after'] = after_df['h'].max()

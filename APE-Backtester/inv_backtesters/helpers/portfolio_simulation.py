@@ -322,12 +322,10 @@ def simulate_portfolio_DS(positions_list, datetime_list, portfolio_cash, risk_un
     return portfolio_df, passed_trades_df, positions_taken, positions_dict
 
 
-def simulate_portfolio_FIXED(positions_list, datetime_list, portfolio_cash, risk_unit,put_adjustment,config,results_dict_func):
+def simulate_portfolio_FIXED(positions_list, datetime_list, period_starting_capital, risk_unit,put_adjustment,config,results_dict_func):
     positions_taken = []
     contracts_bought = []
     contracts_sold = []
-    starting_cash = portfolio_cash
-    current_reserve = 0
     sales_dict = {}
     portfolio_dict, positions_dict, passed_trades_dict = convert_lists_to_dicts_inv(positions_list, datetime_list)
 
@@ -337,18 +335,20 @@ def simulate_portfolio_FIXED(positions_list, datetime_list, portfolio_cash, risk
     ## This will give us dynamic and rective sizing.
     
     i = 0
-    trading_capital = config['portfolio_cash'] * config['portfolio_pct']
+    portfolio_capital = period_starting_capital
+    trading_capital = config['portfolio_capital'] * config['portfolio_pct']
     trade_value = trading_capital/config['risk_unit']
     print(f"Trade Value: {trade_value}")
     for key, value in portfolio_dict.items():
         current_positions = []
         if i == 0:
-            value['portfolio_cash'] = portfolio_cash
+            value['portfolio_capital'] = portfolio_capital
+            value['trading_capital'] = trading_capital
             value['open_positions_start'].extend(current_positions)
 
             if positions_dict.get(key) is not None:
                 for position in positions_dict[key]:
-                    if value['portfolio_cash'] > (.05 * starting_cash):
+                    if value['portfolio_capital'] > (.05 * trading_capital):
                         simulated_position = build_trade(position,risk_unit,put_adjustment,trade_value,config)
                         if len(simulated_position) == 0:
                             continue
@@ -363,7 +363,7 @@ def simulate_portfolio_FIXED(positions_list, datetime_list, portfolio_cash, risk
                                 orders_taken = True
                                 value['contracts_purchased'].append(f"{buy_order['option_symbol']}_{buy_order['order_id']}")
                                 value['purchase_costs'] += 1.02*(buy_order['contract_cost'] * buy_order['quantity'])
-                                value['portfolio_cash'] -= 1.02*(buy_order['contract_cost'] * buy_order['quantity'])
+                                value['trading_capital'] -= 1.02*(buy_order['contract_cost'] * buy_order['quantity'])
                                 contracts_bought.append(f"{buy_order['option_symbol']}_{buy_order['order_id']}")
                                 # quantities[order['option_symbol']] = order['quantity']
                                 ### CHASE
@@ -394,27 +394,32 @@ def simulate_portfolio_FIXED(positions_list, datetime_list, portfolio_cash, risk
         else:
             positions_open = positions_end
             positions_end = []
-            value['portfolio_cash'] = portfolio_dict[key - timedelta(minutes=15)]['portfolio_cash']
+            value['trading_capital'] = portfolio_dict[key - timedelta(minutes=15)]['trading_capital']
+            value['portfolio_capital'] = portfolio_dict[key - timedelta(minutes=15)]['portfolio_capital']
             current_positions = positions_open
             value['open_positions_start'].extend(current_positions)
             check_reup = check_for_reup(key,config)
             if check_reup:
                 print("Reup Time")
-                print(f"Portfolio Cash: {value['portfolio_cash']}")
-                print(f"Starting Cash: {starting_cash}")
-                print(f"Current Reserve: {current_reserve}")
+                print(f"Portfolio Capital: {portfolio_capital}")
+                print(f"Period Start Trading Capital: {trading_capital}")
+                print(f"Current Trading Capital: {value['trading_capital']}")
                 print()
-                if value['portfolio_cash'] < starting_cash:
-                    diff = abs(value['portfolio_cash'] - starting_cash)
-                    value['portfolio_cash'] += diff
-                    current_reserve -= diff
-                elif value['portfolio_cash'] > starting_cash:
-                    diff = abs(value['portfolio_cash'] - starting_cash)
-                    value['portfolio_cash'] -= diff
-                    current_reserve += diff
+                if value['trading_capital'] < trading_capital:
+                    diff = abs(value['trading_capital'] - trading_capital)
+                    portfolio_capital -= diff
+                    trading_capital = portfolio_capital * config['portfolio_pct']
+                    value['trading_capital'] = trading_capital
+                    value['portfolio_capital'] = portfolio_capital
+                elif value['trading_capital'] > trading_capital:
+                    diff = abs(value['trading_capital'] - trading_capital)
+                    portfolio_capital += diff
+                    trading_capital = portfolio_capital * config['portfolio_pct']
+                    value['trading_capital'] = trading_capital
+                    value['portfolio_capital'] = portfolio_capital
                 print("After Adjustments")
-                print(f"Portfolio Cash: {value['portfolio_cash']}")
-                print(f"Current Reserve: {current_reserve}")
+                print(f"Portfolio Capital: {value['portfolio_capital']}")
+                print(f"Period Start Trading Capital: {trading_capital}")
                 print()
 
         
@@ -426,17 +431,14 @@ def simulate_portfolio_FIXED(positions_list, datetime_list, portfolio_cash, risk
                 if (f"{sale['option_symbol']}_{sale['order_id']}") in contracts_bought:
                     value['contracts_sold'].append(f"{sale['option_symbol']}_{sale['order_id']}")
                     value['sale_returns'] += (.98*(sale['contract_cost'] * sale['quantity']))
-                    value['portfolio_cash'] += (.98*(sale['contract_cost'] * sale['quantity']))
+                    value['trading_capital'] += (.98*(sale['contract_cost'] * sale['quantity']))
                     contracts_sold.append(f"{sale['option_symbol']}_{sale['order_id']}")
                     if (sale['position_id'].split("-")[0] + sale['position_id'].split("-")[1]) in current_positions:
                         current_positions.remove((sale['position_id'].split("-")[0] + sale['position_id'].split("-")[1]))    
 
         if positions_dict.get(key) is not None:
                 for position in positions_dict[key]:
-                    if value['portfolio_cash'] > (.05 * starting_cash):
-                        print(f"Position: {position}")
-                        print(f"Portfolio Cash: {value['portfolio_cash']}")
-                        print()
+                    if value['trading_capital'] > (.05 * trading_capital):
                         simulated_position = build_trade(position,risk_unit,put_adjustment,trade_value,config)
                         if len(simulated_position) == 0:
                             continue
@@ -448,7 +450,7 @@ def simulate_portfolio_FIXED(positions_list, datetime_list, portfolio_cash, risk
                                 orders_taken = True
                                 value['contracts_purchased'].append(f"{buy_order['option_symbol']}_{buy_order['order_id']}")
                                 value['purchase_costs'] += 1.02*(buy_order['contract_cost'] * buy_order['quantity'])
-                                value['portfolio_cash'] -= 1.02*(buy_order['contract_cost'] * buy_order['quantity'])
+                                value['trading_capital'] -= 1.02*(buy_order['contract_cost'] * buy_order['quantity'])
                                 contracts_bought.append(f"{buy_order['option_symbol']}_{buy_order['order_id']}")
                                 # quantities[order['option_symbol']] = order['quantity']
                                 ### CHASE
@@ -478,7 +480,6 @@ def simulate_portfolio_FIXED(positions_list, datetime_list, portfolio_cash, risk
 
 
     portfolio_df = pd.DataFrame.from_dict(portfolio_dict, orient='index')
-    portfolio_df['reserve_cash'] = current_reserve
     passed_trades_df = pd.DataFrame.from_dict(passed_trades_dict, orient='index')
     print("Elements in bought but not in sold:")
     diff = list(set(contracts_bought) - set(contracts_sold))
@@ -486,7 +487,7 @@ def simulate_portfolio_FIXED(positions_list, datetime_list, portfolio_cash, risk
     print("Elements in sold but not in bought:")
     diff2 = list(set(contracts_sold) - set(contracts_bought))
     print(diff2)
-    return portfolio_df, passed_trades_df, positions_taken, positions_dict, current_reserve
+    return portfolio_df, passed_trades_df, positions_taken, positions_dict, "current_reserve"
 
 
 def check_for_reup(dt,config):

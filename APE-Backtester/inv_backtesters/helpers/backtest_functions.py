@@ -41,7 +41,8 @@ def create_simulation_data_inv(row,config):
     #     days_back = 3
     end_date = backtrader_helper.create_end_date(start_date, days_back)
     trading_aggregates, option_symbols = backtrader_helper.create_options_aggs_inv(row,start_date,end_date=end_date,spread_length=config['spread_length'],config=config)
-    return start_date, end_date, row['symbol'], row['alert_price'], row['strategy'], option_symbols, trading_aggregates
+    volume_data = backtrader_helper.create_volume_aggs_inv(row,start_date=None,end_date=start_date,options=option_symbols,config=config)
+    return start_date, end_date, row['symbol'], row['alert_price'], row['strategy'], option_symbols, trading_aggregates, volume_data
 
 def create_simulation_data_pt(row,config):
     print(row)
@@ -285,7 +286,7 @@ def simulate_trades_invalert_v2(row,config,portfolio_cash):
     trading_date = row['date']
     symbol = row['symbol']
     trading_date = trading_date.split(" ")[0]
-    start_date, end_date, symbol, mkt_price, strategy, option_symbols, enriched_options_aggregates = create_simulation_data_inv(row,config)
+    start_date, end_date, symbol, mkt_price, strategy, option_symbols, enriched_options_aggregates, volume_data = create_simulation_data_inv(row,config)
     order_dt = start_date.strftime("%m+%d")
     pos_dt = start_date.strftime("%Y-%m-%d-%H")
     position_id = f"{row['symbol']}-{(row['strategy'].replace('_',''))}-{pos_dt}"
@@ -294,9 +295,15 @@ def simulate_trades_invalert_v2(row,config,portfolio_cash):
 
     contract_price_info = {}
     for contract in enriched_options_aggregates:
-        contract_price_info[enriched_options_aggregates[contract].iloc[0]['ticker']] = enriched_options_aggregates[contract].iloc[0]['o']
-
-    
+        try:
+            contract_price_info[contract] = {
+                "open_price":enriched_options_aggregates[contract]['o'][0],
+                "volume_15EMA": volume_data[contract],
+            }
+        except Exception as e:
+            print(f"Error in contract_price_info for {contract} {e}")
+            continue
+        
     contract_df = bet_sizer(contract_price_info, config['risk_unit'],portfolio_cash,config,start_date,symbol)
     if len(contract_df) == 0:
         print(f"Error in simulate_trades_invalert_v2 for {symbol}")
@@ -409,7 +416,7 @@ def build_trade(position, risk_unit,put_adjustment,portfolio_cash,config):
     
     return simulated_position
 
-def bet_sizer(contract_costs,risk_unit,portfolio_cash,config,open_datetime,symbol):
+def bet_sizer(contracts_cost_volume,risk_unit,portfolio_cash,config,open_datetime,symbol):
     # if config['scale'] == "FIX":
         ## we pass in predetermined portfolio amount from simulator
     target_cost = portfolio_cash
@@ -418,7 +425,7 @@ def bet_sizer(contract_costs,risk_unit,portfolio_cash,config,open_datetime,symbo
 
     try:
         # if config['spread_type'] == "standard":
-        quantities = size_spread_quantities(contract_costs, target_cost, config,open_datetime,symbol)
+        quantities = size_spread_quantities(contracts_cost_volume, target_cost, config,open_datetime,symbol)
         # elif config['spread_type'] == "proxy":
         #     quantities = create_single_contract_spread_proxy(contract_costs, target_cost, config,open_datetime)
     except Exception as e:
@@ -487,12 +494,12 @@ def add_extra_contracts(positions, risk_unit,portfolio_cash,config):
             continue
     return None, None
 
-def size_spread_quantities(contracts_details, target_cost, config, open_datetime,symbol):
+def size_spread_quantities(contracts_cost_volume, target_cost, config, open_datetime,symbol):
     # dt = datetime.strptime(open_datetime, "%Y-%m-%d %H:%M")
     day_of_week = open_datetime.weekday()
     spread_start, spread_end = config['spread_search'].split(":")
     spread_length = config['spread_length']
-    tickers = list(contracts_details.keys())
+    tickers = list(contracts_cost_volume.keys())
     capital_distributions = config['capital_distributions']
     # print("CONTRACTS")
     # print(contracts_details)
@@ -516,7 +523,7 @@ def size_spread_quantities(contracts_details, target_cost, config, open_datetime
 
     final_contracts = []
     for contract in adjusted_contracts:
-        final_contracts.append({"option_symbol":contract,"contract_cost":(contracts_details[contract]*100)})
+        final_contracts.append({"option_symbol":contract,"contract_cost":(contracts_cost_volume[contract]['open_price']*100),"contract_volume":contracts_cost_volume[contract]['volume_15EMA']})
     
     spread_candidates = configure_contracts_for_trade_pct_based_v2(final_contracts, target_cost, capital_distributions)
 
@@ -566,7 +573,7 @@ def configure_contracts_for_trade_pct_based_v2(contracts_details, capital, capit
     free_capital = 0
     for index, contract in enumerate(contracts_details):
         contract_capital = (capital_distributions[index]*total_capital) + free_capital
-        quantities = determine_shares(contract['contract_cost'], contract_capital)
+        quantities = determine_shares(contract, contract_capital)
         if quantities > 0:
             sized_contracts.append({"option_symbol": contract['option_symbol'], "quantity": quantities,"contract_cost": contract['contract_cost']})
             free_capital = contract_capital - (quantities * contract['contract_cost'])
@@ -588,8 +595,10 @@ def configure_contracts_for_trade_pct_based_proxy_spread(contract, capital, capi
             free_capital += contract_capital
     return sized_contracts
 
-def determine_shares(contract_cost, target_cost):
-    shares = math.floor(target_cost / contract_cost)
+def determine_shares(contract_details, target_cost):
+    shares = math.floor(target_cost / contract_details['contract_cost'])
+    if shares > (contract_details['contract_volume']*.1):
+        shares = math.floor((contract_details['contract_volume']*.1))
     return shares
 
 def create_single_contract_spread_proxy(contracts_details, target_cost, config, open_datetime):

@@ -179,39 +179,29 @@ if __name__ == "__main__":
             #     "time_span": 4,
             #     "side": "P"
             # },
-            # "CDBFC_1D": {
-            #     "file_path": 'TSSIM2.4_TOP_HYPOPT1_TP0.6',
-            #     "time_span": 2,
-            #     "side": "C"
-            # },
-            "CDBFP_1D": {
-                "file_path": 'TSSIM2.4_TOP_HYPOPT2_TP0.4',
-                "time_span": 2,
-                "side": "P"
-            },
-            "CDLOSEC_1D": {
-                "file_path": 'TSSIM3.1_PE_HYPOPT1_TP0.55',
+            "CDBFC_1D": {
+                "file_path": 'TSSIM2.4_TOP_HYPOPT1_TP0.55',
                 "time_span": 2,
                 "side": "C"
             },
-            "CDLOSEP_1D": {
-                "file_path": 'TSSIM3.1_PE_HYPOPT1_TP0.55',
+            "CDBFP_1D": {
+                "file_path": 'TSSIM2.4_TOP_HYPOPT2_TP0.45',
                 "time_span": 2,
                 "side": "P"
             },
-            # "CDBFC_1D": {
-            #     "file_path": 'TSSIM2.4_PE_HYPOPT10.55',
+            # "CDLOSEC_1D": {
+            #     "file_path": 'TSSIM3.1_PE_HYPOPT1_TP0.55',
             #     "time_span": 2,
             #     "side": "C"
             # },
-            # "CDBFP_1D": {
-            #     "file_path": 'TSSIM2.4_PEBF3NM_HYPOPT10.45',
+            # "CDLOSEP_1D": {
+            #     "file_path": 'TSSIM3.1_PE_HYPOPT1_TP0.55',
             #     "time_span": 2,
             #     "side": "P"
             # },
         }
 
-        data_type = 'CDVOLBF3-6PE3'
+        data_type = 'CDVOLBF3-55PE3'
         file_names = YEAR_CONFIG[year]['all_files']
         
         # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')

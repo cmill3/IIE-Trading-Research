@@ -54,8 +54,13 @@ def execute_polygon_call(url):
 
 def polygon_optiondata(options_ticker, from_date, to_date,frequency):
     #This is for option data
-    from_stamp = int(from_date.timestamp() * 1000)
-    to_stamp = int(to_date.timestamp() * 1000)
+    if from_date == None:
+        from_date = to_date - timedelta(days=1)
+        from_stamp = int(from_date.timestamp() * 1000)
+        to_stamp = int(to_date.timestamp() * 1000)
+    else:
+        from_stamp = int(from_date.timestamp() * 1000)
+        to_stamp = int(to_date.timestamp() * 1000)
 
     url = f"https://api.polygon.io/v2/aggs/ticker/{options_ticker}/range/{frequency}/minute/{from_stamp}/{to_stamp}?adjusted=false&sort=asc&limit=50000&apiKey={KEY}"
     response = execute_polygon_call(url)

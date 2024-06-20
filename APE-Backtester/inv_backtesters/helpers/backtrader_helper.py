@@ -199,6 +199,21 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
             continue
     return enriched_options_aggregates, options
 
+def create_volume_aggs_inv(row,start_date,end_date,options,config):
+    volume_aggregates = {}
+    for contract in options:
+        try:
+            volume_agg_data = ph.polygon_optiondata(contract['contract_symbol'], start_date, end_date,config['frequency'])
+            volume_agg_data['volume_15ema'] = volume_agg_data['v'].ewm(span=15, adjust=False).mean()
+            volume_aggregates[contract['contract_symbol']] = volume_agg_data['volume_15ema'].values[-1]
+        except Exception as e:
+            print(f"Error: {e} in volume agg for {row['symbol']} of {row['strategy']}")
+            print(contract)
+            continue
+    print(volume_aggregates)
+    return volume_aggregates
+
+
 def create_options_aggs_pt(row,start_date,end_date,config):
     options = []
     enriched_options_aggregates = []
@@ -255,7 +270,8 @@ def convert_lists_to_dicts_inv(trades_df, datetime_list):
             "purchase_costs": 0,
             "contracts_sold": [],
             "sale_returns": 0,
-            "portfolio_cash": 0,
+            "portfolio_capital": 0,
+            "trading_capital": 0,
             "active_holdings": [],
             "period_net_returns": 0,
             "open_positions_start": [],
