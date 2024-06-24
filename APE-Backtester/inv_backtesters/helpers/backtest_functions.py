@@ -525,7 +525,7 @@ def size_spread_quantities(contracts_cost_volume, target_cost, config, open_date
     for contract in adjusted_contracts:
         final_contracts.append({"option_symbol":contract,"contract_cost":(contracts_cost_volume[contract]['open_price']*100),"contract_volume":contracts_cost_volume[contract]['volume_15EMA']})
     
-    spread_candidates = configure_contracts_for_trade_pct_based_v2(final_contracts, target_cost, capital_distributions)
+    spread_candidates = configure_contracts_for_trade_pct_based_v3(final_contracts, target_cost, capital_distributions)
 
     if len(spread_candidates) == 0:
         return []
@@ -567,6 +567,20 @@ def configure_contracts_for_trade_pct_based(contracts_details, target_cost, spre
         spread_candidates.append({"option_symbol": contract['option_symbol'], "quantity": contract_quantity,"contract_cost": contract['contract_cost']})
     return spread_candidates
     
+def configure_contracts_for_trade_pct_based_v3(contracts_details, capital, capital_distributions):
+    sized_contracts = []
+    total_capital = capital
+    free_capital = 0
+    for index, contract in enumerate(reversed(contracts_details)):
+        contract_capital = (capital_distributions[-(index+1)]*total_capital) + free_capital
+        quantities = determine_shares(contract, contract_capital)
+        if quantities > 0:
+            sized_contracts.append({"option_symbol": contract['option_symbol'], "quantity": quantities,"contract_cost": contract['contract_cost']})
+            free_capital = contract_capital - (quantities * contract['contract_cost'])
+        else:
+            free_capital += contract_capital
+    return sized_contracts
+
 def configure_contracts_for_trade_pct_based_v2(contracts_details, capital, capital_distributions):
     sized_contracts = []
     total_capital = capital
@@ -581,19 +595,19 @@ def configure_contracts_for_trade_pct_based_v2(contracts_details, capital, capit
             free_capital += contract_capital
     return sized_contracts
 
-def configure_contracts_for_trade_pct_based_proxy_spread(contract, capital, capital_distributions):
-    sized_contracts = []
-    total_capital = capital
-    free_capital = 0
-    for distribution in capital_distributions:
-        contract_capital = (distribution*total_capital) + free_capital
-        quantities = determine_shares(contract['contract_cost'], contract_capital)
-        if quantities > 0:
-            sized_contracts.append({"option_symbol": contract['option_symbol'], "quantity": quantities,"contract_cost": contract['contract_cost']})
-            free_capital = contract_capital - (quantities * contract['contract_cost'])
-        else:
-            free_capital += contract_capital
-    return sized_contracts
+# def configure_contracts_for_trade_pct_based_proxy_spread(contract, capital, capital_distributions):
+#     sized_contracts = []
+#     total_capital = capital
+#     free_capital = 0
+#     for distribution in capital_distributions:
+#         contract_capital = (distribution*total_capital) + free_capital
+#         quantities = determine_shares(contract['contract_cost'], contract_capital)
+#         if quantities > 0:
+#             sized_contracts.append({"option_symbol": contract['option_symbol'], "quantity": quantities,"contract_cost": contract['contract_cost']})
+#             free_capital = contract_capital - (quantities * contract['contract_cost'])
+#         else:
+#             free_capital += contract_capital
+#     return sized_contracts
 
 def determine_shares(contract_details, target_cost):
     shares = math.floor(target_cost / contract_details['contract_cost'])

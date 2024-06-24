@@ -233,7 +233,6 @@ def create_options_aggs_pt(row,start_date,end_date,config):
             enriched_df.dropna(inplace=True)
             enriched_df['quantity'] = contract['quantity']
             enriched_options_aggregates.append(enriched_df)
-            enriched_options_aggregates['']
             options.append(contract)
         except Exception as e:
             print(f"Error: {e} in options agg for {row['symbol']} of {row['strategy']}")
@@ -278,7 +277,7 @@ def convert_lists_to_dicts_inv(trades_df, datetime_list):
             "open_positions_end": [],
         }
     trades_df['open_datetime'] = trades_df.apply(lambda x: f"{x['dt']} {x['hour']}:00", axis=1)
-    for index,position in trades_df.iterrows():
+    for _,position in trades_df.iterrows():
         # print(position)
         pos_dt = datetime.strptime(position['open_datetime'], "%Y-%m-%d %H:%M")
         # pos_dt = position['open_datetime']
