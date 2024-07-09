@@ -25,7 +25,7 @@ def build_backtest_data(file_name,strategies,config):
     dfs = []
     for strategy in strategies:
         name, prediction_horizon = strategy.split(":")
-        data = pd.read_csv(f'/Users/charlesmiller/Documents/backtesting_data/{config["dataset"]}/{name}/{file_name}.csv')
+        data = pd.read_csv(f'/Users/diz/Document/Projects/backtesting_data/{config["dataset"]}/{name}/{file_name}.csv')
         data['prediction_horizon'] = prediction_horizon
         dfs.append(data)
     
@@ -111,7 +111,7 @@ if __name__ == "__main__":
     ## TREND STRATEGIES ONLY
     strategies = [
         # "CDBFC:3","CDBFP:3",
-        "CDBFC_1D:1","CDBFP_1D:1"
+        "CDGAINC_1D:1","CDGAINP_1D:1","CDLOSEC_1D:1","CDLOSEP_1D:1"
         ]    
     years = [
         'twenty4',
@@ -131,11 +131,11 @@ if __name__ == "__main__":
             "vc_level":"90+100+110+300",
             "capital_distributions": ".30,.30,.40",
             "volatility_threshold": 1,
-            "user": "cm3",
+            "user": "diz",
             "threeD_vol": "return_vol_10D",
-            "dataset": "CDVOLBF3-55PE3",
+            "dataset": "CDVOLBF3-6040PE3",
             "reserve_cash": 5000,
-            "days": "23",
+            "days": "01234",
             "scale": "FIX",
             "divisor": .75,
             "reup": "daily",
@@ -155,11 +155,35 @@ if __name__ == "__main__":
             "vc_level":"90+100+110+300",
             "capital_distributions": ".30,.30,.40",
             "volatility_threshold": .5,
-            "user": "cm3",
+            "user": "diz",
             "threeD_vol": "return_vol_10D",
-            "dataset": "CDVOLBF3-55PE3",
+            "dataset": "CDVOLBF3-6040PE3",
             "reserve_cash": 5000,
-            "days": "23",
+            "days": "012",
+            "scale": "FIX",
+            "divisor": .75,
+            "reup": "daily",
+            "IDX": False,
+            "frequency": "15",
+            "holiday_weeks": False,
+        },
+        {
+            "put_pct": 1, 
+            "spread_search": "1:4",
+            "spread_length": 3,
+            "aa": 0,
+            "risk_unit": 55,
+            "portfolio_pct": .33,
+            "portfolio_capital": 100000,
+            "model": "CDVOLVARVC2",
+            "vc_level":"90+100+110+300",
+            "capital_distributions": ".30,.30,.40",
+            "volatility_threshold": .5,
+            "user": "diz",
+            "threeD_vol": "return_vol_10D",
+            "dataset": "CDVOLBF3-6040PE3",
+            "reserve_cash": 5000,
+            "days": "0123",
             "scale": "FIX",
             "divisor": .75,
             "reup": "daily",
@@ -179,9 +203,9 @@ if __name__ == "__main__":
             "vc_level":"90+100+110+300",
             "capital_distributions": ".30,.30,.40",
             "volatility_threshold": 1,
-            "user": "cm3",
+            "user": "diz",
             "threeD_vol": "return_vol_10D",
-            "dataset": "CDVOLBF3-55PE3",
+            "dataset": "CDVOLBF3-6040PE3",
             "reserve_cash": 5000,
             "days": "all",
             "scale": "FIX",

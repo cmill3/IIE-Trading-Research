@@ -124,6 +124,9 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
     # # else:
     # #     expiry = expiries[0]
 
+    ##LOOK HERE AND ABOVE TO PUSH THE TRADES TO THE NEXT WEEK @ line 112 if we want to run Thursday with the next week contracts
+    ##START DAY IS THE DAY THE ALERT CAME THROUGH, ADD SOMETHING FOR IF DAY = 3 (THURSDAY) THEN PUSH THE EXPIRY TO 1 WEEK OUT
+
     if row['symbol'] in ['SPY','IWM','QQQ']:
         expiry = expiries[1]
     else:
