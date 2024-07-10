@@ -25,7 +25,7 @@ def build_backtest_data(file_name,strategies,config):
     dfs = []
     for strategy in strategies:
         name, prediction_horizon = strategy.split(":")
-        data = pd.read_csv(f'/Users/diz/Document/Projects/backtesting_data/{config["dataset"]}/{name}/{file_name}.csv')
+        data = pd.read_csv(f'/Users/diz/Documents/Projects/backtesting_data/{config["dataset"]}/{name}/{file_name}.csv')
         data['prediction_horizon'] = prediction_horizon
         dfs.append(data)
     
