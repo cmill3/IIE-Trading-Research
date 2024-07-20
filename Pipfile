@@ -9,6 +9,7 @@ requests = "*"
 pandas = "*"
 holidays = "*"
 pandas-market-calendars = "*"
+numpy = "*"
 
 [dev-packages]
 ipykernel = "*"

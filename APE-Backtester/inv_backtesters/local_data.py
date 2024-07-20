@@ -202,7 +202,7 @@ if __name__ == "__main__":
             },
         }
 
-        data_type = 'CDVOLBF3-55PE3'
+        data_type = 'CDVOLBF3-6040PE3'
         file_names = YEAR_CONFIG[year]['all_files']
         
         # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')
