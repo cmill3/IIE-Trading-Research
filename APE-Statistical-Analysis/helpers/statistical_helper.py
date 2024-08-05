@@ -36,8 +36,8 @@ def stock_and_options_agg(ticker, options_contract, start_date_str, end_date_str
     base_df = pd.merge(df, df2, on='dt')
     base_df = base_df[['symbol', 'option_contract', 'dt', 'underlying_price', 'underlying_volume', 'option_price', 'option_volume']]
     base_df['contracts'] = qty
-    base_df['contract_value'] = base_df['option_price'].apply(lambda x: round(x * qty))
-    base_df['underlying_value'] = base_df['underlying_price'].apply(lambda x: round(x * qty))
+    base_df['contract_value'] = base_df['option_price'].apply(lambda x: round(float(x) * float(qty)))
+    base_df['underlying_value'] = base_df['underlying_price'].apply(lambda x: round(float(x) * float(qty)))
     return base_df
 
 def window_prep(ticker, start_date_str, end_date_str, timespan, multiplier):

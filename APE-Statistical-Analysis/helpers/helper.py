@@ -29,6 +29,7 @@ def pull_closed_orders_s3(path, bucket):
     keys = s3.list_objects(Bucket=bucket,Prefix=f"{path}")["Contents"]
     for object in keys:
         key = object['Key']
+        print(key)
         dataset = s3.get_object(Bucket=bucket,Key=f"{key}")
         df = pd.read_csv(dataset.get("Body"))
         df.drop(columns=['Unnamed: 0'],inplace=True)

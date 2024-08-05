@@ -111,7 +111,7 @@ if __name__ == "__main__":
     ## TREND STRATEGIES ONLY
     strategies = [
         # "CDBFC:3","CDBFP:3",
-        "CDGAINC_1D:1","CDGAINP_1D:1","CDLOSEC_1D:1","CDLOSEP_1D:1"
+        "CDGAINC_1D:1","CDGAINP_1D:1","CDLOSEP_1D:1", #"CDLOSEC_1D:1"
     ]    
     years = [
         'twenty2',
@@ -135,7 +135,7 @@ if __name__ == "__main__":
             "threeD_vol": "return_vol_10D",
             "dataset": "CDVOLBF3-6040PE3",
             "reserve_cash": 5000,
-            "days": "01234",
+            "days": "01",
             "scale": "FIX",
             "divisor": .75,
             "reup": "daily",

@@ -37,6 +37,7 @@ def pull_orders_clean_df(path, bucket):
     orders_df['average_fill_price_open_float'] = orders_df['average_fill_price_open'].astype(float)
     orders_df['pnlcoefficient'] = orders_df['average_fill_price_close_float'] - orders_df['average_fill_price_open_float']
     orders_df['winloss'] = np.where(orders_df['pnlcoefficient'] < 0, 'L', 'W')
+    return orders_df
 
 
 def pull_closed_orders(month, year):
@@ -46,23 +47,54 @@ def pull_closed_orders(month, year):
     orders_df = orders[orders['env'] == 'PROD_VAL']
     return orders_df
 
+def create_stat_correlation(df):
+    stat_list = []
+    failed_list = []
+
+    for i, row in df.iterrows():
+        try:
+            roc_rsi_dict = statistical_analysis_coordinator(row)
+            roc_rsi_dict['position_id'] = row['position_id']
+            stat_list.append(roc_rsi_dict)
+            print(roc_rsi_dict)
+        except Exception as e:
+            print(e)
+            failed_list.append(row['position_id'])
+            pass
+
+    return stat_list, failed_list
 
 
 if __name__ == '__main__':
     path = 'closed_orders/PROD_VAL/CDBFC_1D'
     bucket = 'inv-alerts-trading-data'
 
-    df = pull_closed_orders_s3(path, bucket)
-
-    df = pd.read_csv('/Users/diz/Documents/Projects/APE-Research/APE-Statistical-Analysis/sample_csv/sample_roc_cdbfc1d.csv')
-    stat_list = []
-    for i, row in df.iterrows():
-        roc_rsi_dict = statistical_analysis_coordinator(row)
-        stat_list.append(roc_rsi_dict)
-        print(roc_rsi_dict)
+    df = pull_orders_clean_df(path, bucket)
+    stat_list, failed_list = create_stat_correlation(df)
 
     final_df = pd.DataFrame(stat_list)
+    print(final_df)
     final_df.to_csv('/Users/diz/Documents/Projects/APE-Research/APE-Statistical-Analysis/sample_csv/roc_rsi_sample.csv')
+
+    print(len(failed_list))
+    print(len(stat_list))
+
+    grouped_mean_rsi = final_df.groupby('winloss')['rsi_contract_cost_corr'].mean()
+    grouped_mean_roc = final_df.groupby('winloss')['roc_contract_cost_corr'].mean()
+    mean_rsi = final_df['rsi_contract_cost_corr'].mean()
+    mean_roc = final_df['roc_contract_cost_corr'].mean()
+    
+
+    print('Contract RSI Means:')
+    print(grouped_mean_rsi)
+    print('Contract ROC Means:')
+    print(grouped_mean_roc)
+    print('Contract RSI Total Means:')
+    print(mean_rsi)
+    print('Contract ROC Total Means:')
+    print(mean_roc)
+
+
 
 
 
