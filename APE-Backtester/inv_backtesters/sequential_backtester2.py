@@ -110,8 +110,8 @@ if __name__ == "__main__":
 
     ## TREND STRATEGIES ONLY
     strategies = [
-        # "CDBFC:3","CDBFP:3",
-        "CDGAINC_1D:1","CDGAINP_1D:1","CDLOSEP_1D:1", #"CDLOSEC_1D:1"
+        # "CDBFC:3","CDBFP:3"
+        "CDGAINC_1D:1","CDGAINP_1D:1","CDLOSEP_1D:1", "CDLOSEC_1D:1"
         ]    
     years = [
         'twenty3',
