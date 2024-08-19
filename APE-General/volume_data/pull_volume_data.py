@@ -9,6 +9,14 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 import json
 import pytz
+import concurrent.futures
+import pandas_market_calendars as mcal
+
+
+## filter out holidays using NYSE calendar
+nyse = mcal.get_calendar('NYSE')
+holidays = nyse.regular_holidays
+market_holidays = holidays.holidays()
 
 KEY = "A_vXSwpuQ4hyNRj_8Rlw1WwVDWGgHbjp"
 s3 = boto3.client('s3')
@@ -93,9 +101,9 @@ def convert_timestamp_est(timestamp):
     return est_datetime
 
 def polygon_volume_pull(from_date, to_date, ticker):
-    from_stamp = int(from_date.timestamp() * 1000)
-    to_stamp = int(to_date.timestamp() * 1000)
-    url = f"https://api.polygon.io/v2/aggs/ticker/{ticker}/range/15/minute/{from_stamp}/{to_stamp}?adjusted=false&sort=asc&limit=50000&apiKey={KEY}"
+    from_str = from_date.strftime('%Y-%m-%d')
+    to_str = to_date.strftime('%Y-%m-%d')
+    url = f"https://api.polygon.io/v2/aggs/ticker/{ticker}/range/15/minute/{from_str}/{to_str}?adjusted=false&sort=asc&limit=50000&apiKey={KEY}"
     response = execute_polygon_call(url)
     # print(response)
     response_data = json.loads(response.text)
@@ -107,13 +115,20 @@ def polygon_volume_pull(from_date, to_date, ticker):
     res_df['hour'] = res_df['date'].apply(lambda x: x.hour)
     res_df['ticker'] = ticker
 
-    return res_df
+    return res_df, from_str
 
-def create_15min_df(row):
+def create_15min_df(df, index):
+    row = df.iloc[-index]
     ##Perform 9-5
     year = int(row['date'].split('-')[0])
     month = int(row['date'].split('-')[1])
     day = int(row['date'].split('-')[2])
+    row_date = datetime(year, month, day)
+    to_date_str = row_date.strftime('%Y-%m-%d')
+    if to_date_str in market_holidays:
+        print(f"Market holiday {to_date_str}")
+        return
+    print("Starting volume run for the date " + str(year) + '/' + str(month) + '/' + str(day))
     start_date = datetime(year, month, day, 9, 0, 0)
     end_date = start_date + timedelta(hours=8)
     increment = 15
@@ -126,13 +141,15 @@ def create_15min_df(row):
     # df = pd.DataFrame(columns = ticker_list)
     # df.insert(0, 'datetime', times)
     df.set_index('datetime', inplace=True)
-
-    full_df = pull_volume_data(df, ticker_list, times, start_date, end_date)
+    full_df, from_str = pull_volume_data(df, ticker_list, times, start_date, end_date)
 
         # for i in row['tickers'].split(','):
     # df.columns = ticker_list
 
-    return full_df, year, month, day
+    from_key = from_str.replace('-', '/')
+    s3.put_object(Body=full_df.to_csv(), Bucket="icarus-research-data", Key=f'historical_volume_data/{from_key}/volume_report.csv')
+    print(f"Successful volume run for the date {from_str}")
+    return "done"
 
 
 def pull_volume_data(df, ticker_list, times, start_date, end_date):
@@ -140,7 +157,7 @@ def pull_volume_data(df, ticker_list, times, start_date, end_date):
     for i in ticker_list:
         try:
             ticker = str(i)
-            res_df = polygon_volume_pull(start_date, end_date, ticker)
+            res_df, from_str = polygon_volume_pull(start_date, end_date, ticker)
             # print(res_df)
             res_df.drop(labels = ['vw','o','c','h','l','t','n','time','hour','ticker'], axis=1, inplace=True)
             res_df.rename(columns = {'date': 'datetime', 'v':ticker}, inplace=True)
@@ -152,13 +169,13 @@ def pull_volume_data(df, ticker_list, times, start_date, end_date):
             df = df.merge(res_df, left_index = True, right_index = True)
             # print(df)
         except Exception as e:
-            print(e)
+            # print(f"error {e} in volume pull for ticker " + i)
             failed_list.append(i)
             # df.drop(ticker, axis = 1, inplace = True)
             continue
-    print("Failed volume pull here: " + failed_list)
+    print(f"Failed volume pull here: {failed_list} on date {from_str}")
 
-    return df
+    return df, from_str
 
 
 
@@ -170,20 +187,22 @@ def pull_volume_data(df, ticker_list, times, start_date, end_date):
 
 
 if __name__ == '__main__':
-    path = '/Users/diz/Documents/Projects/APE-Research/APE-General/volume_data/historical_sp500_tickers.csv'
-    df = clean_csv(path)
+    path = '/Users/charlesmiller/Documents/Code/IIE/research_resources/APE-Research/APE-General/volume_data/historical_sp500_tickers_daily_filled.csv'
+    # df = clean_csv(path)
+    df = pd.read_csv(path)
     failed_list = []
-    for i, row in df.iterrows():
-        try:
-            final_df, year, month, day = create_15min_df(row)
-            s3.put_object(Body=final_df.to_csv(), Bucket="icarus-research-data", Key=f'historical_volume_data/{year}/{month}/{day}/volume_report.csv')
-            print("Successful volume run for the date " + str(year) + '/' + str(month) + '/' + str(day))
-        except Exception as e:
-            print(e)
-            print("Error in volume run for date " + str(year) + '/' + str(month) + '/' + str(day))
-            failed_ticker = str(year) + '/' + str(month) + '/' + str(day)
-            failed_list.append(failed_ticker)
-    print("Failed script iteration pull here: " + failed_list)
+    run_info = []
+    index_list = range(len(df))
+    print(len(df))
+    with concurrent.futures.ProcessPoolExecutor(max_workers=36) as executor:
+        # Submit the processing tasks to the ThreadPoolExecutor
+        processed_weeks_futures = [executor.submit(create_15min_df, df, index) for index in index_list]
+        # except Exception as e:
+        #     print(e)
+        #     print("Error in volume run for date " + str(year) + '/' + str(month) + '/' + str(day))
+        #     failed_ticker = str(year) + '/' + str(month) + '/' + str(day)
+        #     failed_list.append(failed_ticker)
+    # print("Failed script iteration pull here: " + failed_list)
     # df.to_csv('/Users/diz/Documents/Projects/APE-Research/APE-General/option_data/historical_sp500_tickers_daily_filled.csv')
 
 
