@@ -28,7 +28,7 @@ def volume_coordinator(dates):
             bucket = "icarus-research-data"
             df = pull_historical_s3_csv(bucket,path)
             filtered_df = volume_isolation(df)
-            print(filtered_df)
+            # print(filtered_df)
             put_historical_s3(i, filtered_df)
         except Exception as e:
             print(e)
@@ -58,7 +58,7 @@ def volume_isolation(df):
     sorted_df = column_averages.sort_values(by = 'avg_volume', ascending = False)
     # print(sorted_df)
     top50_df = sorted_df.iloc[:50].reset_index()
-    print(top50_df)
+    # print(top50_df)
     top50_tickers = top50_df['symbol'].to_list()
     # print(top50_tickers)
     filtered_df = df[top50_tickers]
@@ -92,6 +92,6 @@ if __name__ == "__main__":
 
     # run_process("2024-04-15")
 
-    with concurrent.futures.ProcessPoolExecutor(max_workers=10) as executor:
-        # Submit the processing tasks to the ThreadPoolExecutor
-        processed_weeks_futures = [executor.submit(volume_coordinator, date_str) for date_str in date_list]
+    # with concurrent.futures.ProcessPoolExecutor(max_workers=10) as executor:
+    #     # Submit the processing tasks to the ThreadPoolExecutor
+    #     processed_weeks_futures = [executor.submit(volume_coordinator, date_str) for date_str in date_list]
