@@ -178,14 +178,6 @@ def pull_volume_data(df, ticker_list, times, start_date, end_date):
     return df, from_str
 
 
-
-
-
-
-
-
-
-
 if __name__ == '__main__':
     path = '/Users/charlesmiller/Documents/Code/IIE/research_resources/APE-Research/APE-General/volume_data/historical_sp500_tickers_daily_filled.csv'
     # df = clean_csv(path)
