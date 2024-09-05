@@ -10,6 +10,7 @@ pandas = "*"
 holidays = "*"
 pandas-market-calendars = "*"
 numpy = "*"
+certifi = "*"
 
 [dev-packages]
 ipykernel = "*"
