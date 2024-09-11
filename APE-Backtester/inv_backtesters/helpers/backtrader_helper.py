@@ -12,7 +12,7 @@ import warnings
 # import helpers.helper as helper
 import helpers.polygon_helper as ph
 import pytz
-from helpers.constants import THREED_STRATEGIES, ONED_STRATEGIES
+from helpers.constants import ONED_STRATEGIES
 
 
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -88,6 +88,8 @@ def s3_data_inv(bucket_name, object_key, prefixes):
     return df
 
 def create_results_dict(buy_dict, sell_dict,order_id):
+    sell_dict['close_price'] = .98*sell_dict['close_price']
+    buy_dict['open_price'] = 1.02*buy_dict['open_price']
     price_change = sell_dict['close_price'] - buy_dict['open_price']
     pct_gain = (price_change / buy_dict['open_price']) *100
     total_gain = (price_change*100) * buy_dict['quantity']
@@ -102,7 +104,7 @@ def create_results_dict(buy_dict, sell_dict,order_id):
 
 def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
     options = []
-    enriched_options_aggregates = []
+    enriched_options_aggregates = {}
     expiries = ast.literal_eval(row['expiries'])
 
     # ASSIGNMENT ADJUSTMENT
@@ -122,29 +124,45 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
     # # else:
     # #     expiry = expiries[0]
 
-    expiry = expiries[0]
+    ##LOOK HERE AND ABOVE TO PUSH THE TRADES TO THE NEXT WEEK @ line 112 if we want to run Thursday with the next week contracts
+    ##START DAY IS THE DAY THE ALERT CAME THROUGH, ADD SOMETHING FOR IF DAY = 3 (THURSDAY) THEN PUSH THE EXPIRY TO 1 WEEK OUT
+
+    if row['symbol'] in ['SPY','IWM','QQQ']:
+        expiry = expiries[1]
+    else:
+        if config['aa'] == 0:
+            expiry = expiries[0]
+        elif config['aa'] == 1:
+            expiry = expiries[1]
     
     strike = row['symbol'] + expiry
     try:
-        underlying_agg_data = ph.polygon_stockdata_inv(row['symbol'],start_date,end_date)
+        underlying_agg_data = ph.polygon_stockdata_inv(row['symbol'],start_date,end_date,config['frequency'])
     except Exception as e:
         print(f"Error: {e} in underlying agg for {row['symbol']} of {row['strategy']}")
         try:
-            underlying_agg_data = ph.polygon_stockdata_inv(row['symbol'],start_date,end_date)
+            underlying_agg_data = ph.polygon_stockdata_inv(row['symbol'],start_date,end_date,config['frequency'])
         except Exception as e:
             print(f"Error: {e} in underlying agg for 2ND {row['symbol']} of {row['strategy']}")
             try: 
-                underlying_agg_data = ph.polygon_stockdata_inv(row['symbol'],start_date,end_date)
+                underlying_agg_data = ph.polygon_stockdata_inv(row['symbol'],start_date,end_date,config['frequency'])
             except Exception as e:
                 print(f"Error: {e} in underlying agg for FINAL {row['symbol']} of {row['strategy']}")
                 return [], []
             
-    underlying_agg_data.rename(columns={'o':'underlying_price'}, inplace=True)
-    open_price = underlying_agg_data['underlying_price'].values[0]
     try:
+        underlying_agg_data.rename(columns={'o':'underlying_price'}, inplace=True)
+        open_price = underlying_agg_data['underlying_price'].values[0]
         contracts = ast.literal_eval(row['contracts'])
     except Exception as e:
         print(f"Error: {e} in evaluating contracts for {row['symbol']} of {row['strategy']}")
+        print(row['contracts'])
+        print(row['symbol'])
+        print(start_date)
+        print(end_date)
+        print(underlying_agg_data)
+        print("ANALYSIS NO UNDERLYING")
+        print()
         return [], []
     filtered_contracts = [k for k in contracts if strike in k]
     if len(filtered_contracts) == 0:
@@ -171,18 +189,59 @@ def create_options_aggs_inv(row,start_date,end_date,spread_length,config):
     # options_df = options_df.iloc[int(spread_start):int(spread_end)]
     for index,contract in options_df.iterrows():
         try:
-            options_agg_data = ph.polygon_optiondata(contract['contract_symbol'], start_date, end_date)
+            options_agg_data = ph.polygon_optiondata(contract['contract_symbol'], start_date, end_date,config['frequency'])
             enriched_df = pd.merge(options_agg_data, underlying_agg_data[['date', 'underlying_price']], on='date', how='left')
             enriched_df.dropna(inplace=True)
-            enriched_options_aggregates.append(enriched_df)
+            enriched_options_aggregates[contract['contract_symbol']] = enriched_df
             options.append(contract)
-            if len(options) > (spread_length+1):
+            if len(options) > (spread_length+4):
                 break
         except Exception as e:
             print(f"Error: {e} in options agg for {row['symbol']} of {row['strategy']}")
             print(contract)
             continue
     return enriched_options_aggregates, options
+
+def create_volume_aggs_inv(row,start_date,end_date,options,config):
+    volume_aggregates = {}
+    for contract in options:
+        try:
+            volume_agg_data = ph.polygon_optiondata(contract['contract_symbol'], start_date, end_date,config['frequency'])
+            volume_agg_data['volume_15ema'] = volume_agg_data['v'].ewm(span=15, adjust=False).mean()
+            volume_aggregates[contract['contract_symbol']] = volume_agg_data['volume_15ema'].values[-1]
+        except Exception as e:
+            print(f"Error: {e} in volume agg for {row['symbol']} of {row['strategy']}")
+            print(contract)
+            continue
+    print(volume_aggregates)
+    return volume_aggregates
+
+
+def create_options_aggs_pt(row,start_date,end_date,config):
+    options = []
+    enriched_options_aggregates = []
+
+    try:
+        underlying_agg_data = ph.polygon_stockdata_inv(row['symbol'],start_date,end_date)
+    except Exception as e:
+        print(f"Error: {e} in underlying agg for {row['symbol']} of {row['strategy']}")
+        underlying_agg_data = ph.polygon_stockdata_inv(row['symbol'],start_date,end_date)
+            
+    underlying_agg_data.rename(columns={'o':'underlying_price'}, inplace=True)
+    open_price = underlying_agg_data['underlying_price'].values[0]
+    for contract in row['trade_details1wk']:
+        try:
+            options_agg_data = ph.polygon_optiondata(contract['contract_ticker'], start_date, end_date)
+            enriched_df = pd.merge(options_agg_data, underlying_agg_data[['date', 'underlying_price']], on='date', how='left')
+            enriched_df.dropna(inplace=True)
+            enriched_df['quantity'] = contract['quantity']
+            enriched_options_aggregates.append(enriched_df)
+            options.append(contract)
+        except Exception as e:
+            print(f"Error: {e} in options agg for {row['symbol']} of {row['strategy']}")
+            print(contract)
+            continue
+    return enriched_options_aggregates, options, open_price
 
 def generate_datetime_range(start_date, end_date):
     delta = timedelta(minutes=15)
@@ -195,12 +254,11 @@ def generate_datetime_range(start_date, end_date):
 
     return datetime_range
 
-def convert_lists_to_dicts_inv(positions_list, datetime_list):
+def convert_lists_to_dicts_inv(trades_df, datetime_list):
     portfolio_dict = {}
     positions_dict = {}
     sales_dict = {}
     passed_trades_dict = {}
-
     for date in datetime_list:
         year = date.year
         month = date.month
@@ -214,13 +272,16 @@ def convert_lists_to_dicts_inv(positions_list, datetime_list):
             "purchase_costs": 0,
             "contracts_sold": [],
             "sale_returns": 0,
-            "portfolio_cash": 0,
+            "portfolio_capital": 0,
+            "trading_capital": 0,
             "active_holdings": [],
             "period_net_returns": 0,
             "open_positions_start": [],
             "open_positions_end": [],
         }
-    for position in positions_list:
+    trades_df['open_datetime'] = trades_df.apply(lambda x: f"{x['dt']} {x['hour']}:00", axis=1)
+    for _,position in trades_df.iterrows():
+        # print(position)
         pos_dt = datetime.strptime(position['open_datetime'], "%Y-%m-%d %H:%M")
         # pos_dt = position['open_datetime']
         try:
@@ -357,18 +418,13 @@ def build_positions_df(positions_list):
     positions_df = pd.DataFrame.from_dict(positions_dict, orient='index')
     return positions_df, positions_dict
 
-def extract_results_dict(positions_list, config, quantities):
+def extract_results_dict(positions_list):
     results_dicts = []
     transactions = positions_list['transactions']
     for transaction in transactions:
         try:
             sell_dict = transaction['sell_info']
             buy_dict = transaction['buy_info']
-            symbol = sell_dict['option_symbol']
-            try:
-                option_quantity = quantities[symbol]
-            except KeyError as e:
-                continue
             results_dicts.append(
             {
                 "price_change": transaction['price_change'], "pct_gain": transaction['pct_gain'],
@@ -377,7 +433,30 @@ def extract_results_dict(positions_list, config, quantities):
                 "max_gain_after": sell_dict['max_value_after_pct_change'],"option_symbol": sell_dict['option_symbol'],
                 "max_value_before_date": sell_dict['max_value_before_date'], "max_value_after_date": sell_dict['max_value_after_date'],
                 "max_value_before_idx": sell_dict['max_value_before_idx'], "max_value_after_idx": sell_dict['max_value_after_idx'],
-                "sell_code": sell_dict['sell_code'], "quantity": option_quantity,
+                "sell_code": sell_dict['sell_code'], "quantity": buy_dict['quantity'],
+            })
+        except Exception as e:
+            print(f"Error: {e} in extracting results dict")
+            print(transaction)
+            continue
+    return results_dicts
+
+def extract_results_dict_pt(positions_list, config):
+    results_dicts = []
+    transactions = positions_list['transactions']
+    for transaction in transactions:
+        try:
+            sell_dict = transaction['sell_info']
+            buy_dict = transaction['buy_info']
+            results_dicts.append(
+            {
+                "price_change": transaction['price_change'], "pct_gain": transaction['pct_gain'],
+                "total_gain": transaction['total_gain'], "open_trade_dt": transaction['open_trade_dt'], 
+                "close_trade_dt": transaction['close_trade_dt'],"max_gain_before": sell_dict['max_value_before_pct_change'],
+                "max_gain_after": sell_dict['max_value_after_pct_change'],"option_symbol": sell_dict['option_symbol'],
+                "max_value_before_date": sell_dict['max_value_before_date'], "max_value_after_date": sell_dict['max_value_after_date'],
+                "max_value_before_idx": sell_dict['max_value_before_idx'], "max_value_after_idx": sell_dict['max_value_after_idx'],
+                "sell_code": sell_dict['sell_code'], "quantity": buy_dict['quantity'],
             })
         except Exception as e:
             print(f"Error: {e} in extracting results dict")
@@ -408,7 +487,8 @@ def create_datetime_index(start_date, end_date):
     print("DATE TIME INDEX")
     print(start_date)
     print(end_date)
-    datetime_index = pd.date_range(start_date, end_date, freq='15min', name = 'Time')
+    print()
+    datetime_index = pd.date_range(start_date, end_date, freq=f"15min", name = 'Time')
     days = []
     for time in datetime_index:
         convertedtime = time.strftime('%Y-%m-%d %H:%M:%S')
@@ -418,7 +498,7 @@ def create_datetime_index(start_date, end_date):
     return days, datetime_index, results
 
     
-def create_portfolio_date_list(start_date, end_date):
+def create_portfolio_date_list(start_date, end_date, config):
     sy, sm, sd = start_date.split('/')
     ey, em, ed = end_date.split('/')
     start_time = datetime(int(sy), int(sm), int(sd), 9, 30)
@@ -484,7 +564,7 @@ def approve_trade_poslimit(portfolio_cash, threshold_cash, position_id, current_
 def build_options_df(contracts, row):
     if row['symbol'] in ["GOOG","GOOGL","NVDA","AMZN","TSLA"]:
         last_price = ph.get_last_price(row)
-        row['o'] = last_price
+        row['alert_price'] = last_price
     df = pd.DataFrame(contracts, columns=['contract_symbol'])
     df['underlying_symbol'] = row['symbol']
     df['option_type'] = row['side']
@@ -496,21 +576,30 @@ def build_options_df(contracts, row):
         print(contracts)
         return df
 
-    df['strike_diff'] = abs((df['strike'] - row['o'])/row['o'])
+    df['strike_diff'] = abs((df['strike'] - row['alert_price'])/row['alert_price'])
     if row['side'] == "P":
-        df = df.loc[df['strike']< row['o']].reset_index(drop=True)
-        df = df.sort_values('strike', ascending=False)
+        df['in_money'] = df['strike']  > row['alert_price']
+        df_in = df.loc[df['strike'] > row['alert_price']]
+        df_out = df.loc[df['strike'] < row['alert_price']]
+        last_in = df_in.head(1)
+        # Concatenate the True rows and the last False row
+        result = pd.concat([last_in, df_out])
+        result = result.sort_values('strike', ascending=False)
         # df  = df.loc[df['strike_diff'] < 0.075].reset_index(drop=True)
         # print(df)
         # breakkk
     elif row['side'] == "C":
-        df = df.loc[df['strike'] > row['o']].reset_index(drop=True)
-        df = df.sort_values('strike', ascending=True)
-        # df  = df.loc[df['strike_diff'] < 0.075].reset_index(drop=True)
-        # print(df)
-        # breakkk
+        df['in_money'] = df['strike']  < row['alert_price']
+        # Select all rows where 'condition' is True
+        df_in = df.loc[df['strike'] < row['alert_price']]
+        df_out = df.loc[df['strike'] > row['alert_price']]
+        last_in = df_in.tail(1)
+        # Concatenate the True rows and the last False row
+        result = pd.concat([last_in, df_out])
+        result = result.sort_values('strike', ascending=True)
+
     
-    return df
+    return result
 
 
 
@@ -543,22 +632,44 @@ def extract_strike(row):
 #     return data
 
 def configure_trade_data(df,config):
-    index = df.loc[df['symbol'].isin(["IWM","SPY","QQQ"])]
-    stocks = df.loc[df['symbol'].isin(["IWM","SPY","QQQ"]) == False]
+    # index = df.loc[df['symbol'].isin(["IWM","SPY","QQQ"])]
+    # stocks = df.loc[df['symbol'].isin(["IWM","SPY","QQQ"]) == False]
 
 
-    one = stocks.loc[stocks['prediction_horizon'] == "1"]
-    three = stocks.loc[stocks['prediction_horizon'] == "3"]
-    one_idx = index.loc[index['prediction_horizon'] == "1"]
-    three_idx = index.loc[index['prediction_horizon'] == "3"]
+    one = df.loc[df['prediction_horizon'] == "1"]
+    # one_idx = index.loc[index['prediction_horizon'] == "1"]
+    # three = stocks.loc[stocks['prediction_horizon'] == "3"]
+    # one_idx = index.loc[index['prediction_horizon'] == "1"]
+    # three_idx = index.loc[index['prediction_horizon'] == "3"]
 
-    filt_one = one.loc[one['day_of_week'].isin([0,1,2,3])]
-    filt_three = three.loc[three['day_of_week'].isin([0,1,2])]
+    if config['days'] == '23':
+        filt_one = one.loc[one['day_of_week'].isin([2,3])]
+    elif config['days'] == '123':
+        filt_one = one.loc[one['day_of_week'].isin([1,2,3])]
+    elif config['days'] == '12':
+        filt_one = one.loc[one['day_of_week'].isin([1,2])]
+    else:
+        filt_one = one.loc[one['day_of_week'].isin([0,1,2,3])]
 
-    one_idxF = one_idx.loc[one_idx['day_of_week'].isin([0,1,2,3])]
-    three_idxF = three_idx.loc[three_idx['day_of_week'].isin([0,1,2])]
+    filt_one = filt_one.loc[filt_one['symbol'] != 'GOOG']
+    return filt_one
+    # if config['IDX'] == "ONLY":
+    #     return one_idx
+    # elif config['IDX'] ==  False:
+    #     one_idx = one_idx.loc[one['day_of_week'].isin([2,3])]
+    #     trades = pd.concat([filt_one,one_idx])
+    #     return trades
+    # elif config['IDX'] == True:
+    #     trades = pd.concat([filt_one,one_idx])
+    #     return trades
 
-    trade_df = pd.concat([filt_one,filt_three,one_idxF,three_idxF])
+    # filt_three = three.loc[three['day_of_week'].isin([0,1,2])]
+
+    # one_idxF = one_idx.loc[one_idx['day_of_week'].isin([0,1,2,3])]
+    # three_idxF = three_idx.loc[three_idx['day_of_week'].isin([0,1,2])]
+
+    # trade_df = pd.concat([filt_one,filt_three,one_idxF,three_idxF])
     # trade_df = pd.concat([stocks,index])
-    return trade_df
+    # trade_df = pd.concat([filt_one,one_idx])
+
 

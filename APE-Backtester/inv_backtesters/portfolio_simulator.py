@@ -1,37 +1,46 @@
 import pandas as pd
 import boto3
 
-starting_capital = 300000
+starting_capital = 60000
 
-# trend_strategy = {
-#     "name": "cm3-20240201-modelTRENDNOLIM_dwnsdVOL:simple_TL15RM_vol1_vc400_dynamicscale$100000_0.0017",
-#     "results": [1.51,-.07,.55,-.28,.43,-.08,1.8,-.34,.59,1.37,.57,1.02]
+# cdvol_strategy_24 = {
+#     "name": "cm3/20240514-24:CDVOLBF3-55PE_CD.33,.33,.33_vol0.4_rc10000_ds_vc100+200+300+300_sssl1:4:3$20000_0.03",
+#     "results": [2.60,.18,0.40,.23]
 # }
 
-# cdvol_strategy = {
-#     "name": "cm3-20240201-modelCDVOLNOLIM_dwnsdVOL:CDVOL_CDVOLBF2_vol1_vc400_dynamicscale$100000_0.0019",
-#     "results": [.51,.28,1.81,-.35,4.69,-.2,1.12,-.02,.49,.48,.02,.43]
+# cdvol_strategy_23 = {
+#     "name": "cm3/20240514-23:CDVOLBF3-55PE_CD.33,.33,.33_vol0.4_rc10000_ds_vc100+200+300+300_sssl1:4:3$20000_0.03",
+#     "results": [1.11,-0.41,2.53,-.10,4.22,0.13,1.43,1.54,-.24,-.61,.04,0.13]
 # }
 
-# trend_strategy = {
-#     "name": "cm3-20240207-modelTRENDNOLIM_dwnsdVOL:stdclsAGG_TL15RMHT_vol1_vc600_dynamicscale_sa1$10000_0.005",
-#     "results": [4.78,.18,.67,-.34,.21,.32,1.45,-.42,1.43,3.05,.44,1.56]
+# cdvol_strategy_22 = {
+#     "name": "cm3/20240516-22:CDVOLBF3-55PE_CD.33,.33,.33_div3_rc10000_vol0.4_DS_vc100+200+300+300_sssl1:4:3$20000_0.035",
+#     "results": [1.84,.98,.14,.69,.2,0.0,1.96,-0.02,-.23,.79,0.59,-0.32]
+# }
+cdvol_strategy_24 = {
+    "name": "cm3/20240520-24:reupv2_CDVOLBF3-55PE2_CDVOLVARVC_CD.33,.33,.33_div3_rc10000_vol0.4_DS_vc100+200+300+300_sssl1:4:3",
+    "results": [1.47,-.36,0.02,-0.44]
+}
+
+# cdvol_strategy_23 = {
+#     "name": "cm3/20240517-22:CDVOLBF3-6PE2_CD.33,.33,.33_div3_rc10000_vol0.4_DS_vc100+250+400+300_sssl1:4:3",
+#     "results": [2.61,-0.48,1.99,-.10,7.08,-0.15,2.23,1.15,-.31,0.0,-.11,0.85]
 # }
 
-cdvol_strategy_21 = {
-    "name": "cm3-20240325-21-modelCDVOL_dwnsdVOL_BT2:CDVOLVARVC_CDVOLBF3-6_vol0.4_vc100/300/500_dynamicscale_sssl1:3:2$100000_0.0055",
-    "results": [.72,.1,2.04,-.1,1.24,.13,1.73,.17,-.07,.56,1.79,-.24]
+cdvol_strategy_23 = {
+    "name": "cm3/20240520-23:reupv2_CDVOLBF3-55PE2_CDVOLVARVC_CD.33,.33,.33_div3_rc10000_vol0.4_DS_vc100+200+300+300_sssl1:4:3",
+    "results": [.51,-.58,1.53,-.33,2.18,-0.08,1.33,1.92,-.52,-.82,.31,-.01]
 }
 
 cdvol_strategy_22 = {
-    "name": "cm3-20240325-22-modelCDVOL_dwnsdVOL_BT2:CDVOLVARVC_CDVOLBF3-6_vol0.4_vc100/300/500_dynamicscale_sssl1:3:2$100000_0.0055",
-    "results": [6.35,5.64,.01,.85,3.57,.31,1.55,1.02,1.62,-.22,1.28,.17]
+    "name": "cm3/20240520-22:reupv2_CDVOLBF3-55PE2_CDVOLVARVC_CD.33,.33,.33_div3_rc10000_vol0.4_DS_vc100+200+300+300_sssl1:4:3",
+    "results": [1.89,.16,-.04,0.74,1.41,.08,0.82,-.86,-.22,.51,0.31,.15]
 }
 
-cdvol_strategy_23 = {
-    "name": "cm3-20240325-23-modelCDVOL_dwnsdVOL_BT2:CDVOLVARVC_CDVOLBF3-6_vol0.4_vc100/300/500_dynamicscale_sssl1:3:2$100000_0.0055",
-    "results": [1.22,.8,2.06,-.02,3.93,.38,1.91,.41,2.11,.89,.1,.01]
-}
+# cdvol_strategy_22 = {
+#     "name": "cm3/20240517-22:CDVOLBF3-6PE2_CD.33,.33,.33_div3_rc10000_vol0.4_DS_vc100+250+400+300_sssl1:4:3",
+#     "results": [14.78,2.18,0.0,.19,.22,2.0,.0,-0.61,-.38,.44,0.92,-0.19]
+# }
 
 # portfolio_config_bad = {
 #     "capital": starting_capital,
@@ -39,12 +48,16 @@ cdvol_strategy_23 = {
 #     "results" : []
 # }
 
-year_results = [cdvol_strategy_21, cdvol_strategy_22, cdvol_strategy_23]
+year_results = [
+    # cdvol_strategy_22, 
+    cdvol_strategy_23,
+    # cdvol_strategy_24
+    ]
 def determine_capital_allocation(starting_capital, capital, risk_units):
     if capital <= starting_capital:
         capital_allocated = capital / risk_units
     elif capital > starting_capital:
-        capital_allocated = (starting_capital / risk_units) + ((capital - starting_capital) * .8)
+        capital_allocated = (starting_capital / risk_units) + ((capital - starting_capital) * .5)
     else:
         print(capital)
         raise ValueError("Capital is not correctly allocated. Please check the capital allocation.")
@@ -56,6 +69,7 @@ def run_portfolio_simulator(cdvol_strategy):
     "units_traded": 3,
     "results" : []
     }
+
     for i in range(0,12):
         capital = portfolio_config["capital"]
         risk_units = portfolio_config["units_traded"]
@@ -69,14 +83,17 @@ def run_portfolio_simulator(cdvol_strategy):
         cdvol_ending_capital = (cdvol_return * strategy_allotment) + strategy_allotment
 
         total_capital = cdvol_ending_capital + (capital - capital_allocated)
+        gain = (total_capital - capital) / capital
+        trading_gain = (cdvol_ending_capital - strategy_allotment) / strategy_allotment
 
         portfolio_config["results"].append({
             "PERIOD": f"MONTH {i+1}",
-            "TOTAL GAIN": (total_capital - capital) / capital,
+            "TOTAL GAIN": round(gain,2),
             # "TREND GAIN": (trend_ending_capital - strategy_allotment) / strategy_allotment,
-            "CDVOL GAIN": (cdvol_ending_capital - strategy_allotment) / strategy_allotment,
-            "TRADING GAIN": ((cdvol_ending_capital) - capital_allocated)/capital_allocated,
-            "CASH": total_capital
+            "CDVOL GAIN":round(trading_gain,2),
+            "STARTING CAPITAL": round(capital,2),
+            "ENDING CAPITAL": round(total_capital,2),
+            "CAPITAL ALLOCATED": round(capital_allocated,2),
         })
 
         portfolio_config["capital"] = total_capital
@@ -135,10 +152,10 @@ if __name__ == "__main__":
         # print(f'AVG MONTHLY GAIN:{sum(trend_strategy["results"])/len(trend_strategy["results"])}')
         # print()
         print(f'CDVOL STRATEGY: {cdvol_strategy["name"]}')
-        print(f'AVG MONTHLY GAIN:{sum(cdvol_strategy["results"])/len(cdvol_strategy["results"])}')
+        print(f'AVG MONTHLY GAIN:{round(sum(cdvol_strategy["results"])/len(cdvol_strategy["results"]),2)}')
         print()
-        print(f'PORTFOLIO SIMULATOR RESULTS: {(portfolio_config["capital"] - starting_capital)/starting_capital}')
-        print(f'FINAL CAPITAL: ${portfolio_config["capital"]}')
+        print(f'PORTFOLIO SIMULATOR RESULTS: {round((portfolio_config["capital"] - starting_capital)/starting_capital,2)}')
+        print(f'FINAL CAPITAL: ${round(portfolio_config["capital"],2)}')
         print()
         for result in portfolio_config["results"]:
             print(result)

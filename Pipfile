@@ -9,8 +9,11 @@ requests = "*"
 pandas = "*"
 holidays = "*"
 pandas-market-calendars = "*"
+numpy = "*"
+certifi = "*"
 
 [dev-packages]
+ipykernel = "*"
 
 [requires]
 python_version = "3.9"

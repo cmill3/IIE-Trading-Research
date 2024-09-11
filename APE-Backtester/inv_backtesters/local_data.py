@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import concurrent.futures
 import pandas_market_calendars as mcal
 import numpy as np
-from helpers.constants import ONED_STRATEGIES, THREED_STRATEGIES, YEAR_CONFIG
+from helpers.constants import ONED_STRATEGIES, YEAR_CONFIG
 
 s3 = boto3.client('s3')
 nyse = mcal.get_calendar('NYSE')
@@ -20,7 +20,7 @@ def add_contract_data_to_local(week,strategy_info,strategy,data_type):
             data['side'] = strategy_info['side']
             data['contracts']= data.apply(lambda x: pull_contract_data(x),axis=1)
             data['expiries'] = data.apply(lambda x: generate_expiry_dates_row(x),axis=1)
-            data.to_csv(f'/Users/charlesmiller/Documents/backtesting_data/{data_type}/{strategy}/{week}.csv', index=False)
+            data.to_csv(f'/Users/diz/Documents/Projects/backtesting_data/{data_type}/{strategy}/{week}.csv', index=False)
             print(f"Finished {strategy} for {week}")
         except Exception as e:
             print(f"Error: {e} for {strategy}")
@@ -78,10 +78,10 @@ def generate_expiry_dates(date_str,symbol,strategy):
             day_of = add_weekdays(date_str,1,symbol)
             next_day = add_weekdays(date_str,2,symbol)
             return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
-        elif strategy in THREED_STRATEGIES:
-            day_of = add_weekdays(date_str,3,symbol)
-            next_day = add_weekdays(date_str,4,symbol)
-            return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
+        # elif strategy in THREED_STRATEGIES:
+        #     day_of = add_weekdays(date_str,3,symbol)
+        #     next_day = add_weekdays(date_str,4,symbol)
+        #     return [day_of.strftime('%Y-%m-%d'),next_day.strftime('%Y-%m-%d')]
     else: 
         input_date = datetime.strptime(date_str, '%Y-%m-%d')
         # Find the weekday of the input date (Monday is 0 and Sunday is 6)
@@ -119,10 +119,10 @@ def generate_expiry_dates_row(row):
             day_of = add_weekdays(date_str,1,row['symbol'])
             next_day = add_weekdays(date_str,2,row['symbol'])
             return [day_of.strftime('%y%m%d'),next_day.strftime('%y%m%d')]
-        elif row['strategy'] in THREED_STRATEGIES:
-            day_of = add_weekdays(date_str,3,row['symbol'])  
-            next_day = add_weekdays(date_str,4,row['symbol'])
-            return [day_of.strftime('%y%m%d'),next_day.strftime('%y%m%d')]
+        # elif row['strategy'] in THREED_STRATEGIES:
+        #     day_of = add_weekdays(date_str,3,row['symbol'])  
+        #     next_day = add_weekdays(date_str,4,row['symbol'])
+        #     return [day_of.strftime('%y%m%d'),next_day.strftime('%y%m%d')]
     else: 
         input_date = datetime.strptime(date_str, '%Y-%m-%d')
         # Find the weekday of the input date (Monday is 0 and Sunday is 6)
@@ -161,31 +161,48 @@ def add_weekdays(date,days,symbol):
     return date
 
 if __name__ == "__main__":
-    for year in ["twenty3","twenty2","twenty1"]:
+    for year in [
+        "twenty3",
+        "twenty2",
+        "twenty4",
+        "twenty1",
+        "twenty0"
+        ]:
         strategy_info = { 
-            "CDBFC": {
-                "file_path": 'TSSIM1_BF3TRIM_RD_custHypTP0.6',
-                "time_span": 4,
-                "side": "C"
-            },
-            "CDBFP": {
-                "file_path": 'TSSIM1_BF3TRIM_RD_custHypTP0.4',
-                "time_span": 4,
-                "side": "P"
-            },
-            "CDBFC_1D": {
-                "file_path": 'TSSIM1_BF3TRIM_RD_custHypTP0.6',
+            # "CDBFC": {
+            #     "file_path": 'TSSIM2S_t11trALL_custHypTP0.6',
+            #     "time_span": 4,
+            #     "side": "C"
+            # },
+            # "CDBFP": {
+            #     "file_path": 'TSSIM2S_t15_custHypTP0.4',
+            #     "time_span": 4,
+            #     "side": "P"
+            # },
+            "CDGAINC_1D": {
+                "file_path": 'TSSIM3.1_PE_HYPOPT1_TP0.6',
                 "time_span": 2,
                 "side": "C"
             },
-            "CDBFP_1D": {
-                "file_path": 'TSSIM1_BF3TRIM_RD_custHypTP0.4',
+            "CDGAINP_1D": {
+                "file_path": 'TSSIM3.1_PE_HYPOPT1_TP0.4',
+                "time_span": 2,
+                "side": "P"
+            },
+
+            "CDLOSEC_1D": {
+                "file_path": 'TSSIM3.1_PE_HYPOPT1_TP0.6',
+                "time_span": 2,
+                "side": "C"
+            },
+            "CDLOSEP_1D": {
+                "file_path": 'TSSIM3.1_PE_HYPOPT1_TP0.4',
                 "time_span": 2,
                 "side": "P"
             },
         }
 
-        data_type = 'CDVOLBF3-6TRIM'
+        data_type = 'CDVOLBF3-6040PE3'
         file_names = YEAR_CONFIG[year]['all_files']
         
         # add_contract_data_to_local(file_names,strategy_info['GAIN'],"GAIN",'cls')
@@ -194,7 +211,7 @@ if __name__ == "__main__":
             with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
                 # Submit the processing tasks to the ThreadPoolExecutor
                 processed_weeks_futures = [executor.submit(add_contract_data_to_local,week,strategy_info[strategy],strategy,data_type) for week in file_names]
-            # add_contract_data_to_local(file_names[0],strategy_info[strategy],strategy,data_type)
+            # add_contract_data_to_local('2024-04-15',strategy_info[strategy],strategy,data_type)
 
     # for week in file_names:
     #     for strategy in ['BFC','BFP','BFC_1D','BFP_1D']:
