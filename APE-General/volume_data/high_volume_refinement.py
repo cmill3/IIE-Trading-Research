@@ -22,18 +22,17 @@ s3 = boto3.client('s3')
 
 def volume_coordinator(dates):
     failed_list = []
-    for i in dates:
+    for date in dates:
         try:
-            path = create_s3_path(i)
+            path = create_s3_path(date)
             bucket = "icarus-research-data"
             df = pull_historical_s3_csv(bucket,path)
             filtered_df = volume_isolation(df)
-            # print(filtered_df)
-            put_historical_s3(i, filtered_df)
+            put_historical_s3(date, filtered_df)
         except Exception as e:
             print(e)
-            print("Volume coordination failed for " + str(i))
-            failed_list.append(i)
+            print("Volume coordination failed for " + str(date))
+            failed_list.append(date)
     failed_dates.append(failed_list)
             
 
@@ -56,14 +55,9 @@ def volume_isolation(df):
     column_averages = df[column_names].mean(axis = 0).to_frame().reset_index()
     column_averages.columns = ['symbol','avg_volume']
     sorted_df = column_averages.sort_values(by = 'avg_volume', ascending = False)
-    # print(sorted_df)
     top50_df = sorted_df.iloc[:50].reset_index()
-    # print(top50_df)
     top50_tickers = top50_df['symbol'].to_list()
-    # print(top50_tickers)
     filtered_df = df[top50_tickers]
-    # print(filtered_df)
-    print(len(filtered_df.columns))
     filtered_df['datetime'] = df['datetime']
 
     return filtered_df
@@ -81,7 +75,6 @@ if __name__ == "__main__":
     date_diff = end_date - start_date
     numdays = date_diff.days 
     date_list = []
-    # print(numdays)
     for x in range (0, numdays):
         temp_date = start_date + timedelta(days = x)
         if temp_date.weekday() < 5:

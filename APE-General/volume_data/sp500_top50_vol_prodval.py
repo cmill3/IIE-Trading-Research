@@ -22,10 +22,6 @@ def build_SP500_vol_data():
     bucket = 'icarus-research-data'
     key = 'sp500-constituents'
     df = pull_monthly_sp500_constituents_s3(key, bucket)
-    failed_list = []
-    run_info = []
-    index_list = range(len(df))
-    print(len(df))
     date = datetime.today()
     if date.weekday() < 5:
             date_str = date.strftime("%Y-%m-%d")
@@ -62,11 +58,10 @@ def volume_coordinator(date):
         bucket = "icarus-research-data"
         df = pull_s3_csv(bucket,path)
         filtered_df = volume_isolation(df)
-        # print(filtered_df)
         put_historical_s3(date, filtered_df)
     except Exception as e:
-        print(e)
-        print("Volume coordination failed for " + str(date))
+        logger.error(e)
+        logger.error("Volume coordination failed for " + str(date))
 
 def volume_isolation(df):
     column_names = df.columns.to_list()
@@ -74,14 +69,9 @@ def volume_isolation(df):
     column_averages = df[column_names].mean(axis = 0).to_frame().reset_index()
     column_averages.columns = ['symbol','avg_volume']
     sorted_df = column_averages.sort_values(by = 'avg_volume', ascending = False)
-    # print(sorted_df)
     top50_df = sorted_df.iloc[:50].reset_index()
-    # print(top50_df)
     top50_tickers = top50_df['symbol'].to_list()
-    # print(top50_tickers)
     filtered_df = df[top50_tickers]
-    # print(filtered_df)
-    print(len(filtered_df.columns))
     filtered_df['datetime'] = df['datetime']
 
     return filtered_df
