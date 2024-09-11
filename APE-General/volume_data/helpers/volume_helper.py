@@ -122,7 +122,7 @@ def pull_volume_data(df, ticker_list, times, start_date, end_date):
         try:
             ticker = str(i)
             res_df, from_str = polygon_volume_pull(start_date, end_date, ticker)
-            res_df.drop(labels = ['vw','o','c','h','l','t','n','time','hour','ticker'], axis=1, inplace=True)
+            res_df = res_df[['date','v']]
             res_df.rename(columns = {'date': 'datetime', 'v':ticker}, inplace=True)
             res_df.set_index('datetime', inplace=True)
             df = df.merge(res_df, left_index = True, right_index = True)
