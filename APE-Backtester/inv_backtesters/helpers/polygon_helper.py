@@ -118,5 +118,5 @@ def stock_aggs(symbol,from_date, to_date):
 def get_last_price(row):
     aggs = stock_aggs(row['symbol'], row['date'], row['date'])
     agg = aggs.loc[aggs['hour'] == row['hour']]
-    agg = agg.loc[agg['minute'] == 0]   
+    agg = agg.loc[agg['minute'] == row['minute']]   
     return agg['o'].values[0]

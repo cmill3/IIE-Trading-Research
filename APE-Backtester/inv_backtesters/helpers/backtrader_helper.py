@@ -12,7 +12,7 @@ import warnings
 # import helpers.helper as helper
 import helpers.polygon_helper as ph
 import pytz
-from helpers.constants import ONED_STRATEGIES
+# from helpers.constants import ONED_STRATEGIES
 
 
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -92,13 +92,21 @@ def create_results_dict(buy_dict, sell_dict,order_id):
     buy_dict['open_price'] = 1.02*buy_dict['open_price']
     price_change = sell_dict['close_price'] - buy_dict['open_price']
     pct_gain = (price_change / buy_dict['open_price']) *100
-    total_gain = (price_change*100) * buy_dict['quantity']
+    total_gain = (price_change*100)
     buy_dict['order_id'] = order_id
     sell_dict['order_id'] = order_id
+    sell_dict['close_datetime'] = sell_dict['close_datetime'].strftime("%Y-%m-%d %H:%M")
+    buy_dict['open_datetime'] = buy_dict['open_datetime'].strftime("%Y-%m-%d %H:%M")
+
+    custom_sell = sell_dict.copy()
+    custom_buy = buy_dict.copy()
+    ## remove value from dict
+    custom_sell.pop('close_datetime')
+    custom_buy.pop('open_datetime')
     results_dict = {
                     "price_change":price_change, "pct_gain":pct_gain, "total_gain":total_gain,
-                    "open_trade_dt": buy_dict['open_datetime'].strftime('%Y-%m-%d %H:%M'), "close_trade_dt": sell_dict['close_datetime'].strftime('%Y-%m-%d %H:%M'),
-                    "sell_info": sell_dict, "buy_info": buy_dict,
+                    "open_trade_dt": buy_dict['open_datetime'], "close_trade_dt": sell_dict['close_datetime'],
+                    "sell_info": custom_sell, "buy_info": custom_buy,
                     }
     return results_dict
 
