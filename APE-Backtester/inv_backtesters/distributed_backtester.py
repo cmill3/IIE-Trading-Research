@@ -95,18 +95,18 @@ if __name__ == "__main__":
     ]
 
     backtest_configs = [
-        {
-            "spread_search": "0:5",
-            "spread_length": 5,
-            "aa": 1,         
-            "model": "CDVOLVARVC",
-            "vc_level":"30+35+40+45+50",
-            "volatility_threshold": .25,
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "dataset": "TREND55-ALLSEV",
-            "holiday_weeks": False,
-        },
+        # {
+        #     "spread_search": "0:5",
+        #     "spread_length": 5,
+        #     "aa": 1,         
+        #     "model": "CDVOLVARVC",
+        #     "vc_level":"30+35+40+45+50",
+        #     "volatility_threshold": .25,
+        #     "user": "cm3",
+        #     "threeD_vol": "return_vol_10D",
+        #     "dataset": "TREND55-ALLSEV",
+        #     "holiday_weeks": False,
+        # },
         # {
         #     "spread_search": "0:5",
         #     "spread_length": 5,
@@ -125,7 +125,7 @@ if __name__ == "__main__":
             "aa": 1,         
             "model": "CDVOLVARVC",
             "vc_level":"30+35+40+45+50",
-            "volatility_threshold": .75,
+            "volatility_threshold": .65,
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "dataset": "TREND55-ALLSEV",
@@ -149,7 +149,7 @@ if __name__ == "__main__":
             "aa": 1,         
             "model": "CDVOLVARVC",
             "vc_level":"30+35+40+45+50",
-            "volatility_threshold": .5,
+            "volatility_threshold": .35,
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "dataset": "TREND55-ALLSEV",
