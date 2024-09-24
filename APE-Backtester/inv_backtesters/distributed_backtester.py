@@ -75,18 +75,18 @@ if __name__ == "__main__":
 
     ## TREND STRATEGIES ONLY
     strategies = [
-        # "CDGAINC_2H:2H",
-        # "CDGAINP_2H:2H",
-        # "CDLOSEP_2H:2H", 
-        # "CDLOSEC_2H:2H",
-        # "CDvDIFFC_2H:2H",
-        # "CDvDIFFP_2H:2H",
-        "CDGAINC_3D:3D",
-        "CDGAINP_3D:3D",
-        "CDLOSEP_3D:3D", 
-        "CDLOSEC_3D:3D",
-        "CDvDIFFC_3D:3D",
-        "CDvDIFFP_3D:3D",
+        "CDGAINC_2H:2H",
+        "CDGAINP_2H:2H",
+        "CDLOSEP_2H:2H", 
+        "CDLOSEC_2H:2H",
+        "CDvDIFFC_2H:2H",
+        "CDvDIFFP_2H:2H",
+        # "CDGAINC_3D:3D",
+        # "CDGAINP_3D:3D",
+        # "CDLOSEP_3D:3D", 
+        # "CDLOSEC_3D:3D",
+        # "CDvDIFFC_3D:3D",
+        # "CDvDIFFP_3D:3D",
     ]    
     years = [
         'twenty4',
@@ -100,73 +100,73 @@ if __name__ == "__main__":
             "spread_length": 5,
             "aa": 1,         
             "model": "CDVOLVARVC",
-            "vc_level":"30+35+40+45+50",
+            "vc_level":"40+45+50+65+70",
             "volatility_threshold": .25,
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "dataset": "TREND55-ALLSEV",
             "holiday_weeks": False,
         },
-        # {
-        #     "spread_search": "0:5",
-        #     "spread_length": 5,
-        #     "aa": 0,         
-        #     "model": "CDVOLVARVC",
-        #     "vc_level":"40+45+50+65+70",
-        #     "volatility_threshold": .25,
-        #     "user": "cm3",
-        #     "threeD_vol": "return_vol_10D",
-        #     "dataset": "TREND55-ALLSEV",
-        #     "holiday_weeks": False,
-        # },
+        {
+            "spread_search": "0:5",
+            "spread_length": 5,
+            "aa": 0,         
+            "model": "CDVOLVARVC",
+            "vc_level":"40+45+50+65+70",
+            "volatility_threshold": .25,
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "dataset": "TREND55-ALLSEV",
+            "holiday_weeks": False,
+        },
         {
             "spread_search": "0:5",
             "spread_length": 5,
             "aa": 1,         
             "model": "CDVOLVARVC",
-            "vc_level":"30+35+40+45+50",
+            "vc_level":"40+45+50+65+70",
             "volatility_threshold": .75,
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "dataset": "TREND55-ALLSEV",
             "holiday_weeks": False,
         },
-        # {
-        #     "spread_search": "0:5",
-        #     "spread_length": 5,
-        #     "aa": 0,         
-        #     "model": "CDVOLVARVC",
-        #     "vc_level":"40+45+50+65+70",
-        #     "volatility_threshold": .75,
-        #     "user": "cm3",
-        #     "threeD_vol": "return_vol_10D",
-        #     "dataset": "TREND55-ALLSEV",
-        #     "holiday_weeks": False,
-        # },
+        {
+            "spread_search": "0:5",
+            "spread_length": 5,
+            "aa": 0,         
+            "model": "CDVOLVARVC",
+            "vc_level":"40+45+50+65+70",
+            "volatility_threshold": .75,
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "dataset": "TREND55-ALLSEV",
+            "holiday_weeks": False,
+        },
         {
             "spread_search": "0:5",
             "spread_length": 5,
             "aa": 1,         
             "model": "CDVOLVARVC",
-            "vc_level":"30+35+40+45+50",
+            "vc_level":"40+45+50+65+70",
             "volatility_threshold": .5,
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "dataset": "TREND55-ALLSEV",
             "holiday_weeks": False,
         },
-        # {
-        #     "spread_search": "0:5",
-        #     "spread_length": 5,
-        #     "aa": 0,         
-        #     "model": "CDVOLVARVC",
-        #     "vc_level":"40+45+50+65+70",
-        #     "volatility_threshold": .5,
-        #     "user": "cm3",
-        #     "threeD_vol": "return_vol_10D",
-        #     "dataset": "TREND55-ALLSEV",
-        #     "holiday_weeks": False,
-        # },
+        {
+            "spread_search": "0:5",
+            "spread_length": 5,
+            "aa": 0,         
+            "model": "CDVOLVARVC",
+            "vc_level":"40+45+50+65+70",
+            "volatility_threshold": .5,
+            "user": "cm3",
+            "threeD_vol": "return_vol_10D",
+            "dataset": "TREND55-ALLSEV",
+            "holiday_weeks": False,
+        },
         ]
     
     modeling_type = "XGB"
@@ -175,14 +175,14 @@ if __name__ == "__main__":
     date = datetime.now().strftime("%Y%m%d")
 
     for config in backtest_configs:
-        model_name = f"3D:sssl{config['spread_search']}-{config['spread_length']}_aa{config['aa']}_model{config['model']}_vc{config['vc_level']}_vt{config['volatility_threshold']}"
+        model_name = f"2H:sssl{config['spread_search']}-{config['spread_length']}_aa{config['aa']}_model{config['model']}_vc{config['vc_level']}_vt{config['volatility_threshold']}"
         for year in years:
             year_data = YEAR_CONFIG[year]
             try:
                 file_names = year_data['all_files']
                 positions_df = backtest_orchestrator(file_names,strategies, config)
                 positions_df = pd.DataFrame.from_records(positions_df)
-                res = s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{date}/{modeling_type}/{user}/{modeling_theme}/{model_name}/{year}/sim_results.csv')
+                res = s3.put_object(Body=positions_df.to_csv(), Bucket="icarus-research-data", Key=f'backtesting_reports/{modeling_type}/{date}/{user}/{modeling_theme}/{model_name}/{year}/sim_results.csv')
             except Exception as e:
                 print(f"Error running model: {e} for {model_name}")
                 error_models.append(model_name)

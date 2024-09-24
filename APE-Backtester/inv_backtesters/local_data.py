@@ -165,37 +165,37 @@ if __name__ == "__main__":
         "twenty3",
         "twenty2",
         "twenty4",
-        "twenty1",
+        # "twenty1",
         # "twenty0"
         ]:
         strategy_info = { 
-            "CDvDIFFC_3D": {
+            "CDvDIFFC_2H": {
                 "file_path": 'TSSIM3.1_TESTALL_HYPOPT1_TP0.55',
                 "time_span": 2,
                 "side": "C"
             },
-            "CDvDIFFP_3D": {
+            "CDvDIFFP_2H": {
                 "file_path": 'TSSIM3.1_TESTALL_HYPOPT1_TP0.45',
                 "time_span": 2,
                 "side": "P"
             },
-            "CDGAINC_3D": {
+            "CDGAINC_2H": {
                 "file_path": 'TSSIM3.1_TESTALL_HYPOPT1_TP0.55',
                 "time_span": 2,
                 "side": "C"
             },
-            "CDGAINP_3D": {
+            "CDGAINP_2H": {
                 "file_path": 'TSSIM3.1_TESTALL_HYPOPT1_TP0.45',
                 "time_span": 2,
                 "side": "P"
             },
 
-            "CDLOSEC_3D": {
+            "CDLOSEC_2H": {
                 "file_path": 'TSSIM3.1_TESTALL_HYPOPT1_TP0.55',
                 "time_span": 2,
                 "side": "C"
             },
-            "CDLOSEP_3D": {
+            "CDLOSEP_2H": {
                 "file_path": 'TSSIM3.1_TESTALL_HYPOPT1_TP0.45',
                 "time_span": 2,
                 "side": "P"
