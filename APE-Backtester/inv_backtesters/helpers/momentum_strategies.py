@@ -32,26 +32,11 @@ def tda_PUT_2H_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target_
         minute = row['date'].minute
 
         if deriv_pct_change > int(vc_config[order_num]):
-            if order_num == 0:
-                if deriv_pct_change > 2*int(vc_config[order_num]):
-                    Floor_pct = (.95*underlying_gain)
-                else:
-                    Floor_pct = (.8*underlying_gain)
-            elif order_num == 1:
-                if deriv_pct_change > 2*int(vc_config[order_num]):
-                    Floor_pct = (.95*underlying_gain)
-                else:
-                    Floor_pct = (.75*underlying_gain)
-            elif order_num == 2:
-                if deriv_pct_change > 2*int(vc_config[order_num]):
-                    Floor_pct = (.95*underlying_gain)
-                else:
-                    Floor_pct = (.7*underlying_gain)
-            if pct_change >= Floor_pct:
+            Floor_pct = (.8*underlying_gain)
+            if pct_change <= Floor_pct:
                 reason = f"VCSell{order_num}"
                 sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)  
                 return sell_dict
-
 
         # print(f"Floor_pct: {Floor_pct} max_value: {max_value} pct_change: {pct_change} current_price: {row['underlying_price']} purchase_price: {open_price} for {row['ticker']}")
         hour_diff = get_hour_diff(simulation_date, row['date'])
@@ -118,12 +103,7 @@ def tda_CALL_2H_CDVOLVARVC(polygon_df, simulation_date, quantity, config, target
         # Floor_pct += underlying_gain
 
         if deriv_pct_change > int(vc_config[order_num]):
-            if order_num == 0:
-                Floor_pct = (.8*underlying_gain)
-            elif order_num == 1:
-                Floor_pct = (.8*underlying_gain)
-            elif order_num == 2:
-                Floor_pct = (.8*underlying_gain)
+            Floor_pct = (.8*underlying_gain)
             if pct_change <= Floor_pct:
                 reason = f"VCSell{order_num}"
                 sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)  
