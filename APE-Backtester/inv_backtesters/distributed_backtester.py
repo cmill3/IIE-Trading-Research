@@ -89,7 +89,7 @@ if __name__ == "__main__":
         # "CDvDIFFP_3D:3D",
     ]    
     years = [
-        'twenty4',
+        # 'twenty4',
         'twenty3',
         'twenty2',
     ]
@@ -173,7 +173,7 @@ if __name__ == "__main__":
     modeling_theme = "trend_threshold"
     user = "cm3"
     date = datetime.now().strftime("%Y%m%d")
-    date = "20240924"
+    # date = "20240924"
 
     for config in backtest_configs:
         model_name = f"2H:sssl{config['spread_search']}-{config['spread_length']}_aa{config['aa']}_model{config['model']}_vc{config['vc_level']}_vt{config['volatility_threshold']}"
