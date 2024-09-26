@@ -1,6 +1,7 @@
 from helpers.constants import *
 from datetime import datetime, timedelta
-import helpers.momentum_strategies as trade
+from helpers.trading_strategies.momentum_strategies_2H import *
+from helpers.trading_strategies.momentum_strategies_3D import *
 import helpers.backtrader_helper as backtrader_helper
 import helpers.polygon_helper as ph
 import pandas as pd
@@ -106,17 +107,33 @@ def buy_iterate_sell(symbol, option_symbol, open_prices, strategy, polygon_df, p
     if config['model'] == "CDVOLVARVC":
         try:
             if strategy in TREND_STRATEGIES_2H and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_2H_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num,symbol=symbol)
+                sell_dict = tda_CALL2H_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num,symbol=symbol)
             elif strategy in TREND_STRATEGIES_2H and strategy in PUT_STRATEGIES:
-                sell_dict = trade.tda_PUT_2H_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num,symbol=symbol)
+                sell_dict = tda_PUT2H_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num,symbol=symbol)
             elif strategy in TREND_STRATEGIES_3D and strategy in CALL_STRATEGIES:
-                sell_dict = trade.tda_CALL_3D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num,symbol=symbol)
+                sell_dict = tda_CALL3D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num,symbol=symbol)
             elif strategy in TREND_STRATEGIES_3D and strategy in PUT_STRATEGIES:
-                sell_dict = trade.tda_PUT_3D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num,symbol=symbol)
+                sell_dict = tda_PUT3D_CDVOLVARVC(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num,symbol=symbol)
         except Exception as e:
-            print(f"Error {e} in trading strat for {symbol} in {strategy} CDVOLVARVC2")
+            print(f"Error {e} in trading strat for {symbol} in {strategy} CDVOLVARVC")
             print(polygon_df)
             return "NO DICT"
+    elif config['model'] == "CDVOLVARSTEP":
+        try:
+            if strategy in TREND_STRATEGIES_2H and strategy in CALL_STRATEGIES:
+                sell_dict = tda_CALL2H_CDVOLSTEP(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num,symbol=symbol)
+            elif strategy in TREND_STRATEGIES_2H and strategy in PUT_STRATEGIES:
+                sell_dict = tda_PUT2H_CDVOLSTEP(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num,symbol=symbol)
+            elif strategy in TREND_STRATEGIES_3D and strategy in CALL_STRATEGIES:
+                sell_dict = tda_CALL3D_CDVOLSTEP(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num,symbol=symbol)
+            elif strategy in TREND_STRATEGIES_3D and strategy in PUT_STRATEGIES:
+                sell_dict = tda_PUT3D_CDVOLSTEP(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num,symbol=symbol)
+        except Exception as e:
+            print(f"Error {e} in trading strat for {symbol} in {strategy} CDVOLSTEP")
+            print(polygon_df)
+            return "NO DICT"
+
+
     
     
     try:
@@ -147,7 +164,13 @@ def create_simulation_data(row,config):
     if row['strategy'] in TREND_STRATEGIES_2H:
         time_horizon_hours = 2
     elif row['strategy'] in TREND_STRATEGIES_3D:
-        time_horizon_hours = 72
+        dow = start_date.weekday()
+        if dow == 4:
+            time_horizon_hours = 120
+        elif dow == 3:
+            time_horizon_hours = 96
+        else:
+            time_horizon_hours = 72
     trading_aggregates, option_symbols = create_options_aggs(row,start_date,time_horizon_hours,spread_length=config['spread_length'],config=config)
     volume_data = create_volume_aggs(row,start_date=None,end_date=start_date,options=option_symbols,config=config)
     print(f"Volume Data for {row['symbol']} and {row['strategy']}")
@@ -165,7 +188,10 @@ def create_options_aggs(row,start_date,time_horizon_hours,spread_length,config):
         expiry = expiries[1]
     else:
         if config['aa'] == 0:
-            expiry = expiries[0]
+            if start_date.weekday() in [0,1]:
+                expiry = expiries[0]
+            else:
+                expiry = expiries[1]
         elif config['aa'] == 1:
             expiry = expiries[1]
     
