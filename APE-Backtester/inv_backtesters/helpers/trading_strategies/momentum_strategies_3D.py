@@ -173,7 +173,12 @@ def tda_PUT3D_CDVOLSTEP(polygon_df, simulation_date, quantity, config, target_pc
         dow = row['date'].weekday()
 
         if deriv_pct_change > int(vc_config[order_num]):
-            Floor_pct = (.8*underlying_gain)
+            if day_diff <= 1:
+                Floor_pct = (.8*underlying_gain)
+            elif day_diff == 2:
+                Floor_pct = (.6*underlying_gain)
+            elif day_diff == 3:
+                Floor_pct = (.4*underlying_gain)
             if pct_change <= Floor_pct:
                 reason = f"VCSell{order_num}"
                 sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)  
@@ -186,7 +191,7 @@ def tda_PUT3D_CDVOLSTEP(polygon_df, simulation_date, quantity, config, target_pc
         sell_code = 0
         reason = ""
         if day_diff < 3:
-            step_values = config['step_level'].split('+')
+            step_values = config['vol_step'].split('+')
             if day_diff == 1:
                 Floor_pct = Floor_pct * float(step_values[0])
             elif day_diff == 2:
@@ -250,7 +255,13 @@ def tda_CALL3D_CDVOLSTEP(polygon_df, simulation_date, quantity, config, target_p
         dow = row['date'].weekday()
 
         if deriv_pct_change > int(vc_config[order_num]):
-            Floor_pct = (.8*underlying_gain)
+            if deriv_pct_change > int(vc_config[order_num]):
+                if day_diff <= 1:
+                    Floor_pct = (1*underlying_gain)
+                elif day_diff == 2:
+                    Floor_pct = (.6*underlying_gain)
+                elif day_diff == 3:
+                    Floor_pct = (.4*underlying_gain)
             if pct_change <= Floor_pct:
                 reason = f"VCSell{order_num}"
                 sell_dict = build_trade_analytics(row,polygon_df,derivative_open_price,index,quantity,reason,order_num)  
@@ -263,7 +274,7 @@ def tda_CALL3D_CDVOLSTEP(polygon_df, simulation_date, quantity, config, target_p
         sell_code = 0
         reason = ""
         if day_diff < 3:
-            step_values = config['step_level'].split('+')
+            step_values = config['vol_step'].split('+')
             if day_diff == 1:
                 Floor_pct = Floor_pct * float(step_values[0])
             elif day_diff == 2:

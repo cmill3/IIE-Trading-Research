@@ -4,10 +4,7 @@ import numpy as np
 from helpers.constants import YEAR_CONFIG
 import boto3
 import helpers.distributed_backtester_helpers as back_tester
-import helpers.backtrader_helper as helper
-import helpers.portfolio_simulation as portfolio_sim
 import warnings
-from backtest_config import backtest_configs
 import concurrent.futures
 import os
 
@@ -75,45 +72,47 @@ if __name__ == "__main__":
 
     ## TREND STRATEGIES ONLY
     strategies = [
-        "CDGAINC_2H:2H",
-        "CDGAINP_2H:2H",
-        "CDLOSEP_2H:2H", 
-        "CDLOSEC_2H:2H",
-        "CDvDIFFC_2H:2H",
-        "CDvDIFFP_2H:2H",
-        # "CDGAINC_3D:3D",
-        # "CDGAINP_3D:3D",
-        # "CDLOSEP_3D:3D", 
-        # "CDLOSEC_3D:3D",
-        # "CDvDIFFC_3D:3D",
-        # "CDvDIFFP_3D:3D",
+        # "CDGAINC_2H:2H",
+        # "CDGAINP_2H:2H",
+        # "CDLOSEP_2H:2H", 
+        # "CDLOSEC_2H:2H",
+        # "CDvDIFFC_2H:2H",
+        # "CDvDIFFP_2H:2H",
+        "CDGAINC_3D:3D",
+        "CDGAINP_3D:3D",
+        "CDLOSEP_3D:3D", 
+        "CDLOSEC_3D:3D",
+        "CDvDIFFC_3D:3D",
+        "CDvDIFFP_3D:3D",
     ]    
     years = [
-        # 'twenty4',
+        'twenty4',
         'twenty3',
         'twenty2',
     ]
 
     backtest_configs = [
+        # {
+        #     "spread_search": "0:5",
+        #     "spread_length": 5,
+        #     "aa": 1,         
+        #     "model": "CDVOLSTEP",
+        #     "vc_level":"60+80+100+110+120",
+        #     "volatility_threshold": .8,
+        #     "vol_step": ".8+.6",
+        #     "user": "cm3",
+        #     "threeD_vol": "return_vol_10D",
+        #     "dataset": "TREND55-ALLSEV",
+        #     "holiday_weeks": False,
+        # },
         {
             "spread_search": "0:5",
             "spread_length": 5,
             "aa": 1,         
-            "model": "CDVOLVSTEP",
-            "vc_level":"60+80+100+110+120",
-            "volatility_threshold": .65,
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "dataset": "TREND55-ALLSEV",
-            "holiday_weeks": False,
-        },
-        {
-            "spread_search": "0:5",
-            "spread_length": 5,
-            "aa": 0,         
-            "model": "CDVOLVSTEP",
-            "vc_level":"60+80+100+110+120",
-            "volatility_threshold": .65,
+            "model": "CDVOLSTEP",
+            "vc_level":"80+90+100+120+140",
+            "volatility_threshold": 1,
+            "vol_step": ".8+.6",
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "dataset": "TREND55-ALLSEV",
@@ -123,21 +122,10 @@ if __name__ == "__main__":
             "spread_search": "0:5",
             "spread_length": 5,
             "aa": 1,         
-            "model": "CDVOLVSTEP",
-            "vc_level":"60+80+100+110+120",
-            "volatility_threshold": .85,
-            "user": "cm3",
-            "threeD_vol": "return_vol_10D",
-            "dataset": "TREND55-ALLSEV",
-            "holiday_weeks": False,
-        },
-        {
-            "spread_search": "0:5",
-            "spread_length": 5,
-            "aa": 0,         
-            "model": "CDVOLVSTEP",
-            "vc_level":"60+80+100+110+120",
-            "volatility_threshold": .85,
+            "model": "CDVOLSTEP",
+            "vc_level":"100+110+120+140+160",
+            "volatility_threshold": 1,
+            "vol_step": ".8+.6",
             "user": "cm3",
             "threeD_vol": "return_vol_10D",
             "dataset": "TREND55-ALLSEV",
@@ -149,10 +137,9 @@ if __name__ == "__main__":
     modeling_theme = "trend_threshold"
     user = "cm3"
     date = datetime.now().strftime("%Y%m%d")
-    # date = "20240924"
 
     for config in backtest_configs:
-        model_name = f"2H:sssl{config['spread_search']}-{config['spread_length']}_aa{config['aa']}_model{config['model']}_vc{config['vc_level']}_vt{config['volatility_threshold']}"
+        model_name = f"3D:sssl{config['spread_search']}-{config['spread_length']}_aa{config['aa']}_model{config['model']}_vc{config['vc_level']}_vt{config['volatility_threshold']}_vs{config['vol_step']}"
         for year in years:
             year_data = YEAR_CONFIG[year]
             try:

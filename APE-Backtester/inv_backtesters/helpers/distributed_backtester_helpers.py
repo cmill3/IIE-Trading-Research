@@ -118,7 +118,7 @@ def buy_iterate_sell(symbol, option_symbol, open_prices, strategy, polygon_df, p
             print(f"Error {e} in trading strat for {symbol} in {strategy} CDVOLVARVC")
             print(polygon_df)
             return "NO DICT"
-    elif config['model'] == "CDVOLVARSTEP":
+    elif config['model'] == "CDVOLSTEP":
         try:
             if strategy in TREND_STRATEGIES_2H and strategy in CALL_STRATEGIES:
                 sell_dict = tda_CALL2H_CDVOLSTEP(polygon_df,open_datetime,1,config,target_pct=row['target_pct'],vol=float(row["target_pct"]),order_num=order_num,symbol=symbol)
