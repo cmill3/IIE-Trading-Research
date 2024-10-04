@@ -179,27 +179,27 @@ if __name__ == "__main__":
                 "time_span": 2,
                 "side": "P"
             },
-            "CDGAINC_2H": {
-                "file_path": 'TSSIM3.1_TESTALL_HYPOPT1_TP0.55',
-                "time_span": 2,
-                "side": "C"
-            },
-            "CDGAINP_2H": {
-                "file_path": 'TSSIM3.1_TESTALL_HYPOPT1_TP0.45',
-                "time_span": 2,
-                "side": "P"
-            },
+            # "CDGAINC_2H": {
+            #     "file_path": 'TSSIM3.1_TESTALL_HYPOPT1_TP0.55',
+            #     "time_span": 2,
+            #     "side": "C"
+            # },
+            # "CDGAINP_2H": {
+            #     "file_path": 'TSSIM3.1_TESTALL_HYPOPT1_TP0.45',
+            #     "time_span": 2,
+            #     "side": "P"
+            # },
 
-            "CDLOSEC_2H": {
-                "file_path": 'TSSIM3.1_TESTALL_HYPOPT1_TP0.55',
-                "time_span": 2,
-                "side": "C"
-            },
-            "CDLOSEP_2H": {
-                "file_path": 'TSSIM3.1_TESTALL_HYPOPT1_TP0.45',
-                "time_span": 2,
-                "side": "P"
-            },
+            # "CDLOSEC_2H": {
+            #     "file_path": 'TSSIM3.1_TESTALL_HYPOPT1_TP0.55',
+            #     "time_span": 2,
+            #     "side": "C"
+            # },
+            # "CDLOSEP_2H": {
+            #     "file_path": 'TSSIM3.1_TESTALL_HYPOPT1_TP0.45',
+            #     "time_span": 2,
+            #     "side": "P"
+            # },
         }
 
         data_type = 'TREND55-ALLSEV'
