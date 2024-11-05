@@ -2,6 +2,7 @@ from helpers.constants import *
 from datetime import datetime, timedelta
 from helpers.trading_strategies.momentum_strategies_2H import *
 from helpers.trading_strategies.momentum_strategies_3D import *
+from helpers.trading_strategies.momentum_regression_2H import *
 import helpers.backtrader_helper as backtrader_helper
 import helpers.polygon_helper as ph
 import pandas as pd
@@ -11,28 +12,41 @@ import pytz
 def build_trade(week_df,config):
     week_postions = []
     for _, row in week_df.iterrows():
-        try:
-            position = simulate_trades(row,config)
-            if len(position) == 0:
+        if row['symbol'] in ["QQQ","SPY","IWM"]:
+            for idx_indic in [1,2]:
+                try:
+                    position = simulate_trades(row,config,idx=idx_indic)
+                    if len(position) == 0:
+                        continue
+                    print(f"Position for {row['symbol']} and {row['strategy']}")
+                except Exception as e:
+                    print(f"Error in build_trade for {row['symbol']} and {row['strategy']} {e}")
+                    continue
+                week_postions.append(position)
+        else:   
+            try:
+                position = simulate_trades(row,config,idx=0)
+                if len(position) == 0:
+                    continue
+                print(f"Position for {row['symbol']} and {row['strategy']}")
+            except Exception as e:
+                print(f"Error in build_trade for {row['symbol']} and {row['strategy']} {e}")
                 continue
-            print(f"Position for {row['symbol']} and {row['strategy']}")
-        except Exception as e:
-            print(f"Error in build_trade for {row['symbol']} and {row['strategy']} {e}")
-            continue
-        week_postions.append(position)
+            week_postions.append(position)
     return week_postions
 
-def simulate_trades(row,config):
+def simulate_trades(row,config,idx=0):
     ## These variables are crucial for controlling the buy/sell flow of the simulation.
     order_num = 1
     alert_hour = row['hour']
+    alert_minute = row['minute']
     trading_date = row['date']
     symbol = row['symbol']
     trading_date = trading_date.split(" ")[0]
-    start_date, end_date, contracts, enriched_options_aggregates, volume_data = create_simulation_data(row,config)
+    start_date, end_date, contracts, enriched_options_aggregates, volume_data = create_simulation_data(row,config,idx)
     order_dt = start_date.strftime("%m+%d")
     pos_dt = start_date.strftime("%Y-%m-%d-%H")
-    position_id = f"{row['symbol']}-{(row['strategy'].replace('_',''))}-{pos_dt}"
+    position_id = f"{row['symbol']}-{(row['strategy'].replace('_',''))}-{pos_dt}-{alert_minute}"
     open_trade_dt = start_date.strftime('%Y-%m-%d %H:%M')
     results = []
 
@@ -41,7 +55,7 @@ def simulate_trades(row,config):
         try:
             contract_price_info[contract] = {
                 "open_price":enriched_options_aggregates[contract]['o'][0],
-                "volume_15EMA": volume_data[contract],
+                "volume_5EMA": volume_data[contract],
             }
         except Exception as e:
             print(f"Error in contract_price_info for {contract} {e}")
@@ -50,22 +64,27 @@ def simulate_trades(row,config):
     # contracts = contract_df.to_dict('records')
     ### Now we need to take that contract sizing info and pass it through to the buy_iterate_sellV2_invalerts function
     ## This way we can actually no the position of the trade and not have it predetermined.
-    contracts = contracts[0:5]
+    contracts = contracts[0:6]
     order_num = 0
     for contract in contracts:
         contract['spread_position'] = order_num
         try:
             option_aggs = enriched_options_aggregates[contract['contract_symbol']]
+            volatility = option_aggs['underlying_vol'].values[0]
+            vol_adjusted_target = row['target_pct']/volatility
+            if vol_adjusted_target < config['minimum_vol_adjusted_target']:
+                continue
             open_prices = option_aggs['o'].values
             ticker = option_aggs.iloc[0]['ticker']
             order_id = f"{order_num}_{order_dt}"
             results_dict = buy_iterate_sell(
                 symbol, ticker, open_prices, row['strategy'], option_aggs, position_id, trading_date, alert_hour, 
-                order_id,config,row,order_num=contract['spread_position']
+                order_id,config,row,order_num=contract['spread_position'], alert_minute=alert_minute
                 )
             if results_dict == "NO DICT":
                 continue
             results_dict['order_num'] = contract['spread_position']
+            results_dict['volume_5EMA'] = contract_price_info[contract['contract_symbol']]['volume_5EMA']
             print(f"results_dict for {symbol} and {ticker}")
             print(results_dict)
             print()
@@ -91,10 +110,10 @@ def simulate_trades(row,config):
     
     return position
 
-def buy_iterate_sell(symbol, option_symbol, open_prices, strategy, polygon_df, position_id, trading_date, alert_hour,order_id,config,row,order_num):
+def buy_iterate_sell(symbol, option_symbol, open_prices, strategy, polygon_df, position_id, trading_date, alert_hour,order_id,config,row,order_num, alert_minute):
 
     open_price = open_prices[0]
-    open_datetime = datetime(int(trading_date.split("-")[0]),int(trading_date.split("-")[1]),int(trading_date.split("-")[2]),int(alert_hour),0,0,tzinfo=pytz.timezone('US/Eastern'))
+    open_datetime = datetime(int(trading_date.split("-")[0]),int(trading_date.split("-")[1]),int(trading_date.split("-")[2]),int(alert_hour),int(alert_minute),0,tzinfo=pytz.timezone('US/Eastern'))
     contract_cost = round(open_price * 100,2)
 
     if strategy in CALL_STRATEGIES:
@@ -132,6 +151,16 @@ def buy_iterate_sell(symbol, option_symbol, open_prices, strategy, polygon_df, p
             print(f"Error {e} in trading strat for {symbol} in {strategy} CDVOLSTEP")
             print(polygon_df)
             return "NO DICT"
+    elif config['model'] == "CDVOLREG":
+        try:
+            if strategy in CALL_STRATEGIES:
+                sell_dict = tda_CALL2H_REG(polygon_df,open_datetime,1,config,target=row['target_pct'],vol=float(row["target_pct"]),symbol=symbol)
+            elif strategy in PUT_STRATEGIES:
+                sell_dict = tda_PUT2H_REG(polygon_df,open_datetime,1,config,target=row['target_pct'],vol=float(row["target_pct"]),symbol=symbol)
+        except Exception as e:
+            print(f"Error {e} in trading strat for {symbol} in {strategy} CDVOLSTEP")
+            print(polygon_df)
+            return "NO DICT"
 
 
     
@@ -158,7 +187,7 @@ def buy_iterate_sell(symbol, option_symbol, open_prices, strategy, polygon_df, p
         print()
     return results_dict
 
-def create_simulation_data(row,config):
+def create_simulation_data(row,config,idx):
     date_str = row['date'].split(" ")[0]
     start_date = datetime(int(date_str.split("-")[0]),int(date_str.split("-")[1]),int(date_str.split("-")[2]),int(row['hour']),0,0)
     if row['strategy'] in TREND_STRATEGIES_2H:
@@ -171,44 +200,40 @@ def create_simulation_data(row,config):
             time_horizon_hours = 96
         else:
             time_horizon_hours = 72
-    trading_aggregates, option_symbols = create_options_aggs(row,start_date,time_horizon_hours,spread_length=config['spread_length'],config=config)
+    trading_aggregates, option_symbols = create_options_aggs(row,start_date,time_horizon_hours,spread_length=config['spread_length'],config=config,idx=idx)
     volume_data = create_volume_aggs(row,start_date=None,end_date=start_date,options=option_symbols,config=config)
-    print(f"Volume Data for {row['symbol']} and {row['strategy']}")
     return start_date, time_horizon_hours,option_symbols, trading_aggregates, volume_data
 
-
     
-def create_options_aggs(row,start_date,time_horizon_hours,spread_length,config):
+def create_options_aggs(row,start_date,time_horizon_hours,spread_length,config,idx):
     options = []
     enriched_options_aggregates = {}
     expiries = ast.literal_eval(row['expiries'])
     end_date = start_date + timedelta(hours=time_horizon_hours)
 
     if row['symbol'] in ['SPY','IWM','QQQ']:
-        expiry = expiries[1]
+        if idx == 1:
+            expiry = expiries[0]
+        elif idx == 2:
+            expiry = expiries[1]
     else:
         if config['aa'] == 0:
-            if start_date.weekday() in [0,1]:
-                expiry = expiries[0]
-            else:
-                expiry = expiries[1]
+            expiry = expiries[0]
         elif config['aa'] == 1:
             expiry = expiries[1]
     
     strike = row['symbol'] + expiry
     try:
-        underlying_agg_data = ph.polygon_stockdata_inv(row['symbol'],start_date,end_date,10)
+        underlying_agg_data = ph.polygon_stockdata_inv(row['symbol'],start_date,end_date,10,time_span="minute")
+        vol_date = start_date - timedelta(days=10)
+        vol_data = ph.polygon_stockdata_inv(row['symbol'],vol_date,start_date,1,time_span="hour")
+        vol_data['abs_pct_change'] = abs(vol_data['c'].pct_change())
+        vol_data['vol_10EMA'] = vol_data['abs_pct_change'].ewm(span=10, adjust=False).mean()
+        underlying_vol = vol_data['vol_10EMA'].values[-1]
+        underlying_agg_data['underlying_vol'] = underlying_vol
     except Exception as e:
         print(f"Error: {e} in underlying agg for {row['symbol']} of {row['strategy']}")
-        try:
-            underlying_agg_data = ph.polygon_stockdata_inv(row['symbol'],start_date,end_date,10)
-        except Exception as e:
-            print(f"Error: {e} in underlying agg for 2ND {row['symbol']} of {row['strategy']}")
-            try: 
-                underlying_agg_data = ph.polygon_stockdata_inv(row['symbol'],start_date,end_date,10)
-            except Exception as e:
-                print(f"Error: {e} in underlying agg for FINAL {row['symbol']} of {row['strategy']}")
-                return [], []
+        return [], []
             
     try:
         underlying_agg_data.rename(columns={'o':'underlying_price'}, inplace=True)
@@ -216,13 +241,6 @@ def create_options_aggs(row,start_date,time_horizon_hours,spread_length,config):
         contracts = ast.literal_eval(row['contracts'])
     except Exception as e:
         print(f"Error: {e} in evaluating contracts for {row['symbol']} of {row['strategy']}")
-        print(row['contracts'])
-        print(row['symbol'])
-        print(start_date)
-        print(end_date)
-        print(underlying_agg_data)
-        print("ANALYSIS NO UNDERLYING")
-        print()
         return [], []
     filtered_contracts = [k for k in contracts if strike in k]
     if len(filtered_contracts) == 0:
@@ -243,14 +261,10 @@ def create_options_aggs(row,start_date,time_horizon_hours,spread_length,config):
             print(start_date)
             return [], []
     options_df = build_options_df(filtered_contracts, row)
-    ## SPREAD ADJUSTMENT
-    # options_df = options_df.iloc[config['spread_adjustment']:]
-    # spread_start, spread_end = config['spread_search'].split(':')
-    # options_df = options_df.iloc[int(spread_start):int(spread_end)]
     for index,contract in options_df.iterrows():
         try:
             options_agg_data = ph.polygon_optiondata(contract['contract_symbol'], start_date, end_date,10)
-            enriched_df = pd.merge(options_agg_data, underlying_agg_data[['date', 'underlying_price']], on='date', how='left')
+            enriched_df = pd.merge(options_agg_data, underlying_agg_data[['date', 'underlying_price','underlying_vol']], on='date', how='left')
             enriched_df.dropna(inplace=True)
             enriched_options_aggregates[contract['contract_symbol']] = enriched_df
             options.append(contract)
@@ -267,13 +281,12 @@ def create_volume_aggs(row,start_date,end_date,options,config):
     for contract in options:
         try:
             volume_agg_data = ph.polygon_optiondata(contract['contract_symbol'], start_date, end_date,10)
-            volume_agg_data['volume_15ema'] = volume_agg_data['v'].ewm(span=15, adjust=False).mean()
-            volume_aggregates[contract['contract_symbol']] = volume_agg_data['volume_15ema'].values[-1]
+            volume_agg_data['volume_5ema'] = volume_agg_data['v'].ewm(span=5, adjust=False).mean()
+            volume_aggregates[contract['contract_symbol']] = volume_agg_data['volume_5ema'].values[-1]
         except Exception as e:
             print(f"Error: {e} in volume agg for {row['symbol']} of {row['strategy']}")
             print(contract)
             continue
-    print(volume_aggregates)
     return volume_aggregates
 
 def build_options_df(contracts, row):

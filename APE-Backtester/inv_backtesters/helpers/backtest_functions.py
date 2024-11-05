@@ -3,7 +3,6 @@ import datetime as dt
 import pandas as pd
 from helpers import backtrader_helper
 import warnings
-import helpers.momentum_strategies as trade
 import boto3
 import pytz
 from helpers.constants import *
@@ -12,19 +11,15 @@ import math
 s3 = boto3.client('s3')
 
 
-def pull_data_invalerts(bucket_name, object_key, file_name, prefixes, time_span):
-    dfs = []
-    for prefix in prefixes:
-        try:
-            print(f"{object_key}/{prefix}/{file_name}")
-            obj = s3.get_object(Bucket=bucket_name, Key=f"{object_key}/{prefix}/{file_name}")
-            df = pd.read_csv(obj.get("Body"))
-            df['strategy'] = prefix
-            dfs.append(df)
-        except Exception as e:
-            print(f"no file for {prefix} with {e}")
-            continue
-    data = pd.concat(dfs)
+def pull_data_invalerts(bucket_name, file_name, strategy_name, time_span):
+    try:
+        print(f"{file_name}")
+        obj = s3.get_object(Bucket=bucket_name, Key=file_name)
+        data = pd.read_csv(obj.get("Body"))
+        data['strategy'] = strategy_name
+    except Exception as e:
+        print(f"no file for {strategy_name} with {e}")
+        return [], []
     data = data[data.predictions == 1]
     start_time = datetime.strptime(data['date'].values[0], '%Y-%m-%d')
     end_date = backtrader_helper.create_end_date_local_data(data['date'].values[-1], time_span)
