@@ -3,7 +3,6 @@ import datetime as dt
 import pandas as pd
 from helpers import backtrader_helper
 import warnings
-import helpers.momentum_strategies as trade
 import boto3
 import pytz
 from helpers.constants import *
@@ -12,19 +11,15 @@ import math
 s3 = boto3.client('s3')
 
 
-def pull_data_invalerts(bucket_name, object_key, file_name, prefixes, time_span):
-    dfs = []
-    for prefix in prefixes:
-        try:
-            print(f"{object_key}/{prefix}/{file_name}")
-            obj = s3.get_object(Bucket=bucket_name, Key=f"{object_key}/{prefix}/{file_name}")
-            df = pd.read_csv(obj.get("Body"))
-            df['strategy'] = prefix
-            dfs.append(df)
-        except Exception as e:
-            print(f"no file for {prefix} with {e}")
-            continue
-    data = pd.concat(dfs)
+def pull_data_invalerts(bucket_name, file_name, strategy_name, time_span):
+    try:
+        print(f"{file_name}")
+        obj = s3.get_object(Bucket=bucket_name, Key=file_name)
+        data = pd.read_csv(obj.get("Body"))
+        data['strategy'] = strategy_name
+    except Exception as e:
+        print(f"no file for {strategy_name} with {e}")
+        return [], []
     data = data[data.predictions == 1]
     start_time = datetime.strptime(data['date'].values[0], '%Y-%m-%d')
     end_date = backtrader_helper.create_end_date_local_data(data['date'].values[-1], time_span)
@@ -279,14 +274,14 @@ def simulate_trades_invalerts_pt(data,config):
     
 #     return positions_list
 
-def simulate_trades_invalert_v2(row,config,portfolio_cash):
+def simulate_trades_invalert_v2(row,config):
     ## These variables are crucial for controlling the buy/sell flow of the simulation.
     order_num = 1
     alert_hour = row['hour']
     trading_date = row['date']
     symbol = row['symbol']
     trading_date = trading_date.split(" ")[0]
-    start_date, end_date, symbol, mkt_price, strategy, option_symbols, enriched_options_aggregates, volume_data = create_simulation_data_inv(row,config)
+    start_date, symbol, strategy, enriched_options_aggregates, volume_data = create_simulation_data_inv(row,config)
     order_dt = start_date.strftime("%m+%d")
     pos_dt = start_date.strftime("%Y-%m-%d-%H")
     position_id = f"{row['symbol']}-{(row['strategy'].replace('_',''))}-{pos_dt}"
@@ -304,7 +299,7 @@ def simulate_trades_invalert_v2(row,config,portfolio_cash):
             print(f"Error in contract_price_info for {contract} {e}")
             continue
         
-    contract_df = bet_sizer(contract_price_info, config['risk_unit'],portfolio_cash,config,start_date,symbol)
+    contract_df = bet_sizer(contract_price_info,config,start_date,symbol)
     if len(contract_df) == 0:
         print(f"Error in simulate_trades_invalert_v2 for {symbol}")
         return []
@@ -391,29 +386,19 @@ def simulate_trades_invalert_v2(row,config,portfolio_cash):
     
 #     return sized_buys, sized_sells
 
-def build_trade(position, risk_unit,put_adjustment,portfolio_cash,config):
-    buy_orders = []
-    sell_orders = []
-    contract_costs = []
-    # spread_start, spread_end = config['spread_search'].split(":")
-    # transactions = position['transactions'][int(spread_start):int(spread_end)]
-    simulated_position = simulate_trades_invalert_v2(position,config,portfolio_cash)
+def build_trade(position,config):
+    simulated_position = simulate_trades_invalert_v2(position,config)
     if len(simulated_position) == 0:
         return []
     for transaction in simulated_position['transactions']:
         try:
             transaction['sell_info']['close_trade_dt'] = transaction['sell_info']['close_datetime'].strftime('%Y-%m-%d %H:%M')
-        # buy_orders.append(transaction['buy_info'])
-        # sell_orders.append(transaction['sell_info'])
-        # contract_costs.append({"option_symbol":transaction['buy_info']['option_symbol'],"contract_cost":transaction['buy_info']['contract_cost']})
         except Exception as e:
             print(f"ERROR in build_trade f{e}")
             print(e)
             print(transaction)
             print(position)
             return []
-
-    
     return simulated_position
 
 def bet_sizer(contracts_cost_volume,risk_unit,portfolio_cash,config,open_datetime,symbol):

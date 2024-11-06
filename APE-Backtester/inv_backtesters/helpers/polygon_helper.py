@@ -77,11 +77,11 @@ def polygon_optiondata(options_ticker, from_date, to_date,frequency):
     res_option_df =res_option_df.loc[res_option_df['time'] >= datetime.strptime("09:30:00", "%H:%M:%S").time()]
     return res_option_df
 
-def polygon_stockdata_inv(symbol, from_date, to_date,frequency):
+def polygon_stockdata_inv(symbol, from_date, to_date,frequency, time_span):
     from_stamp = int(from_date.timestamp() * 1000)
     to_stamp = int(to_date.timestamp() * 1000)
 
-    url = f"https://api.polygon.io/v2/aggs/ticker/{symbol}/range/{frequency}/minute/{from_stamp}/{to_stamp}?adjusted=false&sort=asc&limit=50000&apiKey={KEY}"
+    url = f"https://api.polygon.io/v2/aggs/ticker/{symbol}/range/{frequency}/{time_span}/{from_stamp}/{to_stamp}?adjusted=false&sort=asc&limit=50000&apiKey={KEY}"
     response = execute_polygon_call(url)
 
     response_data = json.loads(response.text)
@@ -118,5 +118,5 @@ def stock_aggs(symbol,from_date, to_date):
 def get_last_price(row):
     aggs = stock_aggs(row['symbol'], row['date'], row['date'])
     agg = aggs.loc[aggs['hour'] == row['hour']]
-    agg = agg.loc[agg['minute'] == 0]   
+    agg = agg.loc[agg['minute'] == row['minute']]   
     return agg['o'].values[0]

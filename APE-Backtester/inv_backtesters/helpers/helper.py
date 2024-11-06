@@ -52,6 +52,14 @@ def get_day_diff(transaction_date, current_date):
             days_between += 1
     return days_between, current_dt.weekday()
 
+def get_hour_diff(transaction_date, current_date):
+    transaction_dt = datetime(transaction_date.year, transaction_date.month, transaction_date.day, transaction_date.hour)
+    current_dt = datetime(current_date.year, current_date.month, current_date.day, current_date.hour)
+
+    ## get the difference in hours
+    hours_between = (current_dt - transaction_dt).total_seconds() / 3600
+    return hours_between
+
 
 def convert_timestamp_est(timestamp):
     # Create a naive datetime object from the UNIX timestamp
